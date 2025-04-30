@@ -59,39 +59,17 @@ npm run dev
 ```
 ## 👥 Equipe
 
-<p align="center">
+<div align="center">
 
-  <a href="https://github.com/jpfelixx">
-    <img src="https://github.com/jpfelixx.png" width="100" alt="João"/><br/>
-    <sub><b>João</b></sub>
-  </a>&nbsp;&nbsp;&nbsp;
+| [João](https://github.com/jpfelixx) | [Jossana](https://github.com/JojoMarques) | [Leticia](https://github.com/lelerudeli) |
+|---|---|---|
+| <img src="https://github.com/jpfelixx.png" width="100"/> | <img src="https://github.com/JojoMarques.png" width="100"/> | <img src="https://github.com/lelerudeli.png" width="100"/> |
 
-  <a href="https://github.com/JojoMarques">
-    <img src="https://github.com/JojoMarques.png" width="100" alt="Jossana"/><br/>
-    <sub><b>Jossana</b></sub>
-  </a>&nbsp;&nbsp;&nbsp;
+| [Marisa](https://github.com/maris2606) | [Millena](https://github.com/Mihcup) | [Rodrigo](https://github.com/RodrigoBettio) |
+|---|---|---|
+| <img src="https://github.com/maris2606.png" width="100"/> | <img src="https://github.com/Mihcup.png" width="100"/> | <img src="https://github.com/RodrigoBettio.png" width="100"/> |
 
-  <a href="https://github.com/lelerudeli">
-    <img src="https://github.com/lelerudeli.png" width="100" alt="Leticia"/><br/>
-    <sub><b>Leticia</b></sub>
-  </a>&nbsp;&nbsp;&nbsp;
-
-  <a href="https://github.com/maris2606">
-    <img src="https://github.com/maris2606.png" width="100" alt="Marisa"/><br/>
-    <sub><b>Marisa</b></sub>
-  </a>&nbsp;&nbsp;&nbsp;
-
-  <a href="https://github.com/Mihcup">
-    <img src="https://github.com/Mihcup.png" width="100" alt="Millena"/><br/>
-    <sub><b>Millena</b></sub>
-  </a>&nbsp;&nbsp;&nbsp;
-
-  <a href="https://github.com/RodrigoBettio">
-    <img src="https://github.com/RodrigoBettio.png" width="100" alt="Rodrigo"/><br/>
-    <sub><b>Rodrigo</b></sub>
-  </a>
-
-</p>
+</div>
 
 
 
