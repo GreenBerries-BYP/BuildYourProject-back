@@ -23,7 +23,7 @@
   - [Dependências globais](#dependências-globais)
   - [Dependências locais](#dependências-locais)
   - [Rodar o projeto](#rodar-o-projeto)
-- [Equipe](#equipe)
+- [Equipe](#-equipe)
 
 ## Instalar e rodar o projeto
 
