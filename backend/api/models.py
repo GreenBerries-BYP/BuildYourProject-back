@@ -15,7 +15,6 @@ class PapelProjeto(models.TextChoices):
 class Usuario(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    senha = models.CharField(max_length=128)
     nome_completo = models.CharField(max_length=255)
     data_cadastro = models.DateTimeField(auto_now_add=True)
     papel = models.CharField(max_length=10, choices=PapelSistema.choices)
