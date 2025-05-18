@@ -1,87 +1,94 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-#Camada de models serve pra definir os dados que serão salvos na aplicação
-#Os atributos de usuário que virarão tabela no banco de dados tem que ser descritos aqui
-#Nesse caso, usuário vai herdar tudo de AbstractUser, que é um usuário padrão que o Django cria (login e senha)
-class PapelSistema(models.TextChoices):
-    ADMIN = 'admin', 'Admin'  
-    USUARIO = 'usuario', 'Usuário'  #O primeiro valor é o que vai ser salvo no banco de dados, o segundo é o que vai aparecer para o django admin
+# Camada de models serve pra definir os dados que serão salvos na aplicação
+# Os atributos de usuário que virarão tabela no banco de dados têm que ser descritos aqui
+# Nesse caso, o usuário vai herdar tudo de AbstractUser, que é um usuário padrão que o Django cria (login e senha)
+class SystemRole(models.TextChoices):
+    ADMIN = 'admin', 'Admin'
+    USER = 'user', 'Usuário'  # O primeiro valor é o que será salvo no banco de dados, o segundo é o que aparece no admin
 
-class PapelProjeto(models.TextChoices):
-    MEMBRO = 'membro', 'Membro'
-    LIDER = 'lider', 'Líder'
+class ProjectRole(models.TextChoices):
+    MEMBER = 'member', 'Membro'
+    LEADER = 'leader', 'Líder'
 
-class Usuario(AbstractUser):
+class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    nome_completo = models.CharField(max_length=255)
-    data_cadastro = models.DateTimeField(auto_now_add=True)
-    papel = models.CharField(max_length=10, choices=PapelSistema.choices)
+    full_name = models.CharField(max_length=255)
+    registration_date = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=10, choices=SystemRole.choices)
 
     def __str__(self):
-        return self.nome_completo
+        return self.full_name
 
-class Projeto(models.Model):
-    nome = models.CharField(max_length=255)
-    descricao = models.TextField()
-    criador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='projetos_criados')
-    tema = models.CharField(max_length=100)
-    data_criacao = models.DateTimeField(auto_now_add=True)
-    data_entrega = models.DateTimeField()
-
-    def __str__(self):
-        return self.nome
-
-class UsuarioProjeto(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE)
-    papel = models.CharField(max_length=10, choices=PapelProjeto.choices)
+class Project(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_projects')
+    theme = models.CharField(max_length=100)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    delivery_date = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.usuario} - {self.projeto} ({self.papel})"
+        return self.name
 
-class Fase(models.Model):
-    nome = models.CharField(max_length=255)
-    descricao = models.TextField()
+class UserProject(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_projects') 
+    # O related_name é o nome que vai aparecer no admin, e o on_delete é o que acontece quando o usuário é deletado
+    # Se não especificar o related_name, o Django vai criar um nome padrão, que é o nome do model em minúsculo + _set
+    # Exemplo: userproject_set
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='user_projects')
+    role = models.CharField(max_length=10, choices=ProjectRole.choices)
 
     def __str__(self):
-        return self.nome
+        return f"{self.user} - {self.project} ({self.role})"
 
-class ProjetoFase(models.Model):
-    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE)
-    fase = models.ForeignKey(Fase, on_delete=models.CASCADE)
-    ordem = models.IntegerField()
+class Phase(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+class ProjectPhase(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    phase = models.ForeignKey(Phase, on_delete=models.CASCADE)
+    order = models.IntegerField()
 
     class Meta:
-        unique_together = ('projeto', 'fase')  
+        constraints = [
+        models.UniqueConstraint(fields=['project', 'phase'], name='unique_project_phase')
+    ] # UniqueConstraint é melhor que unique_together, pois é mais flexível e pode ser alterado depois
 
     def __str__(self):
-        return f"{self.projeto} - {self.fase} (Ordem {self.ordem})"
+        return f"{self.project} - {self.phase} (Ordem {self.order})"
 
-class Tarefa(models.Model):
-    projeto_fase = models.ForeignKey(ProjetoFase, on_delete=models.CASCADE)
-    titulo = models.CharField(max_length=255)
-    descricao = models.TextField()
-    concluida = models.BooleanField(default=False)
-    data_criacao = models.DateTimeField(auto_now_add=True)
-    data_entrega = models.DateTimeField()
+class Task(models.Model):
+    project_phase = models.ForeignKey(ProjectPhase, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    is_completed = models.BooleanField(default=False)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    delivery_date = models.DateTimeField()
 
     def __str__(self):
-        return self.titulo
+        return self.title
 
-class TarefaResponsavel(models.Model):
-    tarefa = models.ForeignKey(Tarefa, on_delete=models.CASCADE)
-    usuario_projeto = models.ForeignKey(UsuarioProjeto, on_delete=models.CASCADE)
+class TaskAssignee(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    user_project = models.ForeignKey(UserProject, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.task} - {self.user_project.user} ({self.user_project.role})"
+# O __str__ é o que vai aparecer no admin quando você clicar no objeto
 
-class Chat(models.Model):
-    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE)
-    remetente = models.ForeignKey(UsuarioProjeto, on_delete=models.CASCADE)
-    conteudo = models.TextField()
-    data_mensagem = models.DateTimeField(auto_now_add=True)
+class ChatMessage(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    sender = models.ForeignKey(UserProject, on_delete=models.CASCADE)
+    content = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
 
-class AnexoTarefa(models.Model):
-    tarefa = models.ForeignKey(Tarefa, on_delete=models.CASCADE)
-    arquivo = models.FileField(upload_to='anexos/')
-    data_upload = models.DateTimeField(auto_now_add=True)
-
+class TaskAttachment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='attachments/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
