@@ -20,11 +20,15 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},  # Por segurança, não exibir no retorno da API
             "registration_date": {"read_only": True},
+            "role": {"required": False, "default": "user"},
         }
 
     def create(self, validated_data):
         password = validated_data.pop("password")
+        role = validated_data.get("role", "user")
+        
         user = User(**validated_data)
+        user.role = role # Define o papel do usuário, se não for enviado, será "user"
         user.set_password(password)
         user.save()
         return user
