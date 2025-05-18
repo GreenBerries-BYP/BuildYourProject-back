@@ -40,7 +40,7 @@ Com o repositório clonado:
 # Backend
 cd backend
 poetry install
-poetry shell
+poetry env activate 
 
 # Frontend
 cd ../frontend
