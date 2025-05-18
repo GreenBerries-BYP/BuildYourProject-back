@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import (
     User, Project, UserProject, Phase, ProjectPhase,
@@ -78,3 +79,20 @@ class TaskAttachmentSerializer(serializers.ModelSerializer):
         model = TaskAttachment
         fields = ['id', 'task', 'file', 'uploaded_at']
         read_only_fields = ['uploaded_at']
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = User.EMAIL_FIELD  # Define o campo de username como email
+
+    @classmethod #Classmethod é um decorator que transforma a função em um método de classe, é usado para acessar atributos e métodos da classe sem precisar instanciar um objeto
+    def get_token(cls, user): #cls é a classe, user é o usuário que está logado
+        token = super().get_token(user) #Gera o token padrão
+        token['username'] = user.username
+        token['role'] = user.role
+        #Adiciona o campo username e role no token, pode add mais
+        return token
+
+    def validate(self, attrs): #attrs é o dicionário que contém os dados enviados pelo usuário
+        attrs['username'] = attrs.get("email") #Coloca o email no lugar do username
+        #Django usa o username para autenticar o usuário, então precisamos colocar o email no lugar do username
+        # Isso é necessário porque o Django não tem um campo de email por padrão
+        return super().validate(attrs)

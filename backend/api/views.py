@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from .serializers import CustomTokenObtainPairSerializer
 from api.models import User
 from api.serializers import UserSerializer
 
@@ -15,15 +15,5 @@ class RegisterView(CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if response.status_code == 200:
-            user = User.objects.get(email=request.data.get("email"))
-            response.data.update({
-                "user_id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-            })
-        return response
+    serializer_class = CustomTokenObtainPairSerializer
 

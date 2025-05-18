@@ -18,6 +18,8 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255)
     registration_date = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=10, choices=SystemRole.choices)
+    USERNAME_FIELD = 'email'       
+    REQUIRED_FIELDS = ['username'] 
 
     def __str__(self):
         return self.full_name
