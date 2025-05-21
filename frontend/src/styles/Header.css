@@ -1,0 +1,55 @@
+.header {
+  height: 80px;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #7c3aed;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: #444;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.header-icon {
+  font-size: 1.8rem;
+  color: #333;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.header-icon:hover {
+  transform: scale(1.1);
+}
+
+.toggle-mode {
+  background: none;
+  border: none;
+  padding: 0;
+}
+

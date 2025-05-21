@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/api';
 import '../styles/LoginCadastro.css';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [fullName, setFullName] = useState('');
@@ -10,6 +11,8 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+
 
 
   // Handle register faz a requisição para o backend para registrar um novo usuário.
@@ -35,6 +38,7 @@ const Register = () => {
         password
       });
       console.log('Cadastro realizado:', response.data);
+      navigate('/login'); // Redireciona para a página de login após o cadastro
     } catch (err) {
       setError('Erro ao cadastrar. Verifique os dados e tente novamente.');
     }

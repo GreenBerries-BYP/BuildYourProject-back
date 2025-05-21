@@ -1,6 +1,7 @@
 import React, { useState } from 'react'; 
 import api from '../api/api';
 import { saveToken } from '../auth/auth';
+import { useNavigate } from 'react-router-dom';
 
 import '../styles/LoginCadastro.css';
 
@@ -8,6 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,6 +20,7 @@ const Login = () => {
       });
       saveToken(res.data.access);
       alert('Login realizado!');
+      navigate('/home'); // Redireciona para a página inicial após o login
     } catch (err) {
       setErro('Credenciais inválidas.');
     }
