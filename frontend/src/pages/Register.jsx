@@ -29,10 +29,10 @@ const Register = () => {
 
     try {
       const response = await api.post('/register/', {
-        nome: fullName,
-        usuario: username,
+        full_name: fullName,
+        username,
         email,
-        senha: password
+        password
       });
       console.log('Cadastro realizado:', response.data);
     } catch (err) {

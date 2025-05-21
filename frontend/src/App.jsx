@@ -4,7 +4,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
 
-
 //App.jsx faz o roteamento da aplicação, definindo as rotas para as páginas de login e registro.
 // Ele utiliza o BrowserRouter do react-router-dom para gerenciar as rotas da aplicação.
 
