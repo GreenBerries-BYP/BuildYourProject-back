@@ -13,32 +13,25 @@
   z-index: 100;
 }
 
-.header-left {
+.header-left, .header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.logo {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #7c3aed;
+.logo-img {
+  width: 8rem;
 }
 
 .title {
-  font-size: 1.8rem;
-  color: #444;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
+  font-size: 2rem;
+  color: #8474A1;
 }
 
 .header-icon {
-  font-size: 1.8rem;
-  color: #333;
+  width: 45px;
+  font-size: 2.6rem;
+  color: #58917A;
   cursor: pointer;
   transition: transform 0.2s;
 }

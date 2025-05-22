@@ -1,24 +1,25 @@
-import React from 'react';
-import { FaSearch, FaBell, FaMoon, FaUserCircle } from 'react-icons/fa';
-import { MdOutlineWbSunny } from 'react-icons/md';
+import { FaRegUserCircle } from "react-icons/fa";
+import { TbBellRingingFilled } from "react-icons/tb";
+import { MdOutlineWbSunny, MdDarkMode } from 'react-icons/md';
 import { GiBrazilFlag } from 'react-icons/gi';
+import { FiSearch } from "react-icons/fi";
 import '../styles/Header.css';
 
 const Header = ({ isDarkMode, toggleDarkMode }) => {
   return (
     <header className="header">
       <div className="header-left">
-        <span className="logo">BYP</span>
-        <span className="title">Build Your Project</span>
+        <img src="/imgs/byp_logo.svg" alt="logo" className="logo-img" />
+        <span className="title mt-2">Build Your Project</span>
       </div>
       <div className="header-right">
-        <FaSearch className="header-icon" />
-        <FaBell className="header-icon" />
+        <FiSearch className="header-icon" />
+        <TbBellRingingFilled className="header-icon" />
         <button className="header-icon toggle-mode" onClick={toggleDarkMode}>
-          {isDarkMode ? <MdOutlineWbSunny /> : <FaMoon />}
+          {isDarkMode ? <MdOutlineWbSunny /> : <MdDarkMode />}
         </button>
         <GiBrazilFlag className="header-icon" />
-        <FaUserCircle className="header-icon" />
+        <FaRegUserCircle className="header-icon" />
       </div>
     </header>
   );

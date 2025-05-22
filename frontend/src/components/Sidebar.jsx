@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import {
-  FaHome, FaProjectDiagram, FaTasks, FaShareAlt,
-  FaCalendarAlt, FaInfoCircle, FaSignOutAlt
-} from 'react-icons/fa';
+import { useState } from 'react';
+import { PiCirclesThreeFill } from "react-icons/pi";
+import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt    } from "react-icons/md";
 import '../styles/Sidebar.css';
 
 const Sidebar = () => {
@@ -12,20 +10,20 @@ const Sidebar = () => {
   const handleMouseLeave = () => setIsExpanded(false);
 
   const topItems = [
-    { icon: <FaHome />, label: 'Home', path: '/home' },
-    { icon: <FaProjectDiagram />, label: 'Meus projetos', path: '/projetos' },
-    { icon: <FaTasks />, label: 'Minhas tarefas', path: '/tarefas' },
+    { icon: <MdHome />, label: 'Home', path: '/home' },
+    { icon: <PiCirclesThreeFill />, label: 'Meus projetos', path: '/projetos' },
+    { icon: <MdOutlineTaskAlt  />, label: 'Minhas tarefas', path: '/tarefas' },
     {
-      icon: <FaShareAlt />,
+      icon: <MdShare  />,
       label: 'Compartilhados\ncomigo',
       path: '/compartilhados'
     },
-    { icon: <FaCalendarAlt />, label: 'Google calendário', path: '/calendario' },
+    { icon: <MdOutlineCalendarMonth  />, label: 'Google calendário', path: '/calendario' },
   ];
 
   const bottomItems = [
-    { icon: <FaInfoCircle />, label: 'Informações', path: '/info' },
-    { icon: <FaSignOutAlt />, label: 'Sair', path: '/logout' },
+    { icon: <MdInfo />, label: 'Informações', path: '/info' },
+    { icon: <MdLogout />, label: 'Sair', path: '/logout' },
   ];
 
   return (
