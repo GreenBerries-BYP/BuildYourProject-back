@@ -1,8 +1,9 @@
 .header {
   height: 80px;
   width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--white-color);
+  border-bottom: 1px solid var(--light-gray-color);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,13 +26,13 @@
 
 .title {
   font-size: 2rem;
-  color: #8474A1;
+  color: var(--lilac-color);
 }
 
 .header-icon {
   width: 45px;
   font-size: 2.6rem;
-  color: #58917A;
+  color: var(--dark-green-color);
   cursor: pointer;
   transition: transform 0.2s;
 }
