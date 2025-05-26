@@ -30,7 +30,10 @@
 }
 
 .header-icon {
-  width: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 4.5rem;
   font-size: 2.6rem;
   color: var(--dark-green-color);
   cursor: pointer;

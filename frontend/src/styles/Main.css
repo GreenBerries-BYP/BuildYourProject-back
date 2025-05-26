@@ -25,6 +25,8 @@
   --green-btn: linear-gradient(90deg,#86B6A3, #045A5C);
 
   --bg-gradient: linear-gradient(166deg, #8474A1, #86B6A3);
+
+  --on-page-link: rgba(91, 69, 132, 36%);
 }
 
 html{
