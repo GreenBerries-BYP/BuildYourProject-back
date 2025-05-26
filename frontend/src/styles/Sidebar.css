@@ -1,8 +1,12 @@
+a{ 
+  text-decoration: none;
+}
+
 .sidebar {
-  width: 60px;
+  width:10rem;
   transition: width 0.3s ease;
-  background-color: #fff; 
-  height: 90vh;
+  background-color: var(--white-color); 
+  height: calc(100% - 80px);
   position: fixed;
   bottom: 0;
   left: 0;
@@ -11,41 +15,50 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 3rem 0;
+  padding-block: 3rem;
+
 }
 
 .sidebar.expanded { 
-  width: 220px;
+  padding-inline: 3rem;
+  width: 36rem;
+  align-items: baseline;
 } 
 
 .sidebar-menu, .sidebar-footer {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  gap: 2rem;
 }
 
 .sidebar-item {
-  color: #6c3d9c;
+  color: var(--sat-dark-purple-color);
   font-size: 1.2rem;
   display: flex;
-  align-items: flex-start;
   transition: background 0.2s, color 0.2s;
   border-radius: 12px;
   text-decoration: none;
+ 
 }
 
 .sidebar-item:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: #4b2773;
+  color: var(--dark-purple-color);
+  text-decoration: none;
 }
 
 .sidebar-icon {
+  display: flex;
   font-size: 3rem;
-  color: #5B4584;
+  color: var(--sat-dark-purple-color);
   cursor: pointer;
   transition: transform 0.2s;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-label {
   font-size: 1.8rem;
   white-space: nowrap;
+  padding-left: 3rem;
 }
