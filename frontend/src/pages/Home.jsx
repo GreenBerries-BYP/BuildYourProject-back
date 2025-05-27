@@ -5,7 +5,7 @@ function Home() {
   return (
     <div className="d-flex">
       <Sidebar />
-      <div className="flex-grow-1" style={{ marginLeft: "250px" }}>
+      <div className="flex-grow-1" style={{ marginLeft: "280px" }}>
         {" "}
         {/* Formatando o espaço entre a sidebar e o conteúdo */}
         <Header />

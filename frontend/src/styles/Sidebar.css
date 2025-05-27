@@ -20,7 +20,7 @@ a {
 }
 
 .sidebar.expanded { 
-  width: 36rem;
+  width: 27rem;
   padding-inline: 3rem; 
 }
 
@@ -58,7 +58,8 @@ a {
 .sidebar-label {
   font-size: 1.8rem;
   white-space: nowrap;
-  padding-left: 3rem;
+  padding-left: 1rem;
+  margin-top: 0.4rem;
   opacity: 1;
   transition: opacity 0.3s ease, max-width 0.3s ease, padding-left 0.3s ease;
   max-width: 200px;
