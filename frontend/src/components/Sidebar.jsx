@@ -3,11 +3,17 @@ import { PiCirclesThreeFill } from "react-icons/pi";
 import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt    } from "react-icons/md";
 import '../styles/Sidebar.css';
 
+import { useLocation } from 'react-router-dom';
+
+
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleMouseEnter = () => setIsExpanded(true);
   const handleMouseLeave = () => setIsExpanded(false);
+
+  const location = useLocation();
+
 
   const topItems = [
     { icon: <MdHome />, label: 'Home', path: '/home' },
@@ -33,18 +39,21 @@ const Sidebar = () => {
       onMouseLeave={handleMouseLeave}
     >
       <div className="sidebar-menu">
-        {topItems.map((item, index) => (
-          <a key={index} href={item.path} className="sidebar-item">
-            <span className="sidebar-icon">{item.icon}</span>
-            {isExpanded && (
-              <span className="sidebar-label">
-                {item.label.split('\n').map((line, i) => (
-                  <div key={i}>{line}</div>
-                ))}
-              </span>
-            )}
-          </a>
-        ))}
+        {topItems.map((item, index) => {
+          const isOnPage = location.pathname === item.path;
+          return(
+            <a key={index} href={item.path} className={`sidebar-item ${isOnPage ? 'on-page' : ''}`}>
+              <span className="sidebar-icon">{item.icon}</span>
+              {isExpanded && (
+                <span className="sidebar-label">
+                  {item.label.split('\n').map((line, i) => (
+                    <div key={i}>{line}</div>
+                  ))}
+                </span>
+              )}
+            </a>
+          );
+        })};
       </div>
       <div className="sidebar-footer">
         {bottomItems.map((item, index) => (
