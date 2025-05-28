@@ -6,40 +6,36 @@
   --form-gray-color: #D9D9D9;
   --lilac-color: #8474A1;
   --light-lilac-color: #C8C1D4;
-  --sat-lilac-color: #7D64AC;  
+  --sat-lilac-color: #7D64AC;
   --dark-purple-color: #383560;
   --sat-dark-purple-color: #5B4584;
-  --sat-purple-color: #6D52B4; 
+  --sat-purple-color: #6D52B4;
   --pink-color: #B383C4;
   --sat-pink-color: #A87CB8;
   --green-color: #86B6A3;
-  --dark-green-color: #58917A; 
+  --dark-green-color: #58917A;
   --light-green-color: #C1D5CD;
   --sat-green-color: #67BA99;
   --dark-teal-color: #045A5C;
   --teal-color: #54969A;
   --sat-teal-color: #08979D;
   --link-blue-color: #1E76E8;
-
-  --purple-btn: linear-gradient(90deg,#7D64AC, #5B4584);
-  --green-btn: linear-gradient(90deg,#86B6A3, #045A5C);
-
+  --purple-btn: linear-gradient(90deg, #7D64AC, #5B4584);
   --bg-gradient: linear-gradient(166deg, #8474A1, #86B6A3);
-
   --on-page-link: rgba(91, 69, 132, 36%);
 }
 
-html{
+html {
   font-size: 62.5%;
 }
 
 * {
   margin: 0;
-  padding: 0;    
+  padding: 0;
   border: none;
 }
 
-body{
+body {
   min-height: 100vh;
   font-family: 'Poppins';
   background: var(--bg-gradient);
@@ -63,7 +59,7 @@ body{
 
 @font-face {
   font-family: 'Poppins';
-  src:  url('/fonts/Poppins/Poppins-Black.woff') format('woff');
+  src: url('/fonts/Poppins/Poppins-Black.woff') format('woff');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -128,4 +124,3 @@ body{
   font-style: normal;
   font-display: swap;
 }
-

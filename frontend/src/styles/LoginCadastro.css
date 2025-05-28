@@ -1,5 +1,6 @@
 .login {
-   height: 100vh;;
+    height: 100vh;
+    ;
 }
 
 .card-login {
@@ -7,7 +8,7 @@
 }
 
 .logo-h {
-   height: 10.4rem;
+    height: 10.4rem;
 }
 
 label {
@@ -67,7 +68,7 @@ label {
 
 .link-cadastre {
     font-size: 2.4rem;
-    color: var(--green-dark-color, var(--dark-green-color)); 
+    color: var(--green-dark-color, var(--dark-green-color));
     display: block;
     border: 3px solid var(--dark-green-color);
     padding: 10px;

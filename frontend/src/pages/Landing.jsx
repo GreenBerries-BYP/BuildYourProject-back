@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import api from '../api/api';
 
 import '../styles/Landing.css';

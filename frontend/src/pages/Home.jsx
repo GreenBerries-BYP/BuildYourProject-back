@@ -1,10 +1,14 @@
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import CreateProjectCard from "../components/CreateProjectCard";
+import ModalNewProject from "../components/ModalNewProject";
 
 function Home() {
+  const [modalAberto, setModalAberto] = useState(false);
+
   const handleCreateProject = () => {
-    alert("Criar projeto clicado!");
+    setModalAberto(true);
   };
 
   return (
@@ -17,6 +21,7 @@ function Home() {
             <CreateProjectCard onClick={handleCreateProject} />
           </div>
         </div>
+        <ModalNewProject isOpen={modalAberto} onClose={() => setModalAberto(false)} />
       </div>
     </div>
   );

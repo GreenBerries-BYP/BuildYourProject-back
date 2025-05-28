@@ -46,9 +46,8 @@ const Header = () => {
       </div>
       <div className="header-right d-flex align-items-center">
         <div
-          className={`search ${
-            isSearchFocused ? "focused" : ""
-          } d-flex align-items-center`}
+          className={`search ${isSearchFocused ? "focused" : ""
+            } d-flex align-items-center`}
         >
           <input
             type="text"

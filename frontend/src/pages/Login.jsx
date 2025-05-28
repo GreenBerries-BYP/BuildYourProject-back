@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import api from '../api/api';
 import { saveToken } from '../auth/auth';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,7 @@ const Login = () => {
   };
 
   return (
-    
+
     <div className="container-fluid login d-flex justify-content-center align-items-center p-0">
       <div className="col-10 card-login rounded d-flex justify-content-center align-items-center bg-white">
         <div className="row w-100 justify-content-center">
@@ -97,10 +97,10 @@ const Login = () => {
               </a>
 
               <span className="row py-5 w-75 d-flex align-items-center align-self-left">
-                  <input className="col-1 check check-form" type="checkbox" name="manter-logado" id="manter_logado"/> 
-                  <label className="col check-label" for="manter-logado">
-                      Manter-me logado
-                  </label>
+                <input className="col-1 check check-form" type="checkbox" name="manter-logado" id="manter_logado" />
+                <label className="col check-label" for="manter-logado">
+                  Manter-me logado
+                </label>
               </span>
 
               <div className="row botoes-login d-flex justify-content-between text-center">

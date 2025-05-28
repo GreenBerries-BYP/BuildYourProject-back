@@ -17,7 +17,7 @@ const Register = () => {
 
   // Handle register faz a requisição para o backend para registrar um novo usuário.
   // Ele utiliza o axios para fazer a requisição POST para a rota /register/ do backend.
-  const handleRegister = async (e) => { 
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
