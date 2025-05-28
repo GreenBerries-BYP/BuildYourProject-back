@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { PiCirclesThreeFill } from "react-icons/pi";
-import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt    } from "react-icons/md";
+import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt } from "react-icons/md";
 import '../styles/Sidebar.css';
-
-import { useLocation } from 'react-router-dom';
-
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -12,19 +10,16 @@ const Sidebar = () => {
   const handleMouseEnter = () => setIsExpanded(true);
   const handleMouseLeave = () => setIsExpanded(false);
 
-  const location = useLocation();
-
-
   const topItems = [
     { icon: <MdHome />, label: 'Home', path: '/home' },
     { icon: <PiCirclesThreeFill />, label: 'Meus projetos', path: '/projetos' },
-    { icon: <MdOutlineTaskAlt  />, label: 'Minhas tarefas', path: '/tarefas' },
+    { icon: <MdOutlineTaskAlt />, label: 'Minhas tarefas', path: '/tarefas' },
     {
-      icon: <MdShare  />,
+      icon: <MdShare />,
       label: 'Compartilhados\ncomigo',
       path: '/compartilhados'
     },
-    { icon: <MdOutlineCalendarMonth  />, label: 'Google calendário', path: '/calendario' },
+    { icon: <MdOutlineCalendarMonth />, label: 'Google calendário', path: '/calendario' },
   ];
 
   const bottomItems = [
@@ -40,9 +35,15 @@ const Sidebar = () => {
     >
       <div className="sidebar-menu">
         {topItems.map((item, index) => {
-          const isOnPage = location.pathname === item.path;
-          return(
-            <a key={index} href={item.path} className={`sidebar-item ${isOnPage ? 'on-page' : ''}`}>
+          return (
+            <NavLink
+              key={index}
+              to={item.path}
+              aria-label={item.label}
+              className={({ isActive }) =>
+                `sidebar-item ${isActive ? 'on-page' : ''}`
+              }
+            >
               <span className="sidebar-icon">{item.icon}</span>
               {isExpanded && (
                 <span className="sidebar-label">
@@ -51,16 +52,25 @@ const Sidebar = () => {
                   ))}
                 </span>
               )}
-            </a>
+            </NavLink>
+
           );
         })};
       </div>
       <div className="sidebar-footer">
         {bottomItems.map((item, index) => (
-          <a key={index} href={item.path} className="sidebar-item">
+          <NavLink
+            key={index}
+            to={item.path}
+            aria-label={item.label}
+            className={({ isActive }) =>
+              `sidebar-item ${isActive ? 'on-page' : ''}`
+            }
+          >
             <span className="sidebar-icon">{item.icon}</span>
             {isExpanded && <span className="sidebar-label">{item.label}</span>}
-          </a>
+          </NavLink>
+
         ))}
       </div>
     </div>

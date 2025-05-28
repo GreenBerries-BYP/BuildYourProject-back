@@ -1,0 +1,29 @@
+.create-project-card {
+  background: var(--card-background, rgba(255, 255, 255, 0.15));
+  border: 2px solid var(--white-color);
+  border-radius: 12px;
+  width: 250px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white-color);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.create-project-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.create-project-card .plus {
+  font-size: 12rem;
+  font-weight: 500;
+  margin-top: -2rem;
+  color: var(--white-color);
+}

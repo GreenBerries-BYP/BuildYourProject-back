@@ -17,6 +17,7 @@ a {
   justify-content: space-between;
   align-items: flex-start; 
   padding-block: 3rem;
+  overflow: hidden;
 }
 
 .sidebar.expanded { 
