@@ -31,6 +31,7 @@
 .modal-header h2 {
     font-size: 1.8rem;
     color: var(--black-color);
+    margin-top: 5px;
 }
 
 .close-btn {

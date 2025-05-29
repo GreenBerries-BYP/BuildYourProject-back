@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
+import { getToken } from "../auth/auth"; // ⚠️ Supondo que você tenha o mesmo helper usado no login.
 
 const ModalNewProject = ({ isOpen, onClose }) => {
     const modalRef = useRef();
@@ -12,6 +13,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const [emailError, setEmailError] = useState("");
     const [formErrors, setFormErrors] = useState({});
+    const [loading, setLoading] = useState(false);
 
     const adicionarColaborador = () => {
         if (!emailInput.trim()) {
@@ -66,20 +68,27 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             template,
         };
 
+        setLoading(true);
+
         try {
-            const response = await fetch("http://localhost:8000/api/projetos", {
-                method: "POST",
+            const token = getToken();
+
+            const response = await api.post('/projetos/', projeto, {
                 headers: {
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(projeto),
             });
 
-            if (!response.ok) throw new Error("Erro ao criar projeto");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Erro ao criar projeto.");
+            }
 
             onClose();
         } catch (err) {
             setFormErrors({ submit: err.message || "Erro inesperado ao criar projeto." });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -197,7 +206,9 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                             <p className="input-error center">{formErrors.submit}</p>
                         )}
                         <div className="save-wrapper">
-                            <button type="submit" className="save-btn">Salvar ✓</button>
+                            <button type="submit" className="save-btn" disabled={loading}>
+                                {loading ? "Salvando..." : "Salvar ✓"}
+                            </button>
                         </div>
                     </form>
                 </div>
