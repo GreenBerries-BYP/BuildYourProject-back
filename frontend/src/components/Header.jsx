@@ -10,7 +10,9 @@ import { i18n } from "../translate/i18n";
 const I18N_STORAGE_KEY = "i18nextLng";
 
 const Header = () => {
-  const [language, setLanguage] = useState(localStorage.getItem(I18N_STORAGE_KEY));
+  const [language, setLanguage] = useState(
+    localStorage.getItem(I18N_STORAGE_KEY)
+  );
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     return savedTheme === "dark";
@@ -30,7 +32,10 @@ const Header = () => {
   //inicia o idioma com o valor do localStorage ou padrão para "pt-BR"
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "pt-BR" ? "en-US" : "pt-BR"));
-    localStorage.setItem(I18N_STORAGE_KEY, language === "pt-BR" ? "en-US" : "pt-BR");
+    localStorage.setItem(
+      I18N_STORAGE_KEY,
+      language === "pt-BR" ? "en-US" : "pt-BR"
+    );
     i18n.changeLanguage(language === "pt-BR" ? "en-US" : "pt-BR");
   };
 
@@ -51,6 +56,7 @@ const Header = () => {
         !searchInputRef.current.contains(document.activeElement)
       ) {
         setIsSearchFocused(false);
+        searchInputRef.current.value = ""; // Clear the input when focus is lost
       }
     }, 0);
   };
@@ -79,7 +85,7 @@ const Header = () => {
         </div>
         <TbBellRingingFilled className="header-icon" />
         <button className="header-icon" onClick={toggleDarkMode}>
-          {isDark ? <MdOutlineWbSunny /> : <MdDarkMode />}
+          {isDark ? <MdDarkMode /> : <MdOutlineWbSunny />}
         </button>
 
         <button onClick={toggleLanguage} className="header-icon">

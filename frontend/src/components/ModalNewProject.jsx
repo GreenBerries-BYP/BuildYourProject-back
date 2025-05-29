@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
 import { getToken } from "../auth/auth"; // ⚠️ Supondo que você tenha o mesmo helper usado no login.
 import { abntTemplates } from "../mocks/abntMock";
+import { FaCheck } from "react-icons/fa";
 import { i18n } from "../translate/i18n";
 
 const ModalNewProject = ({ isOpen, onClose }) => {
@@ -234,7 +235,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             )}
             <div className="save-wrapper">
               <button type="submit" className="save-btn" disabled={loading}>
-                {loading ? "Salvando..." : "Salvar ✓"}
+                {loading ? i18n.t('buttons.saving') : i18n.t('buttons.save') + ' ✓'}
               </button>
             </div>
           </form>
