@@ -28,7 +28,7 @@ const Sidebar = () => {
   ];
 
   const expandedWidth = '280px';
-  const collapsedWidth = '80px'; // Assuming a common collapsed width, adjust if CSS is different
+  const collapsedWidth = '80px';
 
   return (
     <div
@@ -38,7 +38,7 @@ const Sidebar = () => {
       style={{ 
         width: isExpanded ? expandedWidth : collapsedWidth, 
         flexShrink: 0,
-        transition: 'width 0.3s ease' // Optional: ensure smooth transition if not already in CSS
+        transition: 'width 0.3s ease' 
       }}
     >
       <div className="sidebar-menu">
