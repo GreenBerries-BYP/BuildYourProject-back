@@ -4,27 +4,36 @@ import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTas
 import '../styles/Sidebar.css';
 import { NavLink } from 'react-router-dom';
 
-const Sidebar = () => {
+import { i18n } from "../translate/i18n";
+
+const Sidebar = ({ onToggle }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleMouseEnter = () => setIsExpanded(true);
-  const handleMouseLeave = () => setIsExpanded(false);
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+    onToggle(true); 
+  };
+
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+    onToggle(false); 
+  };
 
   const topItems = [
-    { icon: <MdHome />, label: 'Home', path: '/home' },
-    { icon: <PiCirclesThreeFill />, label: 'Meus projetos', path: '/projetos' },
-    { icon: <MdOutlineTaskAlt />, label: 'Minhas tarefas', path: '/tarefas' },
+    { icon: <MdHome />, label: i18n.t('sideBar.home'), path: '/home' },
+    { icon: <PiCirclesThreeFill />, label: i18n.t('sideBar.myProjects'), path: '/projetos' },
+    { icon: <MdOutlineTaskAlt />, label: i18n.t('sideBar.myTasks'), path: '/tarefas' },
     {
       icon: <MdShare />,
-      label: 'Compartilhados\ncomigo',
+      label: i18n.t('sideBar.sharedWithMe'),
       path: '/compartilhados'
     },
-    { icon: <MdOutlineCalendarMonth />, label: 'Google calendário', path: '/calendario' },
+    { icon: <MdOutlineCalendarMonth />, label: i18n.t('sideBar.googleCalendar'), path: '/calendario' },
   ];
 
   const bottomItems = [
-    { icon: <MdInfo />, label: 'Informações', path: '/info' },
-    { icon: <MdLogout />, label: 'Sair', path: '/logout' },
+    { icon: <MdInfo />, label: i18n.t('sideBar.info'), path: '/info' },
+    { icon: <MdLogout />, label: i18n.t('sideBar.logOut'), path: '/logout' },
   ];
 
   const expandedWidth = '280px';

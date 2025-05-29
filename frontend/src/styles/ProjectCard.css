@@ -1,0 +1,44 @@
+.project-card{
+    background: var(--white-color);
+    padding: 3rem;
+    font-size: 2rem;
+    width: 35%;
+    border-radius: 10px;
+    transition: width 500ms ease-in-out;
+}
+
+.project-card.expanded { 
+    width: 45%;
+}
+
+.card-header{
+    display: flex;;
+    justify-content: space-between;
+    background: var(--white-color);
+    font-size: 2.5rem;
+    margin-bottom: 1.6rem;
+    border: none;
+    padding: 0;
+}
+
+.btn-more{
+    width: 4.1rem;
+}
+
+.project-progress{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.progress-label{
+    width: 25%;
+    text-align: right;
+    color: var(--gray-color);
+}
+
+.round-progress{
+    height: 30px;
+}
