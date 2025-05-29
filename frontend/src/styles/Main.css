@@ -23,6 +23,7 @@
   --purple-btn: linear-gradient(90deg, #7D64AC, #5B4584);
   --bg-gradient: linear-gradient(166deg, #8474A1, #86B6A3);
   --on-page-link: rgba(91, 69, 132, 36%);
+  --red-error-color: #FF4D4D;
 }
 
 html {
