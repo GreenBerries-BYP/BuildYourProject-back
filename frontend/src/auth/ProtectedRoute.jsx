@@ -4,9 +4,9 @@ import { getToken } from './auth';
 const ProtectedRoute = ({ children }) => {
   const token = getToken();
 
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
+  // if (!token) {
+  //   return <Navigate to="/login" />;
+  // }
 
   return children;
 };
