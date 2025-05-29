@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ApexCharts from 'apexcharts'
 import '../styles/ProjectCard.css';
+import { i18n } from '../translate/i18n';
 
 
 const ProjectCard = ({
@@ -66,7 +67,7 @@ const ProjectCard = ({
             <span className="alert-task">
               <img src="/imgs/alert.svg"/>
             </span>
-            <span>Suas tarefas: </span>
+            <span>{i18n.t('project.yourTasks')}</span>
             <div className='round-progress d-inline' id='roundProgress'>
               <div ref={chartRef}></div>
             </div>

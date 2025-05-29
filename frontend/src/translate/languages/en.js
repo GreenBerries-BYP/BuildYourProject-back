@@ -30,7 +30,8 @@ const messages = {
         add: 'Add',
         edit: 'Edit',
         delete: 'Delete',
-        save: 'Save'
+        save: 'Save',
+        saving: 'Saving...',
       },
       sideBar: {
         home: 'Home',
@@ -47,6 +48,9 @@ const messages = {
         email: 'Email',
         projectType: 'Project Type',
         template: 'Template',
+      },
+      project: {
+        yourTasks: 'Your Tasks',
       }
     },
   },

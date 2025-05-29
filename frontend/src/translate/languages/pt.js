@@ -14,6 +14,15 @@ const messages = {
         notifications: "Notificações",
         userProfile: "Perfil do Usuário",
         changeLanguage: "Mudar Idioma",
+
+        emailCantBeEmpty: "Email não pode estar vazio",
+        invalidEmailFormat: "Formato de email inválido",
+        emailAlreadyAdded: "Este email já foi adicionado",
+        projectNameRequired: "Nome do projeto é obrigatório",
+        projectDescriptionRequired: "Descrição do projeto é obrigatória",
+        errorNewProject: "Erro ao criar novo projeto",
+
+        emailMessage: "Digite um email e pressione Enter",
       },
       buttons: {
         createProject: "Criar Projeto",
@@ -21,7 +30,8 @@ const messages = {
         add: "Adicionar",
         edit: "Editar",
         delete: "Excluir",
-        save: "Salvar"
+        save: "Salvar",
+        saving: "Salvando...",
       },
       sideBar: {
         home: "Início",
@@ -38,7 +48,10 @@ const messages = {
         email: "E-mail",
         projectType: "Tipo de Projeto",
         template: "Modelo",
-      }
+      },
+      project: {
+        yourTasks: "Suas Tarefas",
+      },
     },
   },
 };
