@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaRegUserCircle } from "react-icons/fa";
 import { TbBellRingingFilled } from "react-icons/tb";
 import { MdOutlineWbSunny, MdDarkMode } from "react-icons/md";
@@ -7,7 +7,21 @@ import "../styles/Header.css";
 
 const Header = () => {
   const [language, setLanguage] = useState("br");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark";
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add("dark-theme");
+    } else {
+      document.body.classList.remove("dark-theme");
+    }
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }, [isDark]);
+
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef(null);
 
@@ -16,17 +30,14 @@ const Header = () => {
   };
 
   const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDark((prev) => !prev);
   };
 
   const flagSrc =
     language === "br" ? "/imgs/brazil-.png" : "/imgs/united-states.png";
   const flagAlt = language === "br" ? "bandeira do Brasil" : "bandeira dos EUA";
 
-  const handleSearchFocus = () => {
-    setIsSearchFocused(true);
-  };
-
+  const handleSearchFocus = () => setIsSearchFocused(true);
   const handleSearchBlur = () => {
     setTimeout(() => {
       if (
@@ -46,8 +57,7 @@ const Header = () => {
       </div>
       <div className="header-right d-flex align-items-center">
         <div
-          className={`search ${isSearchFocused ? "focused" : ""
-            } d-flex align-items-center`}
+          className={`search ${isSearchFocused ? "focused" : ""} d-flex align-items-center`}
         >
           <input
             type="text"
@@ -61,7 +71,7 @@ const Header = () => {
         </div>
         <TbBellRingingFilled className="header-icon" />
         <button className="header-icon" onClick={toggleDarkMode}>
-          {isDarkMode ? <MdOutlineWbSunny /> : <MdDarkMode />}
+          {isDark ? <MdOutlineWbSunny /> : <MdDarkMode />}
         </button>
         <button onClick={toggleLanguage} className="header-icon">
           <img src={flagSrc} alt={flagAlt} className="bandeira" />

@@ -43,6 +43,70 @@ body {
   background: var(--bg-gradient);
 }
 
+/* Dark Mode */
+body.dark-theme {
+  background: linear-gradient(120deg, #1f1b2e, #2d333b 60%, #045A5C);
+}
+
+body.dark-theme .header { 
+   background-color:#2d333b;
+   border-bottom: 1px solid #2d333b;
+}
+
+body.dark-theme .sidebar { 
+   background-color: #2d333b;
+}
+
+body.dark-theme .modal-content { 
+    background-color: #2d333b;
+    color: #ffffff;
+    border: 1px solid #000000;
+}
+
+body.dark-theme .modal-header { 
+    border-bottom: 1px solid #000000;
+    background-color: #AE8CEB;
+}
+
+body.dark-theme .create-project-card { 
+    background-color: #78808a;
+    border: 1px solid #000000; 
+    color: #000000;
+}
+
+body.dark-theme .create-project-card .plus {
+    color: #000000;
+}
+
+body.dark-theme .create-project-card:hover {
+    background-color: #62676d;
+}
+
+body.dark-theme .header .header-icon {
+    color: #67BA99;
+}
+body.dark-theme .header .title {
+    color: #7D64AC;
+}
+
+body.dark-theme .header .search-input { 
+   background-color: #2d333b;
+}
+
+body.dark-theme ::placeholder {
+  color: #000000; 
+}
+
+body.dark-theme .form-select { 
+  background-color: #22272e;
+  color: #c5c8c9;
+  border: 1px solid #444c56;
+}
+
+.sidebar-item:hover {
+  color: #8474A1;
+}
+
 @font-face {
   font-family: 'Sanchez';
   src: url('/fonts/Sanchez/Sanchez-Regular.ttf') format('truetype');

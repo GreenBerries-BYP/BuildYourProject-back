@@ -27,11 +27,19 @@ const Sidebar = () => {
     { icon: <MdLogout />, label: 'Sair', path: '/logout' },
   ];
 
+  const expandedWidth = '280px';
+  const collapsedWidth = '80px'; // Assuming a common collapsed width, adjust if CSS is different
+
   return (
     <div
       className={`sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      style={{ 
+        width: isExpanded ? expandedWidth : collapsedWidth, 
+        flexShrink: 0,
+        transition: 'width 0.3s ease' // Optional: ensure smooth transition if not already in CSS
+      }}
     >
       <div className="sidebar-menu">
         {topItems.map((item, index) => {
@@ -55,7 +63,7 @@ const Sidebar = () => {
             </NavLink>
 
           );
-        })};
+        })}
       </div>
       <div className="sidebar-footer">
         {bottomItems.map((item, index) => (
