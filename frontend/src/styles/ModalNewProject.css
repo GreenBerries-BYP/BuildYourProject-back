@@ -1,0 +1,146 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--white-color);
+  border-radius: 8px;
+  width: 77.3rem;
+  height: 40.3rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  background-color: var(--light-lilac-color);
+  padding: 1rem 2rem;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+    margin-top: 2rem;
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: var(--black-color);
+}
+
+.close-btn {
+  font-size: 4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-body form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.form-grid {
+  display: flex;
+  height: 70%;
+  gap: 2rem;
+}
+
+.form-left,
+.form-right {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1.2rem;
+  justify-content: space-between;
+}
+
+input,
+select {
+  padding: 0.8rem 1.2rem;
+  height: 5rem;
+  border-radius: 6px;
+  border: 1px solid var(--light-gray-color);
+  font-size: 1.8rem;
+  background-color: var(--form-gray-color);
+  width: 100%;
+  outline: none;
+}
+
+
+input::placeholder {
+    
+  color: var(--gray-color);
+}
+
+.project-type label,
+.template-select label {
+  font-size: 2rem;
+}
+
+.project-type .type-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.type-options button {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  margin-inline: 4px;
+  border: 1px solid var(--gray-color);
+  background-color: white;
+  cursor: pointer;
+  font-size: 1.8rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+}
+
+.type-options .selected {
+  background-color: var(--sat-lilac-color);
+  color: white;
+  border: none;
+}
+
+.type-options button:hover {
+  background-color: var(--light-lilac-color);
+}
+
+.template-select select {
+ font-weight: normal;
+  background-color: var(--form-gray-color);
+}
+
+.save-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-btn {
+  background: var(--dark-green-color);
+  color: white;
+  padding: 0.8rem 1.6rem;
+  font-size: 1.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s ease-in-out;
+}

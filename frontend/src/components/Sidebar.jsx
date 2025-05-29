@@ -6,11 +6,18 @@ import '../styles/Sidebar.css';
 import { useLocation } from 'react-router-dom';
 
 
-const Sidebar = () => {
+const Sidebar = ({ onToggle }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleMouseEnter = () => setIsExpanded(true);
-  const handleMouseLeave = () => setIsExpanded(false);
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+    onToggle(true); 
+  };
+
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+    onToggle(false); 
+  };
 
   const location = useLocation();
 

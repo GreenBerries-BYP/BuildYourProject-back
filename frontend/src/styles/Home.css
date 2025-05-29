@@ -1,0 +1,5 @@
+.projects-area{
+    display: flex;
+    gap: 2.4rem;
+    flex-wrap: wrap;
+}
