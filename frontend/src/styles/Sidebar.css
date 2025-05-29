@@ -6,7 +6,7 @@ a {
   width: 10rem;
   padding-inline: 3rem;
   transition: width 0.3s ease, padding-inline 0.3s ease;
-  background-color: var(--white-color);
+  background-color: var(--sidebar-bg);
   height: calc(100% - 80px);
   position: fixed;
   bottom: 0;
@@ -34,7 +34,7 @@ a {
 }
 
 .sidebar-item {
-  color: var(--sat-dark-purple-color);
+  color: var(--purple-sat);
   font-size: 1.2rem;
   display: flex;
   align-items: center;
@@ -44,13 +44,13 @@ a {
 }
 
 .sidebar-item:hover {
-  color: var(--dark-purple-color);
+  color: var(--purple-dark);
 }
 
 .sidebar-icon {
   display: flex;
   font-size: 3rem;
-  color: var(--sat-dark-purple-color);
+  color: var(--purple-dark);
   cursor: pointer;
   transition: transform 0.2s ease;
   align-items: center;

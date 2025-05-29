@@ -1,30 +1,52 @@
 :root {
-  --white-color: #FFFFFF;
-  --black-color: #000000;
-  --gray-color: #4E4E4E;
-  --light-gray-color: #C8C8C8;
-  --form-gray-color: #D9D9D9;
-  --lilac-color: #8474A1;
-  --light-lilac-color: #C8C1D4;
-  --sat-lilac-color: #7D64AC;
-  --dark-purple-color: #383560;
-  --sat-dark-purple-color: #5B4584;
-  --sat-purple-color: #6D52B4;
-  --pink-color: #B383C4;
-  --sat-pink-color: #A87CB8;
-  --green-color: #86B6A3;
-  --dark-green-color: #58917A;
-  --light-green-color: #C1D5CD;
-  --sat-green-color: #67BA99;
-  --dark-teal-color: #045A5C;
-  --green-btn: linear-gradient(90deg, #86B6A3, #045A5C);
-  --teal-color: #54969A;
-  --sat-teal-color: #08979D;
-  --link-blue-color: #1E76E8;
-  --purple-btn: linear-gradient(90deg, #7D64AC, #5B4584);
-  --bg-gradient: linear-gradient(166deg, #8474A1, #86B6A3);
-  --on-page-link: rgba(91, 69, 132, 36%);
-  --red-error-color: #FF4D4D;
+  /* Neutro */
+  --white: #FFFFFF;
+  --black: #000000;
+  --gray: #4E4E4E;
+  --gray-light: #D0D0D0;
+  --form-bg: #D9D9D9;
+  --on-page-link: rgba(91, 69, 132, 0.36);
+
+  /* Roxo */
+  --purple: #8474A1;
+  --purple-light: #C8C1D4;
+  --purple-dark: #383560;
+  --purple-sat: #5B4584;
+
+  /* Verde */
+  --green: #86B6A3;
+  --green-dark: #58917A;
+  --green-light: #C1D5CD;
+  --teal: #54969A;
+  --teal-dark: #045A5C;
+  --teal-bright: #08979D;
+
+  /* Rosa */
+  --pink: #B383C4;
+
+  /* Azul */
+  --blue-link: #1E76E8;
+
+  /* Erro */
+  --error-red: #FF4D4D;
+
+  /* Gradientes */
+  --btn-green: linear-gradient(90deg, var(--green), var(--teal-dark));
+  --btn-purple: linear-gradient(90deg, var(--purple-sat), var(--purple-dark));
+  --bg-gradient: linear-gradient(166deg, var(--purple), var(--green));
+
+  --header-bg: var(--white);
+  --header-border: var(--gray-light);
+  --sidebar-bg: var(--white);
+  --modal-bg: var(--white);
+  --modal-header-bg: var(--purple-light);
+  --card-background: var(--form-bg);
+  --create-card-border: var(--gray-light);
+  --create-card-text: var(--black);
+  
+  --placeholder-color: var(--black);
+  --search-placeholder-text-color: var(--black);
+ 
 }
 
 html {
@@ -45,68 +67,75 @@ body {
 
 /* Dark Mode */
 body.dark-theme {
-  background: linear-gradient(120deg, #1f1b2e, #2d333b 60%, #045A5C);
+  /* Neutro (Tema Escuro) */
+  --white: #2d333b; /* No dark theme, o "white" se torna um cinza escuro */
+  --black: #ffffff; /* No dark theme, o "black" se torna branco */
+  --gray: #a0a0a0;
+  --gray-light: #444c56;
+  --form-bg: #22272e;
+  --on-page-link: rgba(174, 140, 235, 0.36); /* Um roxo mais claro para dark-theme */
+
+  /* Roxo (Tema Escuro) */
+  --purple: #7D64AC;
+  --purple-light: #AE8CEB;
+  --purple-dark: #B59CD9;
+  --purple-sat: #AE8CEB;
+
+  /* Verde (Tema Escuro) */
+  --green: #67BA99;
+  --green-dark: #3E8B6D;
+  --green-light: #8ECDA7;
+  --teal: #3F7A7E;
+  --teal-dark: #07969b;
+  --teal-bright: #07C0C6;
+
+  /* Rosa (Tema Escuro) */
+  --pink: #D5B1E0;
+
+  /* Azul (Tema Escuro) */
+  --blue-link: #5E9DFF;
+
+  /* Erro (Tema Escuro) */
+  --error-red: #FF7D7D;
+
+  /* Gradientes (Tema Escuro) */
+  --btn-green: linear-gradient(90deg, var(--green), var(--teal-bright));
+  --btn-purple: linear-gradient(90deg, var(--purple-dark), var(--purple-light));
+  --bg-gradient: linear-gradient(120deg, #1f1b2e, #2d333b 60%, #045A5C);
+
+  /* Variáveis de texto e componente (Tema Escuro) */
+  --header-bg: #2d333b;
+  --header-border: #2d333b;
+  --sidebar-bg: #2d333b;
+  --modal-bg: #2d333b;
+  --modal-header-bg: #AE8CEB;
+  --card-background: #78808a; /* Fundo do card CreateProjectCard */
+  --create-card-border: #000000;
+  --create-card-text: #000000;
+
+  --placeholder-color: #ffffff;
+
+  --search-placeholder-text-color: #000000; 
+
 }
 
-body.dark-theme .header { 
-   background-color:#2d333b;
-   border-bottom: 1px solid #2d333b;
+input,
+select {
+  padding: 0.8rem 1.2rem;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-light); 
+  font-size: 1.3rem;
+  background-color: var(--form-bg); 
+  width: 100%;
+  outline: none;
 }
 
-body.dark-theme .sidebar { 
-   background-color: #2d333b;
+input::placeholder {
+  color: var(--placeholder-color); 
 }
 
-body.dark-theme .modal-content { 
-    background-color: #2d333b;
-    color: #ffffff;
-    border: 1px solid #000000;
-}
-
-body.dark-theme .modal-header { 
-    border-bottom: 1px solid #000000;
-    background-color: #AE8CEB;
-}
-
-body.dark-theme .create-project-card { 
-    background-color: #78808a;
-    border: 1px solid #000000; 
-    color: #000000;
-}
-
-body.dark-theme .create-project-card .plus {
-    color: #000000;
-}
-
-body.dark-theme .create-project-card:hover {
-    background-color: #62676d;
-}
-
-body.dark-theme .header .header-icon {
-    color: #67BA99;
-}
-body.dark-theme .header .title {
-    color: #7D64AC;
-}
-
-body.dark-theme .header .search-input { 
-   background-color: #2d333b;
-}
-
-body.dark-theme ::placeholder {
-  color: #000000; 
-}
-
-body.dark-theme .form-select { 
-  background-color: #22272e;
-  color: #c5c8c9;
-  border: 1px solid #444c56;
-}
-
-.sidebar-item:hover {
-  color: #8474A1;
-}
-
+/* Font Faces */
 @font-face {
   font-family: 'Sanchez';
   src: url('/fonts/Sanchez/Sanchez-Regular.ttf') format('truetype');
@@ -139,7 +168,6 @@ body.dark-theme .form-select {
   font-display: swap;
 }
 
-
 @font-face {
   font-family: 'Poppins';
   src: url('/fonts/Poppins/Poppins-Light.woff') format('woff');
@@ -147,7 +175,6 @@ body.dark-theme .form-select {
   font-style: normal;
   font-display: swap;
 }
-
 
 @font-face {
   font-family: 'Poppins';
@@ -173,7 +200,6 @@ body.dark-theme .form-select {
   font-display: swap;
 }
 
-
 @font-face {
   font-family: 'Poppins';
   src: url('/fonts/Poppins/Poppins-Thin.woff') format('woff');
@@ -181,7 +207,6 @@ body.dark-theme .form-select {
   font-style: normal;
   font-display: swap;
 }
-
 
 @font-face {
   font-family: 'Poppins';
