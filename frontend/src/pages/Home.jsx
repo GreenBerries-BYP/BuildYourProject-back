@@ -16,6 +16,60 @@ function Home() {
     setModalAberto(true);
   };
 
+   const projetos = [
+    {
+      nomeProjeto: "Projeto Aplicação",
+      progressoProjeto: 45,
+      progressoIndividual: 30,
+      tarefasProjeto: [
+        { nomeTarefa: "Design", statusTarefa: false },
+        { nomeTarefa: "POC", statusTarefa: false },
+        { nomeTarefa: "Conceito", statusTarefa: true },
+        { nomeTarefa: "Introdução", statusTarefa: true },
+      ],
+      estaAtrasado:true,
+    },
+    {
+      nomeProjeto: "Documentação",
+      progressoProjeto: 76,
+      progressoIndividual: 100,
+      tarefasProjeto: [
+        { nomeTarefa: "Conclusão", statusTarefa: true },
+        { nomeTarefa: "Resumo", statusTarefa: false },
+        { nomeTarefa: "Desenvolvimento", statusTarefa: true },
+        { nomeTarefa: "Justificativa", statusTarefa: true },
+        { nomeTarefa: "Introdução", statusTarefa: true },
+      ],
+      estaAtrasado:false,
+    },
+    {
+      nomeProjeto: "Smart Home",
+      progressoProjeto: 34,
+      progressoIndividual: 80,
+      tarefasProjeto: [
+        { nomeTarefa: "Documentação", statusTarefa: true },
+        { nomeTarefa: "Montagem", statusTarefa: true },
+        { nomeTarefa: "Peças", statusTarefa: false },
+        { nomeTarefa: "Desenhos", statusTarefa: false },
+        { nomeTarefa: "Sistemas", statusTarefa: false },
+      ],
+      estaAtrasado:true,
+    },
+    {
+      nomeProjeto: "Seminário",
+      progressoProjeto: 12,
+      progressoIndividual: 20,
+      tarefasProjeto: [
+        { nomeTarefa: "Conclusão", statusTarefa: false },
+        { nomeTarefa: "Resumo", statusTarefa: false },
+        { nomeTarefa: "Desenvolvimento", statusTarefa: false },
+        { nomeTarefa: "Slides", statusTarefa: false },
+        { nomeTarefa: "Introdução", statusTarefa: true },
+      ],
+      estaAtrasado:false,
+    }
+  ];
+
   return (
     <div className="d-flex">
       <Sidebar onToggle={setSidebarAberta}/>
@@ -26,29 +80,15 @@ function Home() {
       }}>
         <CreateProjectCard onClick={handleCreateProject} />
         
-        <ProjectCard 
-          tituloProjeto="Projeto Aplicação" 
-          progressoProjeto={45} 
-          progressoIndividual={30} 
-        />
-
-        <ProjectCard 
-          tituloProjeto="Documentação" 
-          progressoProjeto={76} 
-          progressoIndividual={100} 
-        />
-
-        <ProjectCard 
-          tituloProjeto="Smart Home" 
-          progressoProjeto={34} 
-          progressoIndividual={80} 
-        />
-
-        <ProjectCard 
-          tituloProjeto="Seminário" 
-          progressoProjeto={12} 
-          progressoIndividual={20} 
-        />
+        {projetos.map((projeto, index) => (
+          <ProjectCard 
+            key={index}
+            nomeProjeto={projeto.nomeProjeto}
+            progressoProjeto={projeto.progressoProjeto}
+            progressoIndividual={projeto.progressoIndividual}
+            tarefasProjeto={projeto.tarefasProjeto}
+          />
+        ))}
       </div>
       
       <ModalNewProject isOpen={modalAberto} onClose={() => setModalAberto(false)} />
