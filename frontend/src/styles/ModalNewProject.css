@@ -173,3 +173,10 @@ input::placeholder {
     margin-top: 4px;
     margin-bottom: 2px;
 }
+
+.blur-background {
+    filter: blur(1.5px);
+    pointer-events: none;
+    user-select: none;
+    transition: filter 0.3s ease;
+}
