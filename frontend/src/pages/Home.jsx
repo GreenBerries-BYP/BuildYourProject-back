@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
@@ -8,17 +7,27 @@ import CreateProjectCard from "../components/CreateProjectCard";
 import ModalNewProject from "../components/ModalNewProject";
 
 import '../styles/Home.css';
-
+import { fetchUserData } from '../api/userService';
 
 function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
 
+  useEffect(() => {
+    fetchUserData()
+      .then(data => {
+        console.log('Email do usuário logado:', data.email);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados do usuário:', error);
+      });
+  }, []);
+
   const handleCreateProject = () => {
     setModalAberto(true);
   };
 
-   const projetos = [
+  const projetos = [
     {
       nomeProjeto: "Projeto Aplicação",
       progressoProjeto: 45,
@@ -29,7 +38,7 @@ function Home() {
         { nomeTarefa: "Conceito", statusTarefa: true },
         { nomeTarefa: "Introdução", statusTarefa: true },
       ],
-      estaAtrasado:true,
+      estaAtrasado: true,
     },
     {
       nomeProjeto: "Documentação",
@@ -42,7 +51,7 @@ function Home() {
         { nomeTarefa: "Justificativa", statusTarefa: true },
         { nomeTarefa: "Introdução", statusTarefa: true },
       ],
-      estaAtrasado:false,
+      estaAtrasado: false,
     },
     {
       nomeProjeto: "Smart Home",
@@ -55,7 +64,7 @@ function Home() {
         { nomeTarefa: "Desenhos", statusTarefa: false },
         { nomeTarefa: "Sistemas", statusTarefa: false },
       ],
-      estaAtrasado:true,
+      estaAtrasado: true,
     },
     {
       nomeProjeto: "Seminário",
@@ -68,7 +77,7 @@ function Home() {
         { nomeTarefa: "Slides", statusTarefa: false },
         { nomeTarefa: "Introdução", statusTarefa: true },
       ],
-      estaAtrasado:false,
+      estaAtrasado: false,
     }
   ];
 
