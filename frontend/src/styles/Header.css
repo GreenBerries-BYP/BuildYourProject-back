@@ -2,8 +2,8 @@
 .header {
   height: 80px;
   width: 100%;
-  background-color: var(--white-color);
-  border-bottom: 1px solid var(--light-gray-color);
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
   box-sizing: border-box;
   padding: 0 2rem;
   position: fixed;
@@ -24,7 +24,7 @@
 
 .title {
   font-size: 2rem;
-  color: var(--lilac-color);
+  color: var(--purple);
 }
 
 .header-icon {
@@ -32,7 +32,7 @@
   justify-content: center;
   align-items: center;
   font-size: 3rem;
-  color: var(--dark-green-color);
+  color: var(--green-dark);
   cursor: pointer;
   transition: transform 0.2s;
 
@@ -74,7 +74,7 @@ button:focus {
   position: absolute;
   right: 6px;
   font-size: 2.4rem;
-  color: var(--dark-green-color);
+  color: var(--green-dark);
   transition: color 0.3s ease;
   z-index: 2;
 }
@@ -84,8 +84,9 @@ button:focus {
   background: transparent;
   outline: none;
   font-size: 1.6rem;
-  color: var(--dark-green-color);
+  color: var(--green-dark);
   width: 0;
+  cursor: pointer;
   transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
   margin-right: 40px;
 }
@@ -93,7 +94,7 @@ button:focus {
 .search:hover,
 .search.focused {
   width: 300px;
-  background-color: var(--light-green-color);
+  background-color: var(--green-light);
   padding-left: 15px;
 }
 
@@ -101,4 +102,9 @@ button:focus {
 .search.focused .search-input {
   width: 100%;
   opacity: 1;
+  border: 0;
+}
+
+.search-input::placeholder {
+  color: var(--green-dark);
 }

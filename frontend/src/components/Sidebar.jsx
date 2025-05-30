@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { PiCirclesThreeFill } from "react-icons/pi";
-import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt    } from "react-icons/md";
+import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt } from "react-icons/md";
 import '../styles/Sidebar.css';
+import { NavLink } from 'react-router-dom';
 
-import { useLocation } from 'react-router-dom';
+import { i18n } from "../translate/i18n";
 
 
 const Sidebar = ({ onToggle }) => {
@@ -13,7 +14,6 @@ const Sidebar = ({ onToggle }) => {
     setIsExpanded(true);
     onToggle(true); 
   };
-
   const handleMouseLeave = () => {
     setIsExpanded(false);
     onToggle(false); 
@@ -22,34 +22,53 @@ const Sidebar = ({ onToggle }) => {
   const location = useLocation();
 
 
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+    onToggle(false); 
+  };
+
   const topItems = [
-    { icon: <MdHome />, label: 'Home', path: '/home' },
-    { icon: <PiCirclesThreeFill />, label: 'Meus projetos', path: '/projetos' },
-    { icon: <MdOutlineTaskAlt  />, label: 'Minhas tarefas', path: '/tarefas' },
+    { icon: <MdHome />, label: i18n.t('sideBar.home'), path: '/home' },
+    { icon: <PiCirclesThreeFill />, label: i18n.t('sideBar.myProjects'), path: '/projetos' },
+    { icon: <MdOutlineTaskAlt />, label: i18n.t('sideBar.myTasks'), path: '/tarefas' },
     {
-      icon: <MdShare  />,
-      label: 'Compartilhados\ncomigo',
+      icon: <MdShare />,
+      label: i18n.t('sideBar.sharedWithMe'),
       path: '/compartilhados'
     },
-    { icon: <MdOutlineCalendarMonth  />, label: 'Google calendário', path: '/calendario' },
+    { icon: <MdOutlineCalendarMonth />, label: i18n.t('sideBar.googleCalendar'), path: '/calendario' },
   ];
 
   const bottomItems = [
-    { icon: <MdInfo />, label: 'Informações', path: '/info' },
-    { icon: <MdLogout />, label: 'Sair', path: '/logout' },
+    { icon: <MdInfo />, label: i18n.t('sideBar.info'), path: '/info' },
+    { icon: <MdLogout />, label: i18n.t('sideBar.logOut'), path: '/logout' },
   ];
+
+  const expandedWidth = '280px';
+  const collapsedWidth = '80px';
 
   return (
     <div
       className={`sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      style={{ 
+        width: isExpanded ? expandedWidth : collapsedWidth, 
+        flexShrink: 0,
+        transition: 'width 0.3s ease' 
+      }}
     >
       <div className="sidebar-menu">
         {topItems.map((item, index) => {
-          const isOnPage = location.pathname === item.path;
-          return(
-            <a key={index} href={item.path} className={`sidebar-item ${isOnPage ? 'on-page' : ''}`}>
+          return (
+            <NavLink
+              key={index}
+              to={item.path}
+              aria-label={item.label}
+              className={({ isActive }) =>
+                `sidebar-item ${isActive ? 'on-page' : ''}`
+              }
+            >
               <span className="sidebar-icon">{item.icon}</span>
               {isExpanded && (
                 <span className="sidebar-label">
@@ -58,16 +77,25 @@ const Sidebar = ({ onToggle }) => {
                   ))}
                 </span>
               )}
-            </a>
+            </NavLink>
+
           );
-        })};
+        })}
       </div>
       <div className="sidebar-footer">
         {bottomItems.map((item, index) => (
-          <a key={index} href={item.path} className="sidebar-item">
+          <NavLink
+            key={index}
+            to={item.path}
+            aria-label={item.label}
+            className={({ isActive }) =>
+              `sidebar-item ${isActive ? 'on-page' : ''}`
+            }
+          >
             <span className="sidebar-icon">{item.icon}</span>
             {isExpanded && <span className="sidebar-label">{item.label}</span>}
-          </a>
+          </NavLink>
+
         ))}
       </div>
     </div>

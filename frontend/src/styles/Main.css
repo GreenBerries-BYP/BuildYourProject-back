@@ -1,131 +1,219 @@
 :root {
-  --white-color: #FFFFFF;
-  --black-color: #000000;
-  --gray-color: #4E4E4E;
-  --light-gray-color: #C8C8C8;
-  --form-gray-color: #D9D9D9;
-  --lilac-color: #8474A1;
-  --light-lilac-color: #C8C1D4;
-  --sat-lilac-color: #7D64AC;  
-  --dark-purple-color: #383560;
-  --sat-dark-purple-color: #5B4584;
-  --sat-purple-color: #6D52B4; 
-  --pink-color: #B383C4;
-  --sat-pink-color: #A87CB8;
-  --green-color: #86B6A3;
-  --dark-green-color: #58917A; 
-  --light-green-color: #C1D5CD;
-  --sat-green-color: #67BA99;
-  --dark-teal-color: #045A5C;
-  --teal-color: #54969A;
-  --sat-teal-color: #08979D;
-  --link-blue-color: #1E76E8;
+  /* Neutro */
+  --white: #ffffff;
+  --black: #000000;
+  --gray: #4e4e4e;
+  --gray-light: #d0d0d0;
+  --form-bg: rgba(255, 255, 255, 0.15);
+  --on-page-link: rgba(91, 69, 132, 0.36);
 
-  --purple-btn: linear-gradient(90deg,#7D64AC, #5B4584);
-  --green-btn: linear-gradient(90deg,#86B6A3, #045A5C);
+  /* Roxo */
+  --purple: #8474a1;
+  --purple-light: #c8c1d4;
+  --purple-dark: #383560;
+  --purple-sat: #5b4584;
 
-  --bg-gradient: linear-gradient(166deg, #8474A1, #86B6A3);
+  /* Verde */
+  --green: #86b6a3;
+  --green-dark: #58917a;
+  --green-light: #c1d5cd;
+  --teal: #54969a;
+  --teal-dark: #045a5c;
+  --teal-bright: #08979d;
 
-  --on-page-link: rgba(91, 69, 132, 36%);
+  /* Rosa */
+  --pink: #b383c4;
+
+  /* Azul */
+  --blue-link: #1e76e8;
+
+  /* Erro */
+  --error-red: #ff4d4d;
+
+  /* Gradientes */
+  --btn-green: linear-gradient(90deg, var(--green), var(--teal-dark));
+  --btn-purple: linear-gradient(90deg, var(--purple-sat), var(--purple-dark));
+  --bg-gradient: linear-gradient(166deg, var(--purple) 0%, var(--green) 100%);
+
+  --header-bg: var(--white);
+  --header-border: var(--gray-light);
+  --sidebar-bg: var(--white);
+  --modal-bg: var(--white);
+  --modal-header-bg: var(--purple-light);
+  --card-background: var(--form-bg);
+  --create-card-border: var(--gray-light);
+  --create-card-text: var(--black);
+
+  --placeholder-color: var(--black);
+  --search-placeholder-text-color: var(--black);
 }
 
-html{
+html {
   font-size: 62.5%;
 }
 
 * {
   margin: 0;
-  padding: 0;    
+  padding: 0;
   border: none;
 }
 
-body{
+body {
   min-height: 100vh;
-  font-family: 'Poppins';
+  font-family: "Poppins";
   background: var(--bg-gradient);
 }
 
+/* Dark Mode */
+body.dark-theme {
+  /* Neutro (Tema Escuro) */
+  --white: #262628; /* No dark theme, o "white" se torna um cinza escuro */
+  --black: #ffffff; /* No dark theme, o "black" se torna branco */
+  --gray: #a0a0a0;
+  --gray-light: #444c56;
+  --form-bg: #22272e;
+  --on-page-link: rgba(
+    174,
+    140,
+    235,
+    0.36
+  ); /* Um roxo mais claro para dark-theme */
+
+  /* Roxo (Tema Escuro) */
+  --purple: #7d64ac;
+  --purple-light: #AE8CEB;
+  --purple-dark: #b59cd9;
+  --purple-sat: #AE8CEB;
+
+  /* Verde (Tema Escuro) */
+  --green: #8ecda7;
+  --green-dark: #67BA99;
+  --green-light: #0c5e3d;
+  --teal: #3f7a7e;
+  --teal-dark: #07969b;
+  --teal-bright: #07c0c6;
+
+  /* Rosa (Tema Escuro) */
+  --pink: #d5b1e0;
+
+  /* Azul (Tema Escuro) */
+  --blue-link: #5e9dff;
+
+  /* Erro (Tema Escuro) */
+  --error-red: #ff7d7d;
+
+  /* Gradientes (Tema Escuro) */
+  --btn-green: linear-gradient(90deg, var(--green), var(--teal-bright));
+  --btn-purple: linear-gradient(90deg, var(--purple-dark), var(--purple-light));
+
+  /* Variáveis de texto e componente (Tema Escuro) */
+  --header-bg: #2d333b;
+  --header-border: #000;
+  --sidebar-bg: #2d333b;
+  --modal-bg: #2d333b;
+  --modal-header-bg: #ae8ceb;
+  --card-background: rgb(0, 0, 0, 0.15);
+  --create-card-border: #000000;
+  --create-card-text: #000000;
+
+  --placeholder-color: #ffffff;
+
+  --search-placeholder-text-color: #000000;
+}
+
+input,
+select {
+  padding: 0.8rem 1.2rem;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-light);
+  font-size: 1.3rem;
+  background-color: var(--form-bg);
+  width: 100%;
+  outline: none;
+}
+
+input::placeholder {
+  color: var(--placeholder-color);
+}
+
+/* Font Faces */
 @font-face {
-  font-family: 'Sanchez';
-  src: url('/fonts/Sanchez/Sanchez-Regular.ttf') format('truetype');
+  font-family: "Sanchez";
+  src: url("/fonts/Sanchez/Sanchez-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-ExtraBold.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-ExtraBold.woff") format("woff");
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Poppins';
-  src:  url('/fonts/Poppins/Poppins-Black.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Black.woff") format("woff");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-Bold.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Bold.woff") format("woff");
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
-
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-Light.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Light.woff") format("woff");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
-
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-ExtraLight.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-ExtraLight.woff") format("woff");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-Medium.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Medium.woff") format("woff");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-Regular.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Regular.woff") format("woff");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-Thin.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-Thin.woff") format("woff");
   font-weight: 100;
   font-style: normal;
   font-display: swap;
 }
 
-
 @font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins/Poppins-SemiBold.woff') format('woff');
+  font-family: "Poppins";
+  src: url("/fonts/Poppins/Poppins-SemiBold.woff") format("woff");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
-

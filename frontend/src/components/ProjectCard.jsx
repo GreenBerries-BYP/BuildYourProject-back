@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import ApexCharts from 'apexcharts'
 import '../styles/ProjectCard.css';
 import ProjectCardItem from './ProjectCardItem';
-
+import { i18n } from '../translate/i18n';
 
 const ProjectCard = ({
   nomeProjeto,
@@ -11,6 +11,7 @@ const ProjectCard = ({
   progressoIndividual,
   tarefasProjeto,
   estaAtrasado
+
 }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -58,6 +59,7 @@ const ProjectCard = ({
             <button className='d-inline btn-more'  data-toggle="popover" data-content='
               <button class="btn-popover">apagar projeto<button/>
             '>
+
                 <img src="/imgs/more_vert.svg" alt="mais opções no projeto" />
             </button>
         </div>
@@ -82,11 +84,12 @@ const ProjectCard = ({
               <img src="/imgs/alert.svg"/>
             </span>
 
-            <span className='text-center ml-3 mr-3'>Suas tarefas: </span>
+            <span className='text-center ml-3 mr-3'>{i18n.t('project.yourTasks')}</span>
             <div className='round-progress d-inline' id='roundProgress'>
               <div ref={chartRef}></div>
             </div>
             
+
         </div>
     </div>
   );

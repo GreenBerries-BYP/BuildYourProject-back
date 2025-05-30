@@ -1,95 +1,91 @@
 .login {
-   height: 100vh;;
+  height: 100vh;
 }
 
 .card-login {
-    height: 85%;
+  height: 85%;
 }
 
 .logo-h {
-   height: 10.4rem;
+  height: 10.4rem;
 }
 
 label {
-    font-size: 2.17rem;
+  font-size: 2rem;
+  margin-bottom: 6px;
 }
 
 .input-text {
-    font-size: 2rem;
-    height: 63px;
-    border-radius: 9px;
-    background-color: var(--form-gray-color);
-    margin-bottom: 15px;
-    padding-inline: 20px;
+  font-size: 1.9rem;
+  height: 60px;
+  border-radius: 9px;
+  background-color: var(--form-bg);
+  border: none;
+  padding-inline: 20px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s;
+}
+
+.input-text:focus {
+  border: 2px solid var(--btn-green);
+  outline: none;
 }
 
 .link-esqueci {
-    font-size: 2rem;
-    padding-bottom: 10px;
+  font-size: 1.8rem;
+  cursor: pointer;
 }
 
+.link-esqueci:hover {
+  color: var(--btn-green);
+}
 
 .check {
-    width: 24px;
-    height: 24px;
-    margin-right: 15px;
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
 }
 
-.botoes-login {
-    height: 48px;
-}
-
-.btn-acesso-roxo {
-    font-size: 2.4rem;
-    color: var(--white-color);
-    display: block;
-    background: var(--purple-btn);
-    padding: 10px;
-    border-radius: 30px;
-    transition: all 200ms ease-in-out;
+.btn-acesso-verde,
+.link-cadastre {
+  font-size: 2.2rem;
+  padding: 12px;
+  border-radius: 30px;
+  transition: all 200ms ease-in-out;
 }
 
 .btn-acesso-verde {
-    font-size: 2.4rem;
-    color: var(--white-color);
-    display: block;
-    background: var(--green-btn);
-    padding: 10px;
-    border-radius: 30px;
-    transition: all 200ms ease-in-out;
+  color: var(--white);
+  background: var(--btn-green);
+  border: none;
 }
 
-.btn-acesso:hover {
-    color: var(--white-color);
-    text-decoration: none;
-    transform: scale(1.05);
+.btn-acesso-verde:hover {
+  transform: scale(1.05);
+  background-color: var(--green-dark);
 }
 
 .link-cadastre {
-    font-size: 2.4rem;
-    color: var(--green-dark-color, var(--dark-green-color)); 
-    display: block;
-    border: 3px solid var(--dark-green-color);
-    padding: 10px;
-    border-radius: 30px;
-    transition: all 200ms ease-in-out;
+  color: var(--green-dark);
+  border: 2px solid var(--green-dark);
+  background-color: transparent;
 }
 
 .link-cadastre:hover {
-    color: var(--white-color);
-    background-color: var(--dark-green-color);
-    text-decoration: none;
-    transform: scale(1.05);
-}
-
-.cadastro {
-    margin-block: 8rem;
+  background-color: var(--green-dark);
+  color: var(--white);
+  transform: scale(1.05);
 }
 
 .check-label {
-    font-size: 2rem;
+  font-size: 1.9rem;
 }
 
 .check-form {
-    margin: 0;
+  width: 22px;
+  height: 22px;
+}
+
+.alert {
+  font-size: 1.8rem;
 }

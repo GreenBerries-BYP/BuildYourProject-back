@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 import Sidebar from "../components/Sidebar";
@@ -8,10 +9,11 @@ import ModalNewProject from "../components/ModalNewProject";
 
 import '../styles/Home.css';
 
+
 function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
-  
+
   const handleCreateProject = () => {
     setModalAberto(true);
   };
@@ -89,6 +91,7 @@ function Home() {
             tarefasProjeto={projeto.tarefasProjeto}
           />
         ))}
+
       </div>
       
       <ModalNewProject isOpen={modalAberto} onClose={() => setModalAberto(false)} />
