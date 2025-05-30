@@ -1,5 +1,4 @@
 import "../styles/CreateProjectCard.css";
-
 import { i18n } from "../translate/i18n";
 
 const CreateProjectCard = ({ onClick }) => {

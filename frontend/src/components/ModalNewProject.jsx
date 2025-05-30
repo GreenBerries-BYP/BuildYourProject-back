@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
-import { getToken } from "../auth/auth"; // ⚠️ Supondo que você tenha o mesmo helper usado no login.
+
+import { getToken } from "../auth/auth"; 
 import { abntTemplates } from "../mocks/abntMock";
 import { FaCheck } from "react-icons/fa";
 import { i18n } from "../translate/i18n";
+
 
 const ModalNewProject = ({ isOpen, onClose }) => {
   const modalRef = useRef();
@@ -99,7 +101,6 @@ const ModalNewProject = ({ isOpen, onClose }) => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
@@ -244,5 +245,4 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
 export default ModalNewProject;

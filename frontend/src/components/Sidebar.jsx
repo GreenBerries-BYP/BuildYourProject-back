@@ -6,6 +6,7 @@ import { NavLink } from 'react-router-dom';
 
 import { i18n } from "../translate/i18n";
 
+
 const Sidebar = ({ onToggle }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -13,6 +14,13 @@ const Sidebar = ({ onToggle }) => {
     setIsExpanded(true);
     onToggle(true); 
   };
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+    onToggle(false); 
+  };
+
+  const location = useLocation();
+
 
   const handleMouseLeave = () => {
     setIsExpanded(false);

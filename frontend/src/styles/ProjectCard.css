@@ -2,14 +2,18 @@
     background: var(--white-color);
     padding: 3rem;
     font-size: 2rem;
-    width: 35%;
+    width: 25%;
     border-radius: 10px;
     transition: width 500ms ease-in-out;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
 }
+/* 
 
 .project-card.expanded { 
     width: 45%;
-}
+} */
 
 .card-header{
     display: flex;;
@@ -40,5 +44,22 @@
 }
 
 .round-progress{
-    height: 30px;
+    width: 6rem;
+    height: 6rem;
+}
+
+.tasks{
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+}
+
+.btn-popover{
+    font-size: 2rem;
+    background: var(--white-color);
+    padding: 0.5rem;
+    transition: color 300ms ease-in-out;
+}
+.btn-popover:hover{
+    color: var(--gray-color);
 }

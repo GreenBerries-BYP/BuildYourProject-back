@@ -1,13 +1,17 @@
+
 import { useState, useRef, useEffect } from 'react';
 import ApexCharts from 'apexcharts'
 import '../styles/ProjectCard.css';
+import ProjectCardItem from './ProjectCardItem';
 import { i18n } from '../translate/i18n';
 
-
 const ProjectCard = ({
-  tituloProjeto = "Projeto Aplicação",
-  progressoProjeto = 50,
-  progressoIndividual = 30,
+  nomeProjeto,
+  progressoProjeto,
+  progressoIndividual,
+  tarefasProjeto,
+  estaAtrasado
+
 }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -51,8 +55,11 @@ const ProjectCard = ({
       onMouseLeave={handleMouseLeave}
     >
         <div className="card-header">
-            {tituloProjeto}
-            <button className='d-inline btn-more'>
+            {nomeProjeto}
+            <button className='d-inline btn-more'  data-toggle="popover" data-content='
+              <button class="btn-popover">apagar projeto<button/>
+            '>
+
                 <img src="/imgs/more_vert.svg" alt="mais opções no projeto" />
             </button>
         </div>
@@ -62,18 +69,34 @@ const ProjectCard = ({
             </div>
             <span className='progress-label'>{progressoProjeto}%</span>
         </div>
-        <div className="tasks"></div>
-        <div className='individual-progress d-flex align-items-center justify-content-between'>
-            <span className="alert-task">
+        <div className="tasks">
+            {tarefasProjeto?.map((tarefa, index)=>(
+                <ProjectCardItem 
+                    key={index}
+                    nomeTarefa={tarefa.nomeTarefa} 
+                    statusTarefa={tarefa.statusTarefa} 
+                />      
+            ))}
+            
+        </div>
+        <div className='individual-progress d-flex align-items-center justify-content-end'>
+            <span className={estaAtrasado ? "":"d-none"}>
               <img src="/imgs/alert.svg"/>
             </span>
-            <span>{i18n.t('project.yourTasks')}</span>
+
+            <span className='text-center ml-3 mr-3'>{i18n.t('project.yourTasks')}</span>
             <div className='round-progress d-inline' id='roundProgress'>
               <div ref={chartRef}></div>
             </div>
+            
+
         </div>
     </div>
   );
 };
 
 export default ProjectCard;
+
+$(function () {
+  $('[data-toggle="popover"]').popover({html: true})
+})
