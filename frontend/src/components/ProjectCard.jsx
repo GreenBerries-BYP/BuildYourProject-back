@@ -10,8 +10,7 @@ const ProjectCard = ({
   progressoProjeto,
   progressoIndividual,
   tarefasProjeto,
-  estaAtrasado
-
+  estaAtrasado,
 }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -80,11 +79,12 @@ const ProjectCard = ({
             
         </div>
         <div className='individual-progress d-flex align-items-center justify-content-end'>
-            <span className={estaAtrasado ? "":"d-none"}>
+            <span className={estaAtrasado ? "d-none" : ""}>
               <img src="/imgs/alert.svg"/>
             </span>
 
-            <span className='text-center ml-3 mr-3'>{i18n.t('project.yourTasks')}</span>
+            <span className='text-center mx-3'>{i18n.t('project.yourTasks')}</span>
+
             <div className='round-progress d-inline' id='roundProgress'>
               <div ref={chartRef}></div>
             </div>

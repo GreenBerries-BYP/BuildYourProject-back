@@ -45,7 +45,7 @@ a {
 
 .sidebar-item:hover {
   text-decoration: none;
-  color: var(--dark-purple-color);
+  color: var(--purple-dark);
 }
 
 .sidebar-icon {

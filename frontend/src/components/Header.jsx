@@ -65,7 +65,7 @@ const Header = () => {
     <header className="header d-flex align-items-center justify-content-between">
       <div className="header-left d-flex align-items-center">
         <img src="/imgs/byp_logo.svg" alt="logo" className="logo-img" />
-        <span className="title mt-2">{i18n.t("titles.title")}</span>
+        <span className="title mt-2">Build Your Project</span>
       </div>
       <div className="header-right d-flex align-items-center">
         <div
