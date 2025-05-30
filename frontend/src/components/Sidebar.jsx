@@ -21,12 +21,6 @@ const Sidebar = ({ onToggle }) => {
 
   const location = useLocation();
 
-
-  const handleMouseLeave = () => {
-    setIsExpanded(false);
-    onToggle(false); 
-  };
-
   const topItems = [
     { icon: <MdHome />, label: i18n.t('sideBar.home'), path: '/home' },
     { icon: <PiCirclesThreeFill />, label: i18n.t('sideBar.myProjects'), path: '/projetos' },
