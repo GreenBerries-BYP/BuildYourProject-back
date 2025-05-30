@@ -3,7 +3,7 @@ import { PiCirclesThreeFill } from "react-icons/pi";
 import { MdHome, MdLogout, MdInfo, MdOutlineCalendarMonth, MdShare, MdOutlineTaskAlt } from "react-icons/md";
 import '../styles/Sidebar.css';
 import { NavLink } from 'react-router-dom';
-
+import { useLocation } from 'react-router-dom';
 import { i18n } from "../translate/i18n";
 
 
