@@ -4,9 +4,10 @@ from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import CustomTokenObtainPairSerializer
+from .serializers import CustomTokenObtainPairSerializer, ProjectSerializer
 from api.models import User
 from api.serializers import UserSerializer
+from rest_framework import status
 
 # Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
 # Sempre retorne em JSON pro front conseguir tratar bem
@@ -32,3 +33,19 @@ class HomeView(APIView):
 
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class ProjectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        projetos = request.user.projects.all()  # ajuste conforme relacionamento
+        serializer = ProjectSerializer(projetos, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        print("Dados recebidos no POST:", request.data)  # imprime os dados recebidos
+        serializer = ProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

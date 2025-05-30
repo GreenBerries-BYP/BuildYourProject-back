@@ -13,9 +13,12 @@ function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
 
+  const [userData, setUserData] = useState(null);
+
   useEffect(() => {
     fetchUserData()
       .then(data => {
+        setUserData(data);
         console.log('Email do usuário logado:', data.email);
       })
       .catch(error => {
@@ -83,14 +86,14 @@ function Home() {
 
   return (
     <div className="d-flex">
-      <Sidebar onToggle={setSidebarAberta}/>
+      <Sidebar onToggle={setSidebarAberta} />
       <Header />
       <div className="projects-area" style={{
           padding: sidebarAberta ? "12rem 3rem 0 32rem" : "12rem 3rem 0 15rem", 
           transition: "padding 0.3s ease"
       }}>
         <CreateProjectCard onClick={handleCreateProject} />
-        
+
         {projetos.map((projeto, index) => (
           <ProjectCard 
             key={index}
@@ -98,12 +101,16 @@ function Home() {
             progressoProjeto={projeto.progressoProjeto}
             progressoIndividual={projeto.progressoIndividual}
             tarefasProjeto={projeto.tarefasProjeto}
+            estaAtrasado={projeto.estaAtrasado}
           />
         ))}
 
       </div>
-      
-      <ModalNewProject isOpen={modalAberto} onClose={() => setModalAberto(false)} />
+
+      <ModalNewProject 
+        isOpen={modalAberto} 
+        onClose={() => setModalAberto(false)} 
+      />
     </div>
   );
 }
