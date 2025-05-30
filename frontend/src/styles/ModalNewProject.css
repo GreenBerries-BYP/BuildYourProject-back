@@ -12,7 +12,7 @@
 }
 
 .modal-content {
-  background-color: var(--white-color);
+  background-color: var(--white);
   border-radius: 8px;
   width: 77.3rem;
   height: 40.3rem;
@@ -21,7 +21,7 @@
 }
 
 .modal-header {
-  background-color: var(--light-lilac-color);
+  background-color: var(--purple-light);
   padding: 1rem 2rem;
   border-radius: 8px 8px 0 0;
   display: flex;
@@ -33,7 +33,7 @@
     margin-top: 2rem;
     font-size: 2.5rem;
     font-weight: normal;
-    color: var(--black-color);
+    color: var(--black);
 }
 
 .close-btn {
@@ -77,9 +77,9 @@ select {
   padding: 0.8rem 1.2rem;
   height: 5rem;
   border-radius: 6px;
-  border: 1px solid var(--light-gray-color);
-  font-size: 1.8rem;
-  background-color: var(--form-gray-color);
+  border: 1px solid var(--gray);
+  font-size: 2rem;
+  background-color: var(--gray-light);
   width: 100%;
   outline: none;
 }
@@ -87,18 +87,20 @@ select {
 
 input::placeholder {
     
-  color: var(--gray-color);
+  color: var(--gray);
 }
 
 .form-options {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1.6rem;
-  /* Espaço entre o Tipo de projeto e o Template */
+  justify-content: space-between;
 }
 
 .project-type,
 .template-select {
+
   display: flex;
   flex-direction: column;
 }
@@ -106,6 +108,12 @@ input::placeholder {
 .project-type label,
 .template-select label {
   font-size: 2rem;
+}
+
+.template-select select{
+  font-size: 1.8rem;  
+  height: 5rem;
+  padding: 1rem;
 }
 
 .project-type .type-options {
@@ -118,7 +126,7 @@ input::placeholder {
   padding: 0.6rem 1rem;
   border-radius: 10px;
   margin-inline: 4px;
-  border: 1px solid var(--gray-color);
+  border: 1px solid var(--gray);
   background-color: white;
   cursor: pointer;
   font-size: 1.8rem;
@@ -127,18 +135,18 @@ input::placeholder {
 }
 
 .type-options .selected {
-  background-color: var(--sat-lilac-color);
+  background-color: var(--purple-sat);
   color: white;
   border: none;
 }
 
 .type-options button:hover {
-  background-color: var(--light-lilac-color);
+  background-color: var(--purple-light);
 }
 
 .template-select select {
  font-weight: normal;
-  background-color: var(--form-gray-color);
+  background-color: var(--gray-light);
 
 }
 
@@ -148,7 +156,7 @@ input::placeholder {
 }
 
 .save-btn {
-  background: var(--dark-green-color);
+  background: var(--green-dark);
   color: white;
   padding: 0.8rem 1.6rem;
   font-size: 1.8rem;
@@ -189,6 +197,12 @@ input::placeholder {
   margin-left: 0.5rem;
   cursor: pointer;
   font-weight: bold;
+}
+
+.input-group input{
+  height: 5rem;
+  padding: 1rem;
+  font-size: 1.8rem;
 }
 
 .input-error {

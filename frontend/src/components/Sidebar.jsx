@@ -19,8 +19,6 @@ const Sidebar = ({ onToggle }) => {
     onToggle(false); 
   };
 
-  const location = useLocation();
-
 
   const topItems = [
     { icon: <MdHome />, label: i18n.t('sideBar.home'), path: '/home' },
