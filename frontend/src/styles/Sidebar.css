@@ -7,8 +7,7 @@ a {
   padding-inline: 3rem;
   transition: width 0.3s ease, padding-inline 0.3s ease;
   background-color: var(--sidebar-bg);
-  border-right: 1px solid var(--header-border);
-  /* Added border */
+  border-right: 1px solid var(--header-border); 
   height: calc(100% - 80px);
   position: fixed;
   bottom: 0;
@@ -87,4 +86,8 @@ a {
   border-radius: 0 10px 10px 0;
   z-index: -1;
   background-color: var(--on-page-link);
+}
+
+.sidebar-item.on-page {
+  color: var(--black-color);
 }
