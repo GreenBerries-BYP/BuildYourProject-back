@@ -41,8 +41,7 @@
   --modal-bg: var(--white-color);
   --modal-header-bg: var(--purple-light-color);
   --card-background: var(--form-bg);
-  --create-card-border: var(--gray-light-color);
-  --create-card-text: var(--black-color);
+
 
   --placeholder-color: var(--black-color);
   --search-placeholder-text-color: var(--black-color);

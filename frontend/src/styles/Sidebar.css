@@ -35,7 +35,7 @@ a {
 }
 
 .sidebar-item {
-  color: var(--purple-saturated-color);
+  color: var(--purple-dark-color);
   font-size: 1.2rem;
   display: flex;
   align-items: center;
@@ -46,7 +46,7 @@ a {
 
 .sidebar-item:hover {
   text-decoration: none;
-  color: var(--purple-dark-color);
+  color: var(--purple-saturated-color);
 }
 
 .sidebar-icon {

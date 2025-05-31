@@ -34,12 +34,12 @@
     margin-top: 2rem;
     font-size: 2.5rem;
     font-weight: normal;
-    color: var(--black-color);
+    color: var(--white-color);
 }
 
 .close-btn {
   font-size: 4rem;
-  color: var(--black-color); /* Ensure visibility in dark mode */
+  color: var(--white-color);
   background: none;
   border: none;
   cursor: pointer;
@@ -169,7 +169,7 @@ body:not(.dark-theme) .type-options .selected {
 
 .save-btn {
   background: var(--green-dark-color);
-  color: var(--black-color); 
+  color: var(--white-color); 
   padding: 0.8rem 1.6rem;
   font-size: 1.8rem;
   font-weight: 500;
