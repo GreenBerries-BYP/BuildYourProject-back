@@ -20,7 +20,7 @@ label {
   height: 60px;
   border-radius: 9px;
   background-color: var(--form-bg);
-  border: 1px solid var(--gray);
+  border: 1px solid var(--gray-color);
   padding-inline: 20px;
   margin-bottom: 10px;
   transition: border-color 0.3s;
@@ -72,14 +72,14 @@ label {
 }
 
 .btn-acesso-roxo {
-  color: var(--white);
+  color: var(--white-color);
   background: var(--btn-purple);
   border: none;
 }
 
 .btn-acesso-roxo:hover {
   transform: scale(1.05);
-  background-color: var(--purple-dark);
+  background-color: var(--purple-dark-color);
 }
 
 .link-cadastre {
