@@ -1,9 +1,11 @@
-import { messages as portugueseMessages } from './pt';
-import { messages as englishMessages } from './en';
+import pt from './pt';
+import en from './en';
 
-const messages = {
-  ...portugueseMessages,
-  ...englishMessages
+export const messages = {
+  pt: {
+    translations: pt,
+  },
+  en: {
+    translations: en,
+  },
 };
-
-export { messages };
