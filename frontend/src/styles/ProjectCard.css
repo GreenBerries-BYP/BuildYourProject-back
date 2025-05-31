@@ -2,7 +2,7 @@
     background: var(--white-color);
     padding: 3rem;
     font-size: 2rem;
-    width: 25%;
+    min-width: 25%;
     border-radius: 10px;
     border: 1px solid var(--gray-light-color);
     color: var(--black-color); 

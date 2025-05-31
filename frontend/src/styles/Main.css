@@ -1,5 +1,7 @@
 :root {
   /* Neutro */
+
+  --project-bg: #F0F0F0;
   --white-color: #ffffff;
   --black-color: #000000;
   --gray-color: #4e4e4e;
@@ -22,6 +24,9 @@
   --teal-bright-color: #08979d;
 
   /* Rosa */
+
+  --pink-bright: #CCABD8;
+
   --pink-color: #b383c4;
 
   /* Azul */
@@ -30,9 +35,9 @@
   /* Erro */
   --error-red-color: #ff4d4d;
 
-  /* Gradientes */
-  --btn-green: linear-gradient(90deg, var(--green-color), var(--teal-dark-color));
-  --btn-purple: linear-gradient(90deg, var(--purple-saturated-color), var(--purple-dark-color));
+
+  --btn-green: linear-gradient(45deg, var(--green-color), var(--green-dark-color));
+  --btn-purple: linear-gradient(45deg, var(--purple-color), var(--purple-saturated-color));
   --bg-gradient: linear-gradient(166deg, var(--purple-color) 0%, var(--green-color) 100%);
 
   --header-bg: var(--white-color);

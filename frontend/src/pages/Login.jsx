@@ -48,7 +48,7 @@ const Login = () => {
               alt="Logo amigosConnect"
             />
 
-            <form className="row p-4 d-flex flex-column gap-3" onSubmit={handleLogin}>
+            <form className="row p-4 d-flex justify-content-between flex-column gap-3" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="email">Email</label>
                 <input
@@ -98,7 +98,7 @@ const Login = () => {
                 </label>
               </div>
 
-              <div className="d-flex justify-content-between gap-3">
+              <div className="d-flex justify-content-between gap-5">
                 <Link to="/register" className="link-cadastre flex-fill text-center">
                   Cadastre-se
                 </Link>

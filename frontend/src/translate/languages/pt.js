@@ -47,9 +47,11 @@ const pt = {
     email: "E-mail",
     projectType: "Tipo de Projeto",
     template: "Modelo",
+
   },
   project: {
     yourTasks: "Suas Tarefas",
+      newTask: "New Task",
   }
 };
 

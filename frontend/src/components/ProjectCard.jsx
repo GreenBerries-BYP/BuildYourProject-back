@@ -12,6 +12,7 @@ const ProjectCard = ({
   progressoIndividual,
   tarefasProjeto,
   estaAtrasado,
+  onClick
 }) => {
 
   const { t } = useTranslation();
@@ -22,6 +23,7 @@ const ProjectCard = ({
   const handleMouseLeave = () => setIsExpanded(false);
 
   const btnRef = useRef(null);
+
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -59,35 +61,37 @@ const ProjectCard = ({
   }, [progressoIndividual]);
 
   return (
-    <div
-      className={`project-card ${isExpanded ? 'expanded' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="card-header">
-        {nomeProjeto}
-        <button
-          className="d-inline btn-more"
-          ref={btnRef}
-          data-toggle="popover"
-        >
-          <img src="/imgs/more_vert.svg" alt="mais opções no projeto" />
-        </button>
-      </div>
-      <div className="project-progress d-flex">
-        <div className="progress w-75">
-          <div className="progress-bar" role="progressbar" style={{ width: `${progressoProjeto}%` }} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+    <div className='project-card' onClick={onClick}>
+        <div className="card-header">
+            {nomeProjeto}
+            <button className='d-inline btn-more'  data-toggle="popover" data-content='
+              <button class="btn-popover">apagar projeto<button/>
+            '>
+
+                <img src="/imgs/more_vert.svg" alt="mais opções no projeto" />
+            </button>
         </div>
-        <span className='progress-label'>{progressoProjeto}%</span>
-      </div>
-      <div className="tasks">
-        {tarefasProjeto?.map((tarefa, index) => (
-          <ProjectCardItem
-            key={index}
-            nomeTarefa={tarefa.nomeTarefa}
-            statusTarefa={tarefa.statusTarefa}
-          />
-        ))}
+        <div className="project-progress d-flex">
+            <div className="progress w-75">
+                <div className="progress-bar" role="progressbar" style={{width: `${progressoProjeto}%`}} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span className='progress-label'>{progressoProjeto}%</span>
+        </div>
+        <div className="tasks">
+            {tarefasProjeto?.map((tarefa, index)=>(
+                <ProjectCardItem 
+                    key={index}
+                    nomeTarefa={tarefa.nomeTarefa} 
+                    statusTarefa={tarefa.statusTarefa} 
+                />      
+            ))}
+            
+        </div>
+        <div className='individual-progress d-flex align-items-center justify-content-end'>
+            <span className={estaAtrasado ? "" : "d-none"}>
+              <img src="/imgs/alert.svg"/>
+            </span>
+
 
       </div>
       <div className='individual-progress d-flex align-items-center justify-content-end'>

@@ -47,9 +47,11 @@ const en = {
     email: "Email",
     projectType: "Project Type",
     template: "Template",
+
   },
   project: {
     yourTasks: "Your Tasks",
+      newTask: "New Task",
   }
 };
 
