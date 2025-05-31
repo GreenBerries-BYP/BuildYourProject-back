@@ -11,6 +11,8 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
 
@@ -19,6 +21,7 @@ const Register = () => {
   // Ele utiliza o axios para fazer a requisição POST para a rota /register/ do backend.
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (password !== confirmPassword) {
       setError('As senhas não coincidem.');
@@ -37,10 +40,13 @@ const Register = () => {
         email,
         password
       });
+      setLoading(false);
       console.log('Cadastro realizado:', response.data);
       navigate('/login'); // Redireciona para a página de login após o cadastro
     } catch (err) {
       setError('Erro ao cadastrar. Verifique os dados e tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,7 +132,19 @@ const Register = () => {
           )}
 
           <div className="row px-5 d-flex justify-content-center text-center">
-            <button className="col btn-acesso-roxo justify-content-center" type="submit">Realizar cadastro</button>
+            <button className="col btn-acesso-roxo justify-content-center" type="submit" disabled={loading}>
+              {loading ? (
+                    <div
+                      className="spinner-border text-light"
+                      style={{ width: '2rem', height: '2rem' }}
+                      role="status"
+                    >
+                      <span className="visually-hidden">Carregando...</span>
+                    </div>
+                  ) : (
+                    'Realizar Cadastro'
+                  )}
+            </button>
 
           </div>
         </form>

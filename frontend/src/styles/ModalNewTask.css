@@ -1,0 +1,125 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--modal-bg);
+  border: 1px solid var(--gray-light-color);
+  border-radius: 8px;
+  width: 77.3rem;
+  height: 40.3rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  background-color: var(--purple-light-color);
+  padding: 1rem 2rem;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin-top: 2rem;
+  font-size: 2.5rem;
+  font-weight: normal;
+  color: var(--white-color);
+}
+
+.close-btn {
+  font-size: 4rem;
+  color: var(--white-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 2rem;
+  flex: 1;
+}
+
+.modal-body form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.6rem;
+}
+
+input,
+textarea,
+select {
+  padding: 0.8rem 1.2rem;
+  height: 5rem;
+  border-radius: 6px;
+  border: 1px solid var(--gray-color);
+  font-size: 2rem;
+  background-color: var(--gray-light-color);
+  color: var(--black-color);
+  width: 100%;
+  outline: none;
+}
+
+textarea {
+  height: 10rem;
+  resize: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--gray-color);
+}
+
+.input-error {
+  color: var(--error-color, red);
+  font-size: 1.4rem;
+  margin-top: 0.5rem;
+}
+
+.center {
+  text-align: center;
+}
+
+.save-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.save-btn {
+  background: var(--green-dark-color);
+  color: var(--white-color);
+  padding: 0.8rem 1.6rem;
+  font-size: 1.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.save-btn:hover {
+  background: var(--green-color);
+}
