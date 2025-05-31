@@ -39,7 +39,7 @@ const Landing = () => {
             <p className="descricao-inicio">
               Gerencie, colabore e cumpra prazos com tecnologia inteligente.
             </p>
-            <button className="botao-comecar link-roxo">Começar agora</button>
+            <a href='/register' className="botao-comecar link-roxo">Começar agora</a>
           </div>
 
           <div className="blocos-inicio">
