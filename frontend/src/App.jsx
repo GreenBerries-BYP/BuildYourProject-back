@@ -17,7 +17,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/home"element={<ProtectedRoute> <Home /></ProtectedRoute>}/>
-        //Aqui vou fazer a rota de logout:
         <Route path="/logout" element={<ProtectedRoute> <Logout /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>

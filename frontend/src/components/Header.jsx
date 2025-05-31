@@ -56,7 +56,7 @@ const Header = () => {
         !searchInputRef.current.contains(document.activeElement)
       ) {
         setIsSearchFocused(false);
-        searchInputRef.current.value = ""; // Clear the input when focus is lost
+        searchInputRef.current.value = ""; 
       }
     }, 0);
   };
@@ -85,7 +85,7 @@ const Header = () => {
         </div>
         <TbBellRingingFilled className="header-icon" />
         <button className="header-icon" onClick={toggleDarkMode}>
-          {isDark ? <MdDarkMode /> : <MdOutlineWbSunny />}
+          {isDark ? <MdOutlineWbSunny /> : <MdDarkMode /> }
         </button>
 
         <button onClick={toggleLanguage} className="header-icon">

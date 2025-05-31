@@ -20,14 +20,16 @@ label {
   height: 60px;
   border-radius: 9px;
   background-color: var(--form-bg);
-  border: none;
+  /* Ensured this is explicitly set */
+  border: 1px solid var(--gray-light-color);
+  /* Reinstated border */
   padding-inline: 20px;
   margin-bottom: 10px;
   transition: border-color 0.3s;
 }
 
 .input-text:focus {
-  border: 2px solid var(--btn-green);
+  border: 2px solid var(--green-dark-color);
   outline: none;
 }
 
@@ -55,25 +57,25 @@ label {
 }
 
 .btn-acesso-verde {
-  color: var(--white);
+  color: var(--white-color);
   background: var(--btn-green);
   border: none;
 }
 
 .btn-acesso-verde:hover {
   transform: scale(1.05);
-  background-color: var(--green-dark);
+  background-color: var(--green-dark-color);
 }
 
 .link-cadastre {
-  color: var(--green-dark);
-  border: 2px solid var(--green-dark);
+  color: var(--green-dark-color);
+  border: 2px solid var(--green-dark-color);
   background-color: transparent;
 }
 
 .link-cadastre:hover {
-  background-color: var(--green-dark);
-  color: var(--white);
+  background: var(--btn-green);
+  color: var(--white-color);
   transform: scale(1.05);
 }
 
@@ -88,4 +90,19 @@ label {
 
 .alert {
   font-size: 1.8rem;
+}
+
+.btn-cadastro {
+  font-size: 2.4rem;
+  color: var(--white-color);
+  display: block;
+  background: var(--btn-purple);
+  padding: 10px;
+  border-radius: 30px;
+  transition: all 200ms ease-in-out;
+}
+
+.btn-cadastro:hover {
+  text-decoration: none;
+  transform: scale(1.05);
 }
