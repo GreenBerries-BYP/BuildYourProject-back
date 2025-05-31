@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
@@ -9,7 +8,7 @@ import ViewProject from "../components/ViewProject";
 import ModalNewProject from "../components/ModalNewProject";
 
 import '../styles/Home.css';
-
+import { fetchUserData } from '../api/userService';
 
 function Home() {
   const [projetoSelecionado, setProjetoSelecionado] = useState(null); 
@@ -24,6 +23,19 @@ function Home() {
 
   const [modalAberto, setModalAberto] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
+
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    fetchUserData()
+      .then(data => {
+        setUserData(data);
+        console.log('Email do usuário logado:', data.email);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar dados do usuário:', error);
+      });
+  }, []);
 
   const handleCreateProject = () => {
     setModalAberto(true);
@@ -101,14 +113,14 @@ const projetos = [
 
   return (
     <div className="d-flex">
-      <Sidebar onToggle={setSidebarAberta}/>
+      <Sidebar onToggle={setSidebarAberta} />
       <Header />
       
       <div className="projects-area" style={{
           padding: sidebarAberta ? "12rem 3rem 0 32rem" : "12rem 3rem 0 15rem", 
           transition: "padding 0.3s ease"
       }}>
-
+        
       {projetoSelecionado ? (
         <div className='d-flex w-100 justify-content-center align-items-center'>
           <ViewProject
@@ -117,6 +129,7 @@ const projetos = [
             numIntegrantes={projetoSelecionado.numIntegrantes}
             tarefasProjeto={projetoSelecionado.tarefasProjeto}
             onVoltar={handleVoltar}
+
           />
         </div>
         ) : (
@@ -138,8 +151,11 @@ const projetos = [
       )}
 
       </div>
-      
-      <ModalNewProject isOpen={modalAberto} onClose={() => setModalAberto(false)} />
+
+      <ModalNewProject 
+        isOpen={modalAberto} 
+        onClose={() => setModalAberto(false)} 
+      />
     </div>
   );
 }

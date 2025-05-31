@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
+import api from "../api/api";
 
-import { getToken } from "../auth/auth"; 
+import { getToken } from "../auth/auth";
 import { abntTemplates } from "../mocks/abntMock";
 import { FaCheck } from "react-icons/fa";
 import { i18n } from "../translate/i18n";
@@ -14,9 +15,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
   const [descricao, setDescricao] = useState("");
   const [colaboradores, setColaboradores] = useState([]);
   const [emailInput, setEmailInput] = useState("");
-  const [template, setTemplate] = useState(
-    "Introdução, Objetivo, Conclusão..."
-  );
+  const [template, setTemplate] = useState([]);
 
   const [emailError, setEmailError] = useState("");
   const [formErrors, setFormErrors] = useState({});
@@ -81,7 +80,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     try {
       const token = getToken();
 
-      const response = await api.post("/projetos/", projeto, {
+      const response = await api.post("../api/projetos/", projeto, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -211,13 +210,10 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                   <div className="template-select">
                     <label>{i18n.t("inputs.template")}</label>
                     <select
-                      multiple
                       value={template}
                       onChange={(e) =>
                         setTemplate(
-                          Array.from(e.target.selectedOptions, (option) =>
-                            Number(option.value)
-                          )
+                          Array.from(e.target.selectedOptions, (option) => option.value)
                         )
                       }
                     >
