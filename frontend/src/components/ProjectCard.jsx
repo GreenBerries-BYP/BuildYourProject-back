@@ -87,15 +87,9 @@ const ProjectCard = ({
             ))}
             
         </div>
-        <div className='individual-progress d-flex align-items-center justify-content-end'>
-            <span className={estaAtrasado ? "" : "d-none"}>
-              <img src="/imgs/alert.svg"/>
-            </span>
-
-
-      </div>
+       
       <div className='individual-progress d-flex align-items-center justify-content-end'>
-        <span className={estaAtrasado ? "d-none" : ""}>
+        <span className={estaAtrasado ? "" : "d-none"}>
           <img src="/imgs/alert.svg" />
         </span>
 
