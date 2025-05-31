@@ -51,6 +51,7 @@ const messages = {
       },
       project: {
         yourTasks: 'Your Tasks',
+        newTask: "New Task",
       }
     },
   },

@@ -11,12 +11,9 @@ const ProjectCard = ({
   progressoIndividual,
   tarefasProjeto,
   estaAtrasado,
+  onClick
 }) => {
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  const handleMouseEnter = () => setIsExpanded(true);
-  const handleMouseLeave = () => setIsExpanded(false);
   
   const chartRef = useRef(null);
 
@@ -48,11 +45,7 @@ const ProjectCard = ({
   }, [progressoIndividual]);
 
   return (
-    <div
-      className={`project-card ${isExpanded ? 'expanded' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className='project-card' onClick={onClick}>
         <div className="card-header">
             {nomeProjeto}
             <button className='d-inline btn-more'  data-toggle="popover" data-content='
@@ -79,7 +72,7 @@ const ProjectCard = ({
             
         </div>
         <div className='individual-progress d-flex align-items-center justify-content-end'>
-            <span className={estaAtrasado ? "d-none" : ""}>
+            <span className={estaAtrasado ? "" : "d-none"}>
               <img src="/imgs/alert.svg"/>
             </span>
 

@@ -2,18 +2,13 @@
     background: var(--white);
     padding: 3rem;
     font-size: 2rem;
-    width: 25%;
+    min-width: 25%;
     border-radius: 10px;
     transition: width 500ms ease-in-out;
     justify-content: space-between;
     display: flex;
     flex-direction: column;
 }
-/* 
-
-.project-card.expanded { 
-    width: 45%;
-} */
 
 .card-header{
     display: flex;;

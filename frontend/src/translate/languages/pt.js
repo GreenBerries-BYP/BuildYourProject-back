@@ -51,6 +51,7 @@ const messages = {
       },
       project: {
         yourTasks: "Suas Tarefas",
+        newTask: "Nova Tarefa",
       },
     },
   },

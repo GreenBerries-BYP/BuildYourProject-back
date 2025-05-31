@@ -4,6 +4,7 @@
   --black: #000000;
   --gray: #4e4e4e;
   --gray-light: #d0d0d0;
+  --project-bg: #F0F0F0;
   --form-bg: rgba(255, 255, 255, 0.15);
   --on-page-link: rgba(91, 69, 132, 0.36);
 
@@ -23,6 +24,7 @@
 
   /* Rosa */
   --pink: #b383c4;
+  --pink-bright: #CCABD8;
 
   /* Azul */
   --blue-link: #1e76e8;
@@ -31,8 +33,8 @@
   --error-red: #ff4d4d;
 
   /* Gradientes */
-  --btn-green: linear-gradient(90deg, var(--green), var(--teal-dark));
-  --btn-purple: linear-gradient(90deg, var(--purple-sat), var(--purple-dark));
+  --btn-green: linear-gradient(45deg, var(--green), var(--green-dark));
+  --btn-purple: linear-gradient(45deg, var(--purple), var(--purple-sat));
   --bg-gradient: linear-gradient(166deg, var(--purple) 0%, var(--green) 100%);
 
   --header-bg: var(--white);
