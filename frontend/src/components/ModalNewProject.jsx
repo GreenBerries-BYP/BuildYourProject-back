@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
 import { getToken } from "../auth/auth"; // ⚠️ Supondo que você tenha o mesmo helper usado no login.
-
-import { getToken } from "../auth/auth";
 import { abntTemplates } from "../mocks/abntMock";
 import { i18n } from "../translate/i18n";
 

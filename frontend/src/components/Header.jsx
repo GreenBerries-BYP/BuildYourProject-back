@@ -85,7 +85,7 @@ const Header = () => {
         </div>
         <TbBellRingingFilled className="header-icon" />
         <button className="header-icon" onClick={toggleDarkMode}>
-          {isDark ? <MdDarkMode /> : <MdOutlineWbSunny />}
+          {isDark ?  <MdOutlineWbSunny /> : <MdDarkMode />}
         </button>
 
         <button onClick={toggleLanguage} className="header-icon">
