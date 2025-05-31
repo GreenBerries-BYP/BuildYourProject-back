@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
 import { getToken } from "../auth/auth"; // ⚠️ Supondo que você tenha o mesmo helper usado no login.
 
-import { i18n } from '../translate/i18n';
+import { getToken } from "../auth/auth";
+import { abntTemplates } from "../mocks/abntMock";
+import { i18n } from "../translate/i18n";
 
 const ModalNewProject = ({ isOpen, onClose }) => {
     const modalRef = useRef();
@@ -11,7 +13,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     const [descricao, setDescricao] = useState("");
     const [colaboradores, setColaboradores] = useState([]);
     const [emailInput, setEmailInput] = useState("");
-    const [template, setTemplate] = useState("Introdução, Objetivo, Conclusão...");
+    const [template, setTemplate] = useState([]);
 
     const [emailError, setEmailError] = useState("");
     const [formErrors, setFormErrors] = useState({});
@@ -19,17 +21,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const adicionarColaborador = () => {
         if (!emailInput.trim()) {
-            setEmailError(i18n.t('messages.emailCantBeEmpty'));
+            setEmailError(i18n.t("messages.emailCantBeEmpty"));
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
-            setEmailError(i18n.t('messages.invalidEmailFormat'));
+            setEmailError(i18n.t("messages.invalidEmailFormat"));
             return;
         }
 
         if (colaboradores.includes(emailInput)) {
-            setEmailError(i18n.t('messages.emailAlreadyAdded'));
+            setEmailError(i18n.t("messages.emailAlreadyAdded"));
             return;
         }
 
@@ -51,8 +53,9 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const validateForm = () => {
         const errors = {};
-        if (!nome.trim()) errors.nome = i18n.t('messages.projectNameRequired');
-        if (!descricao.trim()) errors.descricao = i18n.t('messages.projectDescriptionRequired');
+        if (!nome.trim()) errors.nome = i18n.t("messages.projectNameRequired");
+        if (!descricao.trim())
+            errors.descricao = i18n.t("messages.projectDescriptionRequired");
         return errors;
     };
 
@@ -75,7 +78,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         try {
             const token = getToken();
 
-            const response = await api.post('/projetos/', projeto, {
+            const response = await api.post("../api/projetos/", projeto, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -83,17 +86,18 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || i18n.t('messages.errorNewProject'));
+                throw new Error(errorData.detail || i18n.t("messages.errorNewProject"));
             }
 
             onClose();
         } catch (err) {
-            setFormErrors({ submit: err.message || i18n.t('messages.errorNewProject') });
+            setFormErrors({
+                submit: err.message || i18n.t("messages.errorNewProject"),
+            });
         } finally {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         const handleEsc = (e) => {
             if (e.key === "Escape") onClose();
@@ -120,8 +124,10 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         <div className="modal-overlay">
             <div className="modal-content" ref={modalRef}>
                 <div className="modal-header">
-                    <h2>{i18n.t('titles.newProject')}</h2>
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <h2>{i18n.t("titles.newProject")}</h2>
+                    <button className="close-btn" onClick={onClose}>
+                        ×
+                    </button>
                 </div>
                 <div className="modal-body">
                     <form onSubmit={handleSubmit} noValidate>
@@ -129,30 +135,34 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                             <div className="form-left">
                                 <div className="input-group">
                                     <input
-                                        placeholder={i18n.t('inputs.name')}
+                                        placeholder={i18n.t("inputs.name")}
                                         value={nome}
                                         onChange={(e) => {
                                             setNome(e.target.value);
                                             setFormErrors({ ...formErrors, nome: "" });
                                         }}
                                     />
-                                    {formErrors.nome && <p className="input-error">{formErrors.nome}</p>}
+                                    {formErrors.nome && (
+                                        <p className="input-error">{formErrors.nome}</p>
+                                    )}
                                 </div>
                                 <div className="input-group">
                                     <input
-                                        placeholder={i18n.t('inputs.description')}
+                                        placeholder={i18n.t("inputs.description")}
                                         value={descricao}
                                         onChange={(e) => {
                                             setDescricao(e.target.value);
                                             setFormErrors({ ...formErrors, descricao: "" });
                                         }}
                                     />
-                                    {formErrors.descricao && <p className="input-error">{formErrors.descricao}</p>}
+                                    {formErrors.descricao && (
+                                        <p className="input-error">{formErrors.descricao}</p>
+                                    )}
                                 </div>
                                 <div className="input-group">
                                     <input
                                         type="email"
-                                        placeholder={i18n.t('messages.emailMessage')}
+                                        placeholder={i18n.t("messages.emailMessage")}
                                         value={emailInput}
                                         onChange={(e) => {
                                             setEmailInput(e.target.value);
@@ -165,7 +175,12 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                         {colaboradores.map((email) => (
                                             <span key={email} className="email-chip">
                                                 {email}
-                                                <button type="button" onClick={() => removerColaborador(email)}>×</button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removerColaborador(email)}
+                                                >
+                                                    ×
+                                                </button>
                                             </span>
                                         ))}
                                     </div>
@@ -175,7 +190,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                             <div className="form-right">
                                 <div className="form-options">
                                     <div className="project-type">
-                                        <label>{i18n.t('inputs.projectType')}</label>
+                                        <label>{i18n.t("inputs.projectType")}</label>
                                         <div className="type-options">
                                             {projectTypes.map((type) => (
                                                 <button
@@ -191,14 +206,20 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                     </div>
 
                                     <div className="template-select">
-                                        <label>{i18n.t('inputs.template')}</label>
+                                        <label>{i18n.t("inputs.template")}</label>
                                         <select
                                             value={template}
-                                            onChange={(e) => setTemplate(e.target.value)}
+                                            onChange={(e) =>
+                                                setTemplate(
+                                                    Array.from(e.target.selectedOptions, (option) => option.value)
+                                                )
+                                            }
                                         >
-                                            <option>Introdução, Objetivo, Conclusão...</option>
-                                            <option>Teste 2</option>
-                                            <option>Teste 3</option>
+                                            {abntTemplates.map((template) => (
+                                                <option key={template.value} value={template.value}>
+                                                    {template.label}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -209,7 +230,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         )}
                         <div className="save-wrapper">
                             <button type="submit" className="save-btn" disabled={loading}>
-                                {loading ? i18n.t('buttons.saving') : i18n.t('buttons.save') + ' ✔'}
+                                {loading ? i18n.t('buttons.saving') : i18n.t('buttons.save') + ' ✓'}
                             </button>
                         </div>
                     </form>

@@ -12,7 +12,8 @@
 }
 
 .modal-content {
-  background-color: var(--white);
+  background-color: var(--modal-bg); /* Use dedicated modal background variable */
+  border: 1px solid var(--gray-light-color); /* Added border */
   border-radius: 8px;
   width: 77.3rem;
   height: 40.3rem;
@@ -21,7 +22,7 @@
 }
 
 .modal-header {
-  background-color: var(--purple-light);
+  background-color: var(--purple-light-color);
   padding: 1rem 2rem;
   border-radius: 8px 8px 0 0;
   display: flex;
@@ -33,12 +34,12 @@
     margin-top: 2rem;
     font-size: 2.5rem;
     font-weight: normal;
-    color: var(--black);
+    color: var(--white-color);
 }
 
 .close-btn {
   font-size: 4rem;
-
+  color: var(--white-color);
   background: none;
   border: none;
   cursor: pointer;
@@ -77,9 +78,10 @@ select {
   padding: 0.8rem 1.2rem;
   height: 5rem;
   border-radius: 6px;
-  border: 1px solid var(--gray);
+  border: 1px solid var(--gray-color);
   font-size: 2rem;
-  background-color: var(--gray-light);
+  background-color: var(--gray-light-color);
+  color: var(--black-color); /* Ensure input text is visible in dark mode */
   width: 100%;
   outline: none;
 }
@@ -87,7 +89,7 @@ select {
 
 input::placeholder {
     
-  color: var(--gray);
+  color: var(--gray-color); /* This is light gray in dark mode - good */
 }
 
 .form-options {
@@ -108,6 +110,7 @@ input::placeholder {
 .project-type label,
 .template-select label {
   font-size: 2rem;
+  color: var(--black-color); /* Ensure labels are visible in dark mode */
 }
 
 .template-select select{
@@ -126,8 +129,9 @@ input::placeholder {
   padding: 0.6rem 1rem;
   border-radius: 10px;
   margin-inline: 4px;
-  border: 1px solid var(--gray);
-  background-color: white;
+  border: 1px solid var(--gray-light-color); /* Lighter border for default state */
+  background-color: var(--white-color); 
+  color: var(--black-color); 
   cursor: pointer;
   font-size: 1.8rem;
   transition: all 0.2s ease-in-out;
@@ -135,18 +139,26 @@ input::placeholder {
 }
 
 .type-options .selected {
-  background-color: var(--purple-sat);
-  color: white;
+  background-color: var(--purple-saturated-color);
+  color: var(--black-color); 
   border: none;
 }
 
+body:not(.dark-theme) .type-options .selected {
+  color: var(--white-color);
+}
+
 .type-options button:hover {
-  background-color: var(--purple-light);
+  background-color: var(--purple-light-color);; 
+}
+
+.type-options button.selected:hover {
+  background-color: var(--purple-saturated-color);
 }
 
 .template-select select {
  font-weight: normal;
-  background-color: var(--gray-light);
+  background-color: var(--gray-light-color);
 
 }
 
@@ -156,8 +168,8 @@ input::placeholder {
 }
 
 .save-btn {
-  background: var(--green-dark);
-  color: white;
+  background: var(--green-dark-color);
+  color: var(--white-color); 
   padding: 0.8rem 1.6rem;
   font-size: 1.8rem;
   font-weight: 500;
@@ -184,11 +196,12 @@ input::placeholder {
 }
 
 .email-chip {
-  background-color: var(--gray-light);
+  background-color: var(--gray-light-color);
   border-radius: 16px;
   padding: 0.3rem 0.7rem;
   display: flex;
   align-items: center;
+  color: var(--black-color);
 }
 
 .email-chip button {
@@ -197,6 +210,7 @@ input::placeholder {
   margin-left: 0.5rem;
   cursor: pointer;
   font-weight: bold;
+  color: var(--black-color);
 }
 
 .input-group input{
@@ -206,7 +220,7 @@ input::placeholder {
 }
 
 .input-error {
-  color: var(--error-red);
+  color: var(--error-red-color);
   font-size: 1rem;
   margin-top: 4px;
   margin-bottom: 2px;
@@ -220,5 +234,5 @@ input::placeholder {
 }
 
 select {
-  color: var(--black);
+  color: var(--black-color);
 }

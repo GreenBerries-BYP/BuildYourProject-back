@@ -126,7 +126,7 @@ const Register = () => {
           )}
 
           <div className="row px-5 d-flex justify-content-between text-center">
-            <button className="col btn-acesso-roxo" type="submit">Realizar cadastro</button>
+            <button className="col btn-cadastro" type="submit">Realizar cadastro</button>
           </div>
         </form>
       </div>
