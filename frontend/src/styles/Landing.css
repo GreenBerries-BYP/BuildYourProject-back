@@ -13,7 +13,7 @@
   left: 16.1rem;
   top: 34.1rem;
   height: 2.7rem;
-  background-color: var(--pink);
+  background-color: var(--pink-color);
   border-radius: 30px;
 }
 
@@ -22,7 +22,7 @@
   left: 20.9rem;
   top: 34.9rem;
   height: 3.7rem;
-  background-color: var(--teal-bright);
+  background-color: var(--teal-bright-color);
   border-radius: 30px;
 }
 
@@ -31,7 +31,7 @@
   left: 15.3rem;
   top: 41.9rem;
   height: 3.3rem;
-  background-color: var(--purple);
+  background-color: var(--purple-color);
   border-radius: 30px;
 }
 
@@ -40,7 +40,7 @@
   left: 108.2rem;
   top: 28.4rem;
   height: 4rem;
-  background-color: var(--teal-bright);
+  background-color: var(--teal-bright-color);
   border-radius: 30px;
 }
 
@@ -49,7 +49,7 @@
   left: 115.2rem;
   top: 32.5rem;
   height: 4.1rem;
-  background-color: var(--pink-bright);
+  background-color: var(--pink-bright-color);
   border-radius: 30px;
 }
 
@@ -66,13 +66,13 @@
     overflow: visible;
     width: 129.3rem;
     margin-block: 6rem;
-    background: var(--white);
+    background: var(--white-color);
 }
 
 
 #landing_header{
     position: sticky;
-    background: var(--white);
+    background: var(--white-color);
     top: 6rem;
     z-index: 5;
     display: flex;
@@ -97,7 +97,7 @@
 }
 
 .nav-group a{
-    color: var(--black);
+    color: var(--black-color);
     text-decoration: none;
     transition: transform 300ms ease-in-out;
 }
@@ -126,26 +126,26 @@
 }
 
 .link-borda-roxo {
-  color: var(--purple-dark);
-  border: 2px solid var(--purple-dark);
+  color: var(--purple-dark-color);
+  border: 2px solid var(--purple-dark-color);
   background-color: transparent;
 }
 
 .link-borda-roxo:hover {
-  background-color: var(--purple-dark);
-  color: var(--white);
+  background-color: var(--purple-dark-color);
+  color: var(--white-color);
   transform: scale(1.05);
 }
 
 .link-roxo {
-  color: var(--white);
+  color: var(--white-color);
   background: var(--btn-purple);
   border: none;
 }
 
 .link-roxo:hover {
   transform: scale(1.05);
-  background-color: var(--purple-dark);
+  background-color: var(--purple-dark-color);
 }
 
 #inicio {
@@ -204,7 +204,7 @@
     height: 34rem;
     border-radius: 10px;
     padding: 2rem;
-    background-color: var(--purple-sat);
+    background-color: var(--purple-saturated-color);
 }
 
 .bloco-roxo img {
@@ -220,7 +220,7 @@
     height: 25.2rem;
     border-radius: 10px;
     padding: 2rem;
-    background-color: var(--teal-bright);
+    background-color: var(--teal-bright-color);
 }
 
 .bloco-lilas{
@@ -232,7 +232,7 @@
     height: 32.6rem;
     border-radius: 10px;
     padding: 2rem;
-    background-color: var(--pink);
+    background-color: var(--pink-color);
 }
 
 .bloco-lilas img {
@@ -261,8 +261,8 @@
 #ferramentas{
     padding-top: 6rem;
     height: 100vh;
-    background: var(--purple-dark);
-    color: var(--white);
+    background: var(--purple-dark-color);
+    color: var(--white-color);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -342,7 +342,7 @@
     width: 5rem;
     height: 5rem;
     border-radius: 50px;
-    background: var(--gray);
+    background: var(--gray-color);
     align-self: center;
 }
 
@@ -354,7 +354,7 @@
     padding-top: 6rem;
     height: 100vh;
     text-align: center;
-    background: linear-gradient(180deg, var(--green), var(--green-dark));
+    background: linear-gradient(180deg, var(--green-color), var(--green-dark-color));
 }
 
 .titulo-sobre h1{
@@ -378,7 +378,7 @@
 
 .quem-somos{
     padding: 5rem;
-    background: var(--white);
+    background: var(--white-color);
     width: 49.7rem;
     height: 54.5rem;
     text-align: left;

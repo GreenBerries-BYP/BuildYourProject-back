@@ -36,11 +36,11 @@
 }
 
 .criar-tarefa-btn{
-    color: var(--white);
-    background: var(--green-dark);
+    color: var(--white-color);
+    background: var(--green-dark-color);
     padding: 1rem 2rem;
     border-radius: 10px;
-    border: 2px var(--white) solid;
+    border: 2px var(--white-color) solid;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
     gap: 1rem;
 }
@@ -53,7 +53,7 @@
 }
 
 .task-section{
-    background: var(--white);
+    background: var(--white-color);
     padding: 2rem;
     border-radius: 15px;
 }
@@ -99,7 +99,7 @@
     width: 15%;
     text-align: right;
     font-size: 3rem;
-    color: var(--gray);
+    color: var(--gray-color);
 }
 
 .progress{
