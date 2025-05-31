@@ -2,6 +2,7 @@
     background: var(--project-bg);
     font-size: 2rem;
     padding: 3rem;
+    color: var(--black-color);
     width: 90%;
     border-radius: 10px;
     margin-bottom: 4rem;

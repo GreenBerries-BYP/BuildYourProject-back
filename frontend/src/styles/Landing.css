@@ -190,7 +190,7 @@
     align-items: end;
     justify-content: space-between;
     gap: 3rem;
-    color: var(--white);
+    color: var(--white-color);
     padding-bottom: 3rem;
 }
 

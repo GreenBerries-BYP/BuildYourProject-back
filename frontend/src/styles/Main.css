@@ -71,6 +71,7 @@ body {
 /* Dark Mode */
 body.dark-theme {
   /* Neutro (Tema Escuro) */
+  --project-bg:rgb(68, 66, 70);
   --white-color: #262628; /* No dark theme, o "white" se torna um cinza escuro */
   --black-color: #ffffff; /* No dark theme, o "black" se torna branco */
   --gray-color: #a0a0a0;
