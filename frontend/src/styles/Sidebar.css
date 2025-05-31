@@ -7,6 +7,7 @@ a {
   padding-inline: 3rem;
   transition: width 0.3s ease, padding-inline 0.3s ease;
   background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--header-border); 
   height: calc(100% - 80px);
   position: fixed;
   bottom: 0;
@@ -34,7 +35,7 @@ a {
 }
 
 .sidebar-item {
-  color: var(--purple-sat);
+  color: var(--purple-dark-color);
   font-size: 1.2rem;
   display: flex;
   align-items: center;
@@ -45,13 +46,13 @@ a {
 
 .sidebar-item:hover {
   text-decoration: none;
-  color: var(--purple-dark);
+  color: var(--purple-saturated-color);
 }
 
 .sidebar-icon {
   display: flex;
   font-size: 3rem;
-  color: var(--purple-dark);
+  color: var(--purple-dark-color);
   cursor: pointer;
   transition: transform 0.2s ease;
   align-items: center;
@@ -85,4 +86,8 @@ a {
   border-radius: 0 10px 10px 0;
   z-index: -1;
   background-color: var(--on-page-link);
+}
+
+.sidebar-item.on-page {
+  color: var(--black-color);
 }

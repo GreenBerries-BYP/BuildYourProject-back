@@ -12,11 +12,11 @@ const Sidebar = ({ onToggle }) => {
 
   const handleMouseEnter = () => {
     setIsExpanded(true);
-    onToggle(true); 
+    onToggle(true);
   };
   const handleMouseLeave = () => {
     setIsExpanded(false);
-    onToggle(false); 
+    onToggle(false);
   };
 
 
@@ -45,10 +45,10 @@ const Sidebar = ({ onToggle }) => {
       className={`sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ 
-        width: isExpanded ? expandedWidth : collapsedWidth, 
+      style={{
+        width: isExpanded ? expandedWidth : collapsedWidth,
         flexShrink: 0,
-        transition: 'width 0.3s ease' 
+        transition: 'width 0.3s ease'
       }}
     >
       <div className="sidebar-menu">

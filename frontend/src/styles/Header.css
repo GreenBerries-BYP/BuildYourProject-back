@@ -1,4 +1,3 @@
-
 .header {
   height: 80px;
   width: 100%;
@@ -24,7 +23,7 @@
 
 .title {
   font-size: 2rem;
-  color: var(--purple);
+  color: var(--purple-color);
 }
 
 .header-icon {
@@ -32,7 +31,7 @@
   justify-content: center;
   align-items: center;
   font-size: 3rem;
-  color: var(--green-dark);
+  color: var(--green-dark-color);
   cursor: pointer;
   transition: transform 0.2s;
 
@@ -74,7 +73,6 @@ button:focus {
   position: absolute;
   right: 6px;
   font-size: 2.4rem;
-  color: var(--green-dark);
   transition: color 0.3s ease;
   z-index: 2;
 }
@@ -84,7 +82,7 @@ button:focus {
   background: transparent;
   outline: none;
   font-size: 1.6rem;
-  color: var(--green-dark);
+  color: var(--green-dark-color);
   width: 0;
   cursor: pointer;
   transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -94,7 +92,7 @@ button:focus {
 .search:hover,
 .search.focused {
   width: 300px;
-  background-color: var(--green-light);
+  background-color: var(--green-light-color);
   padding-left: 15px;
 }
 
@@ -106,5 +104,5 @@ button:focus {
 }
 
 .search-input::placeholder {
-  color: var(--green-dark);
+  color: var(--green-dark-color);
 }

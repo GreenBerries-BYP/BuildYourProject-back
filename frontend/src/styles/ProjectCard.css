@@ -1,9 +1,11 @@
 .project-card{
-    background: var(--white);
+    background: var(--white-color);
     padding: 3rem;
     font-size: 2rem;
     min-width: 25%;
     border-radius: 10px;
+    border: 1px solid var(--gray-light-color);
+    color: var(--black-color); 
     transition: width 500ms ease-in-out;
     justify-content: space-between;
     display: flex;
@@ -13,7 +15,8 @@
 .card-header{
     display: flex;;
     justify-content: space-between;
-    background: var(--white);
+    background: var(--white-color);
+    color: var(--black-color); 
     font-size: 2.5rem;
     margin-bottom: 1.6rem;
     border: none;
@@ -35,7 +38,7 @@
 .progress-label{
     width: 25%;
     text-align: right;
-    color: var(--gray);
+    color: var(--gray-color);
 }
 
 .round-progress{
@@ -51,10 +54,11 @@
 
 .btn-popover{
     font-size: 2rem;
-    background: var(--white);
+    background: var(--white-color);
+    color: var(--black-color); 
     padding: 0.5rem;
     transition: color 300ms ease-in-out;
 }
 .btn-popover:hover{
-    color: var(--gray);
+    color: var(--gray-color);
 }

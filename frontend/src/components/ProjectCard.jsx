@@ -3,7 +3,8 @@ import { useState, useRef, useEffect } from 'react';
 import ApexCharts from 'apexcharts'
 import '../styles/ProjectCard.css';
 import ProjectCardItem from './ProjectCardItem';
-import { i18n } from '../translate/i18n';
+import { useTranslation } from 'react-i18next';
+
 
 const ProjectCard = ({
   nomeProjeto,
@@ -14,8 +15,23 @@ const ProjectCard = ({
   onClick
 }) => {
 
-  
+  const { t } = useTranslation();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleMouseEnter = () => setIsExpanded(true);
+  const handleMouseLeave = () => setIsExpanded(false);
+
+  const btnRef = useRef(null);
+
   const chartRef = useRef(null);
+
+  useEffect(() => {
+    $(btnRef.current).popover({
+      html: true,
+      content: `<button class="btn-popover">${t('buttons.deleteProject')}</button>`,
+    });
+  }, [t]);
 
   useEffect(() => {
     const options = {
@@ -76,14 +92,21 @@ const ProjectCard = ({
               <img src="/imgs/alert.svg"/>
             </span>
 
-            <span className='text-center mx-3'>{i18n.t('project.yourTasks')}</span>
 
-            <div className='round-progress d-inline' id='roundProgress'>
-              <div ref={chartRef}></div>
-            </div>
-            
+      </div>
+      <div className='individual-progress d-flex align-items-center justify-content-end'>
+        <span className={estaAtrasado ? "d-none" : ""}>
+          <img src="/imgs/alert.svg" />
+        </span>
 
+        <span className='text-center mx-3'>{t('project.yourTasks')}</span>
+
+        <div className='round-progress d-inline' id='roundProgress'>
+          <div ref={chartRef}></div>
         </div>
+
+
+      </div>
     </div>
   );
 };
@@ -91,5 +114,5 @@ const ProjectCard = ({
 export default ProjectCard;
 
 $(function () {
-  $('[data-toggle="popover"]').popover({html: true})
+  $('[data-toggle="popover"]').popover({ html: true })
 })
