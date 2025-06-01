@@ -4,3 +4,13 @@
     flex-wrap: wrap;
     width:100%;
 }
+
+.blur-background {
+    filter: blur(2px);
+    user-select: none;
+    transition: filter 0.8s ease;
+}
+
+body.no-scroll {
+    overflow: hidden;
+}
