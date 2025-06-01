@@ -245,7 +245,7 @@ function Home() {
       <Sidebar onToggle={setSidebarAberta} />
       <Header />
 
-      <div className={`main-page-content ${modalAberto || projetoSelecionado ? "blur-background" : ""}`} style={{
+      <div className={`main-page-content ${modalAberto ? "blur-background" : ""}`} style={{
         padding: sidebarAberta ? "12rem 3rem 0 32rem" : "12rem 3rem 0 15rem",
         transition: "padding 0.3s ease",
         flexGrow: 1,

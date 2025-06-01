@@ -22,6 +22,9 @@ label {
   background-color: var(--form-bg);
   border: 1px solid var(--gray-color);
   padding-inline: 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: calc(60px - 2px);
   margin-bottom: 10px;
   transition: border-color 0.3s;
 }

@@ -30,6 +30,8 @@ const Register = () => {
 
     if (!acceptTerms) {
       setError('Você precisa aceitar os termos de uso e políticas de privacidade.');
+      setLoading(false);
+
       return;
     }
 
@@ -134,16 +136,16 @@ const Register = () => {
           <div className="row px-5 d-flex justify-content-center text-center">
             <button className="col btn-acesso-roxo justify-content-center" type="submit" disabled={loading}>
               {loading ? (
-                    <div
-                      className="spinner-border text-light"
-                      style={{ width: '2rem', height: '2rem' }}
-                      role="status"
-                    >
-                      <span className="visually-hidden">Carregando...</span>
-                    </div>
-                  ) : (
-                    'Realizar Cadastro'
-                  )}
+                <div
+                  className="spinner-border text-light"
+                  style={{ width: '2rem', height: '2rem' }}
+                  role="status"
+                >
+                  <span className="visually-hidden">Carregando...</span>
+                </div>
+              ) : (
+                'Realizar Cadastro'
+              )}
             </button>
 
           </div>
