@@ -75,13 +75,13 @@ const Login = () => {
                   onChange={(e) => setSenha(e.target.value)}
                   required
                 />
+                {erro && (
+                  <div className="alert alert-danger text-center">
+                    {erro}
+                  </div>
+                )}
               </div>
 
-              {erro && (
-                <div className="alert alert-danger text-center py-2" role="alert">
-                  {erro}
-                </div>
-              )}
 
               <div className="d-flex justify-content-end">
                 <Link className="link-esqueci" to="/forgot_password">

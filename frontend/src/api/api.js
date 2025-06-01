@@ -31,12 +31,13 @@ instance.interceptors.response.use(
       return Promise.reject(error); // Skip global handling, error will be caught by the component
     }
 
-    if (error.response?.status === 401) {
-      // Você pode redirecionar para login ou renovar o token aqui
-      console.error('Não autorizado - redirecionando para login');
-      localStorage.removeItem('access_token');
-      window.location.href = '/login';
-    }
+    // if (error.response?.status === 401) {
+    //   // Você pode redirecionar para login ou renovar o token aqui
+    //   console.error('Não autorizado - redirecionando para login');
+    //   localStorage.removeItem('access_token');
+    //   window.location.href = '/login';
+    // }
+    
     return Promise.reject(error);
   }
 );

@@ -107,7 +107,8 @@ label {
 }
 
 .alert {
-  font-size: 1.8rem;
+  width: fit-content;
+  font-size: 1.4rem;
 }
 
 .btn-cadastro {
