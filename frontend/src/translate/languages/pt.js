@@ -135,6 +135,7 @@ const pt = {
     projectDetails: "Detalhes do Projeto",
     collaborators: "Colaboradores",
     datesAndCollaborators: "Datas e Colaboradores", 
+    newTask: "Nova Tarefa"
   },
   messages: {
     welcome: "Bem-vindo ao Build Your Project",

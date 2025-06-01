@@ -7,7 +7,7 @@ import api from "../api/api"; // Assuming api is used in handleSubmit
 
 const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
 
-const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
+const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
     const modalRef = useRef();
     const [nome, setNome] = useState("");
     const [descricao, setDescricao] = useState("");
@@ -45,15 +45,15 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
         setLoading(true);
         try {
             const token = getToken();
-            await api.post("/api/tarefas/", tarefa, { // Assuming this is the correct endpoint
+            await api.post("/api/tarefas/", tarefa, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            onClose(); // Reset form or give feedback as needed
+            onClose();
         } catch (err) {
             setFormErrors({
-                submit: err.message || t("messages.errorNewTask", "Error creating new task"),
+                submit: err.message || i18n.t("messages.errorNewTask"),
             });
         } finally {
             setLoading(false);
@@ -91,7 +91,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
                     <form onSubmit={handleSubmit} noValidate>
                         <div className="input-group">
                             <input
-                                placeholder={t("inputs.taskName", "Task Name")}
+                                placeholder={i18n.t("inputs.name")}
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                             />
@@ -100,7 +100,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="input-group">
                             <textarea
-                                placeholder={t("inputs.taskDescription", "Task Description")}
+                                placeholder={i18n.t("inputs.description")}
                                 value={descricao}
                                 onChange={(e) => setDescricao(e.target.value)}
                             />
@@ -142,4 +142,4 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
     );
 };
 
-export default ModalNovaTarefa;
+export default ModalNewTask;

@@ -135,6 +135,7 @@ const en = {
     projectDetails: "Project Details",
     collaborators: "Collaborators",
     datesAndCollaborators: "Dates and Collaborators", 
+    newTask: "Nova Tarefa",
   },
   messages: {
     welcome: "Welcome to Build Your Project",
@@ -179,6 +180,7 @@ const en = {
     next: "Next",
     readLess: "Read less",
     readMore: "Read more",
+    newTask: "New Task",
   },
   sideBar: {
     home: "Home",
