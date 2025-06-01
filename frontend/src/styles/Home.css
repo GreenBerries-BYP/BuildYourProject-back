@@ -1,3 +1,8 @@
+.main-page-content {
+    min-height: calc(100vh - 80px);
+    box-sizing: border-box;
+}
+
 .projects-area {
     display: flex;
     gap: 2.4rem;

@@ -212,7 +212,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     setEmailInput("");
                     setFormErrors({});
                     setIsDescriptionExpanded(false);
-                    // Maybe add a success notification/toast here in a real app
+                   
+                    location.reload();
                 } else {
                     // This block might not be strictly necessary if Axios throws on non-2xx by default
                     // For safety, keeping a generic error if it somehow reaches here
@@ -242,7 +243,6 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 }
             } finally {
                 setLoading(false);
-                //location.reload();
             }
         } else {
             nextStep();
