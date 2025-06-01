@@ -17,7 +17,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         name: "",
         description: "",
         type: "TCC",
-        template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
+        template: [],
         collaborators: [],
         created_at: "",
         due_date: "",
@@ -47,10 +47,20 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     };
 
     const handleTemplateChange = (selectedTemplateValue) => {
-        setFormData(prev => ({ ...prev, template: selectedTemplateValue }));
-        if (formErrors.template) {
-            setFormErrors(prev => ({ ...prev, template: "" }));
-        }
+        setFormData((prevData) => {
+            const currentTemplates = prevData.template;
+            if (currentTemplates.includes(selectedTemplateValue)) {
+                return {
+                    ...prevData,
+                    template: currentTemplates.filter((tmpl) => tmpl !== selectedTemplateValue),
+                };
+            } else {
+                return {
+                    ...prevData,
+                    template: [...currentTemplates, selectedTemplateValue],
+                };
+            }
+        });
     };
 
     const handleCollaboratorChange = (newColaboradores) => {
@@ -188,7 +198,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
                 if (response.status && response.status >= 200 && response.status < 300) {
                     // Successful creation
-                    onClose(); 
+                    onClose();
                     setFormData({
                         name: "",
                         description: "",
@@ -206,7 +216,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 } else {
                     // This block might not be strictly necessary if Axios throws on non-2xx by default
                     // For safety, keeping a generic error if it somehow reaches here
-                    const errorData = response.data; 
+                    const errorData = response.data;
                     throw new Error(errorData.detail || t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }));
                 }
             } catch (err) {
@@ -232,7 +242,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 }
             } finally {
                 setLoading(false);
-                location.reload();
+                //location.reload();
             }
         } else {
             nextStep();
@@ -287,7 +297,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         <div className="modal-overlay">
             <div className="modal-content" ref={modalRef}>
                 <div className="modal-header">
-                    <h2>{t("titles.newProject", { defaultValue: "Novo Projeto" })}</h2>
+                    <h2>{t("titles.newProject")}</h2>
                     <button className="close-btn" onClick={onClose}>
                         ×
                     </button>
@@ -296,31 +306,31 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     <div className="step-indicator">
                         <div className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
                             <span className="step-number">1</span>
-                            <span className="step-label">{t("steps.basicInfo", { defaultValue: "Info Básicas" })}</span>
+                            <span className="step-label">{t("steps.basicInfo")}</span>
                         </div>
                         <div className="step-connector"></div>
                         <div className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
                             <span className="step-number">2</span>
-                            <span className="step-label">{t("steps.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</span>
+                            <span className="step-label">{t("steps.datesAndCollaborators")}</span>
                         </div>
                         <div className="step-connector"></div>
                         <div className={`step-item ${currentStep === 3 ? 'active' : ''}`}>
                             <span className="step-number">3</span>
-                            <span className="step-label">{t("steps.review", { defaultValue: "Revisão" })}</span>
+                            <span className="step-label">{t("steps.review")}</span>
                         </div>
                     </div>
                     <form onSubmit={handleSubmit} noValidate>
                         {currentStep === 1 && (
                             <div>
-                                <h3>{t("titles.step1BasicInfo", { defaultValue: "Etapa 1: Informações Básicas" })}</h3>
+                                <h3>{t("titles.step1BasicInfo")}</h3>
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="projectName">{t("inputs.name", { defaultValue: "Nome do Projeto" })}</label>
+                                            <label htmlFor="projectName">{t("inputs.name")}</label>
                                             <input
                                                 id="projectName"
                                                 name="name"
-                                                placeholder={t("placeholders.projectName", { defaultValue: "Insira o name do projeto" })}
+                                                placeholder={t("placeholders.projectName")}
                                                 value={formData.name}
                                                 onChange={handleChange}
                                             />
@@ -346,7 +356,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                 rows="4"
                                             />
                                             <label htmlFor="projectDescription">
-                                                {t("inputs.description", { defaultValue: "Descrição do Projeto" })}
+                                                {t("inputs.description")}
                                             </label>
                                             <div className="char-counter-footer">
                                                 <span>{formData.description.length} / 500</span>
@@ -359,8 +369,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                     <div className="form-right">
                                         <div className="form-options">
                                             <div className="project-type">
-                                                <label>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}</label>
-                                                <div className="type-options">
+                                                <label>{t("inputs.projectType")}</label>
+                                                <div className="options">
                                                     {projectTypes.map((type) => (
                                                         <button
                                                             key={type}
@@ -373,21 +383,20 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <div className="template-select">
-                                                <label htmlFor="projectTemplate">{t("inputs.template", { defaultValue: "Template" })}</label>
-                                                <select
-                                                    id="projectTemplate"
-                                                    name="template"
-                                                    value={formData.template}
-                                                    onChange={(e) => handleTemplateChange(e.target.value)}
-                                                >
-                                                    <option value="">{t("inputs.selectTemplate", { defaultValue: "Selecione um template" })}</option>
+                                            <div className="template mt-4">
+                                                <label htmlFor="projectTemplate">{t("inputs.template")}</label>
+                                                <div className="options">
                                                     {abntTemplates.map((tmpl) => (
-                                                        <option key={tmpl.value} value={tmpl.value}>
-                                                            {tmpl.label}
-                                                        </option>
+                                                        <button
+                                                            key={tmpl.value}
+                                                            type="button"
+                                                            onClick={() => handleTemplateChange(tmpl?.value)}
+                                                            className={formData.template.includes(tmpl?.value) ? "selected" : ""}
+                                                        >
+                                                            {t(tmpl?.label)}
+                                                        </button>
                                                     ))}
-                                                </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -396,11 +405,11 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         )}
                         {currentStep === 2 && (
                             <div>
-                                <h3>{t("titles.step2DatesAndCollabs", { defaultValue: "Etapa 2: Datas e Colaboradores" })}</h3>
+                                <h3>{t("titles.step2DatesAndCollabs")}</h3>
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="created_at">{t("inputs.created_at", { defaultValue: "Data de Início" })}</label>
+                                            <label htmlFor="created_at">{t("inputs.created_at")}</label>
                                             <input
                                                 type="date"
                                                 id="created_at"
@@ -411,7 +420,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             {formErrors.created_at && <p className="input-error">{formErrors.created_at}</p>}
                                         </div>
                                         <div className="input-group">
-                                            <label htmlFor="due_date">{t("inputs.due_date", { defaultValue: "Data de Término" })}</label>
+                                            <label htmlFor="due_date">{t("inputs.due_date")}</label>
                                             <input
                                                 type="date"
                                                 id="due_date"
@@ -423,12 +432,12 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                         </div>
                                     </div>
                                     <div className="form-right">
-                                        <h4>{t("titles.collaborators", { defaultValue: "Colaboradores" })}</h4>
+                                        <h4>{t("titles.collaborators")}</h4>
                                         <div className="input-group">
                                             <input
                                                 id="collaboratorEmail"
                                                 type="email"
-                                                placeholder={t("messages.emailMessage", { defaultValue: "Insira o email e pressione Enter" })}
+                                                placeholder={t("messages.emailMessage")}
                                                 value={emailInput}
                                                 onChange={(e) => {
                                                     setEmailInput(e.target.value);
@@ -457,21 +466,21 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         )}
                         {currentStep === 3 && (
                             <div>
-                                <h3>{t("titles.step3Review", { defaultValue: "Etapa 3: Revisão dos Detalhes do Projeto" })}</h3>
-        <p className="review-intro-message">{t("messages.reviewProjectDetails", { defaultValue: "Por favor, revise os detalhes do seu projeto antes de enviar." })}</p>
+                                <h3>{t("titles.step3Review")}</h3>
+                                <p className="review-intro-message">{t("messages.reviewProjectDetails")}</p>
                                 <div className="review-grid">
                                     <div className="review-section">
-                                        <h4>{t("titles.projectDetails", { defaultValue: "Detalhes do Projeto" })}</h4>
-                                        <p><strong>{t("inputs.name", { defaultValue: "Nome do Projeto" })}:</strong> {formData.name || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <h4>{t("titles.projectDetails")}</h4>
+                                        <p><strong>{t("inputs.name")}:</strong> {formData.name || t("messages.notSpecified")}</p>
 
                                         <div className="review-item review-description-wrapper">
                                             <p style={{ marginBottom: '0.5rem' }}>
-                                                <strong>{t("inputs.descriptionShort", { defaultValue: "Descrição" })}:</strong>
+                                                <strong>{t("inputs.descriptionShort")}:</strong>
                                             </p>
                                             <div
                                                 className={`review-description-content ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}
                                             >
-                                                {formData.description || t("messages.notSpecified", { defaultValue: "N/A" })}
+                                                {formData.description || t("messages.notSpecified")}
                                             </div>
                                             {formData.description && formData.description.length > 150 && (
                                                 <button
@@ -480,27 +489,29 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                     className="toggle-description-btn"
                                                 >
                                                     {isDescriptionExpanded
-                                                        ? t("buttons.readLess", { defaultValue: "Ler menos" })
-                                                        : t("buttons.readMore", { defaultValue: "Ler mais" })}
+                                                        ? t("buttons.readLess")
+                                                        : t("buttons.readMore")}
                                                 </button>
                                             )}
                                         </div>
 
-                                        <p><strong>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}:</strong> {formData.type || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{t("inputs.template", { defaultValue: "Template" })}:</strong> {
-                                            (abntTemplates.find(tmpl => tmpl.value === formData.template) || {}).label || formData.template || t("messages.notSpecified", { defaultValue: "N/A" })
+                                        <p><strong>{t("inputs.projectType")}:</strong> {formData.type || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("inputs.template")}:</strong> {
+                                            formData.template.length > 0
+                                                ? formData.template.map(value => (abntTemplates.find(tmpl => tmpl.value === value) || {}).label || value).join(', ')
+                                                : t("messages.notSpecified")
                                         }</p>
                                     </div>
                                     <div className="review-section">
-                                        <h4>{t("titles.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</h4>
-                                        <p><strong>{t("inputs.created_at", { defaultValue: "Data de Início" })}:</strong> {formData.created_at || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{t("inputs.due_date", { defaultValue: "Data de Término" })}:</strong> {formData.due_date || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{t("titles.collaborators", { defaultValue: "Colaboradores" })}:</strong></p>
+                                        <h4>{t("titles.datesAndCollaborators")}</h4>
+                                        <p><strong>{t("inputs.created_at")}:</strong> {formData.created_at || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("inputs.due_date")}:</strong> {formData.due_date || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("titles.collaborators")}:</strong></p>
                                         {formData.collaborators.length > 0 ? (
                                             <ul className="review-collaborators-list">
                                                 {formData.collaborators.map(email => <li key={email}>{email}</li>)}
                                             </ul>
-                                        ) : <p>{t("messages.noCollaborators", { defaultValue: "N/A" })}</p>}
+                                        ) : <p>{t("messages.noCollaborators")}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -509,17 +520,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         <div className="navigation-buttons">
                             {currentStep > 1 && (
                                 <button type="button" className="prev-btn" onClick={prevStep}>
-                                    {t("buttons.previous", { defaultValue: "Anterior" })}
+                                    {t("buttons.previous")}
                                 </button>
                             )}
                             {currentStep < 3 && (
                                 <button type="button" className="next-btn" onClick={nextStep}>
-                                    {t("buttons.next", { defaultValue: "Próximo" })}
+                                    {t("buttons.next")}
                                 </button>
                             )}
                             {currentStep === 3 && (
                                 <button type="submit" className="save-btn" disabled={loading}>
-                                    {loading ? t('buttons.saving', { defaultValue: 'Salvando...' }) : t('buttons.createProject', { defaultValue: 'Criar Projeto' })}
+                                    {loading ? t('buttons.saving') : t('buttons.createProject')}
                                 </button>
                             )}
                         </div>

@@ -173,7 +173,6 @@
 }
 
 input,
-select,
 textarea {
     padding: 0rem 1.2rem;
     height: 4.8rem;
@@ -190,7 +189,6 @@ textarea {
 }
 
 input:focus,
-select:focus,
 textarea:focus {
     border-color: var(--purple-saturated-color);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-saturated-color) 20%, transparent);
@@ -295,7 +293,7 @@ body.dark-theme .floating-label-group.has-value label[for="projectDescription"] 
 }
 
 .project-type label,
-.template-select label,
+.template label,
 .input-group label:not(.floating-label-group label) {
     font-size: 1.6rem;
     color: var(--black-color);
@@ -303,48 +301,43 @@ body.dark-theme .floating-label-group.has-value label[for="projectDescription"] 
     display: block;
 }
 
-.template-select select {
-    font-size: 1.6rem;
-    height: 4.8rem;
-    padding: 0.8rem 1.2rem;
-    font-weight: normal;
-}
-
-.project-type .type-options {
+ .options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem;
+
+    margin-top: 5px;
     margin-top: 0.5rem;
 }
 
-.type-options button {
-    padding: 0.8rem 1.2rem;
+.options button {
+    padding: 0.8rem 1rem;
     border-radius: 6px;
     border: 1px solid var(--gray-light-color);
     background-color: var(--white-color);
     color: var(--black-color);
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     transition: all 0.2s ease-in-out;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.type-options .selected {
+.options .selected {
     background-color: var(--purple-saturated-color);
     border-color: var(--purple-saturated-color);
     color: var(--white-color);
 }
 
-body.dark-theme .type-options .selected {
+body.dark-theme .options .selected {
     color: var(--black-color);
 }
 
-.type-options button:hover {
+.options button:hover {
     background-color: var(--purple-light-color);
     border-color: var(--purple-light-color);
 }
 
-.type-options button.selected:hover {
+.options button.selected:hover {
     background-color: var(--purple-saturated-color);
 }
 

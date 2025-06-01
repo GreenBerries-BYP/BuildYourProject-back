@@ -9,7 +9,7 @@ const Logout = () => {
   useEffect(() => {
     removeToken();
     document.body.classList.remove('dark-theme');
-    navigate('/login');
+    navigate('/');
   }, [navigate]);
 
   return null; // Não renderiza nada

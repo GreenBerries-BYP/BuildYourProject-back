@@ -134,7 +134,7 @@ const pt = {
     step3Review: "Etapa 3: Revisão dos Detalhes do Projeto",
     projectDetails: "Detalhes do Projeto",
     collaborators: "Colaboradores",
-    datesAndCollaborators: "Datas e Colaboradores", 
+    datesAndCollaborators: "Datas e Colaboradores",
     newTask: "Nova Tarefa"
   },
   messages: {
@@ -193,13 +193,13 @@ const pt = {
   },
   inputs: {
     name: "Nome do Projeto",
-    description: "Descrição do Projeto", 
-    descriptionShort: "Descrição", 
+    description: "Descrição do Projeto",
+    descriptionShort: "Descrição",
     email: "E-mail",
     projectType: "Tipo de Projeto",
     template: "Template",
-    taskName: "Nome da Tarefa", 
-    taskDescription: "Descrição da Tarefa", 
+    taskName: "Nome da Tarefa",
+    taskDescription: "Descrição da Tarefa",
     selectResponsible: "Selecione um responsável",
     selectTemplate: "Selecione um template",
     startDate: "Data de Início",
@@ -215,6 +215,21 @@ const pt = {
   },
   project: {
     yourTasks: "Suas Tarefas",
+  },
+  abntTemplates: {
+    cover: "Capa",
+    titlePage: "Folha de Rosto",
+    dedication: "Dedicatória",
+    acknowledgements: "Agradecimentos",
+    abstract: "Resumo",
+    abstractEnglish: "Abstract (Inglês)",
+    summary: "Sumário",
+    introduction: "Introdução",
+    development: "Desenvolvimento",
+    methodology: "Metodologia",
+    results: "Resultados",
+    conclusion: "Conclusão",
+    references: "Referências"
   }
 };
 

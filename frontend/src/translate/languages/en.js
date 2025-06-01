@@ -134,7 +134,7 @@ const en = {
     step3Review: "Step 3: Review Project Details",
     projectDetails: "Project Details",
     collaborators: "Collaborators",
-    datesAndCollaborators: "Dates and Collaborators", 
+    datesAndCollaborators: "Dates and Collaborators",
     newTask: "Nova Tarefa",
   },
   messages: {
@@ -158,7 +158,7 @@ const en = {
     dueDateRequired: "Due date is required",
     responsibleRequired: "Responsible is required",
     errorNewTask: "Error creating new task",
-    emailMessage: "Enter email and press Enter", 
+    emailMessage: "Enter email and press Enter",
     reviewProjectDetails: "Please review your project details before submitting.",
     notSpecified: "N/A",
     noCollaborators: "N/A",
@@ -186,15 +186,15 @@ const en = {
     home: "Home",
     myProjects: "My Projects",
     myTasks: "My Tasks",
-    sharedWithMe: "Shared\nWith Me", 
+    sharedWithMe: "Shared\nWith Me",
     googleCalendar: "Google Calendar",
     info: "Info",
     logOut: "Log Out",
   },
   inputs: {
-    name: "Project Name", 
-    description: "Project Description", 
-    descriptionShort: "Description", 
+    name: "Project Name",
+    description: "Project Description",
+    descriptionShort: "Description",
     email: "Email",
     projectType: "Project Type",
     template: "Template",
@@ -203,18 +203,33 @@ const en = {
     selectResponsible: "Select responsible",
     selectTemplate: "Select a template",
     startDate: "Start Date",
-    endDate: "End Date", 
+    endDate: "End Date",
   },
-  placeholders: { 
+  placeholders: {
     projectName: "Enter project name",
   },
-  steps: { 
+  steps: {
     basicInfo: "Basic Info",
     datesAndCollaborators: "Dates & Collaborators",
     review: "Review",
   },
   project: {
     yourTasks: "Your Tasks",
+  },
+  abntTemplates: {
+    cover: "Cover",
+    titlePage: "Title Page",
+    dedication: "Dedication",
+    acknowledgements: "Acknowledgements",
+    abstract: "Abstract",
+    abstractEnglish: "Abstract (English)",
+    summary: "Summary",
+    introduction: "Introduction",
+    development: "Development",
+    methodology: "Methodology",
+    results: "Results",
+    conclusion: "Conclusion",
+    references: "References"
   }
 };
 
