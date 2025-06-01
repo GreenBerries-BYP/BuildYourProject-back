@@ -17,10 +17,10 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         name: "",
         description: "",
         type: "TCC",
-        template: [],
+        phases: [],
         collaborators: [],
-        created_at: "",
-        due_date: "",
+        startDate: "",
+        endDate: "",
     });
 
     const [emailInput, setEmailInput] = useState("");
@@ -46,18 +46,18 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleTemplateChange = (selectedTemplateValue) => {
+    const handlephasesChange = (selectedphasesValue) => {
         setFormData((prevData) => {
-            const currentTemplates = prevData.template;
-            if (currentTemplates.includes(selectedTemplateValue)) {
+            const currentphasess = prevData.phases;
+            if (currentphasess.includes(selectedphasesValue)) {
                 return {
                     ...prevData,
-                    template: currentTemplates.filter((tmpl) => tmpl !== selectedTemplateValue),
+                    phases: currentphasess.filter((tmpl) => tmpl !== selectedphasesValue),
                 };
             } else {
                 return {
                     ...prevData,
-                    template: [...currentTemplates, selectedTemplateValue],
+                    phases: [...currentphasess, selectedphasesValue],
                 };
             }
         });
@@ -106,16 +106,16 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         if (!formData.name.trim()) errors.name = t("messages.projectNameRequired");
         if (!formData.description.trim()) errors.description = t("messages.projectDescriptionRequired");
 
-        if (!formData.created_at) {
-            errors.created_at = t("messages.created_atRequired");
+        if (!formData.startDate) {
+            errors.startDate = t("messages.startDateRequired");
         }
-        if (!formData.due_date) {
-            errors.due_date = t("messages.due_dateRequired");
-        } else if (formData.created_at && formData.due_date) {
-            const start = new Date(formData.created_at);
-            const end = new Date(formData.due_date);
+        if (!formData.endDate) {
+            errors.endDate = t("messages.endDateRequired");
+        } else if (formData.startDate && formData.endDate) {
+            const start = new Date(formData.startDate);
+            const end = new Date(formData.endDate);
             if (end < start) {
-                errors.due_date = t("messages.due_dateAfterStartDate");
+                errors.endDate = t("messages.endDateAfterStartDate");
             }
         }
         return errors;
@@ -129,8 +129,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             if (allErrors.name) currentStepErrors.name = allErrors.name;
             if (allErrors.description) currentStepErrors.description = allErrors.description;
         } else if (currentStep === 2) {
-            if (allErrors.created_at) currentStepErrors.created_at = allErrors.created_at;
-            if (allErrors.due_date) currentStepErrors.due_date = allErrors.due_date;
+            if (allErrors.startDate) currentStepErrors.startDate = allErrors.startDate;
+            if (allErrors.endDate) currentStepErrors.endDate = allErrors.endDate;
         }
 
         if (Object.keys(currentStepErrors).length > 0) {
@@ -140,7 +140,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
         let relevantErrorKeys = [];
         if (currentStep === 1) relevantErrorKeys = ['name', 'description'];
-        if (currentStep === 2) relevantErrorKeys = ['created_at', 'due_date'];
+        if (currentStep === 2) relevantErrorKeys = ['startDate', 'endDate'];
 
         const newErrors = { ...formErrors };
 
@@ -165,7 +165,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 setFormErrors(allErrors);
                 if (allErrors.name || allErrors.description) {
                     setCurrentStep(1);
-                } else if (allErrors.created_at || allErrors.due_date) {
+                } else if (allErrors.startDate || allErrors.endDate) {
                     setCurrentStep(2);
                 }
                 return;
@@ -179,9 +179,9 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     description: formData.description,
                     type: formData.type,
                     collaborators: formData.collaborators,
-                    template: formData.template,
-                    created_at: formData.created_at,
-                    due_date: formData.due_date,
+                    phases: formData.phases,
+                    startDate: formData.startDate,
+                    endDate: formData.endDate,
                 };
                 // Add a comment about backend dependency
                 // TODO: Ensure backend endpoint /api/projetos/ is fully implemented and handles auth correctly.
@@ -203,10 +203,10 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         name: "",
                         description: "",
                         type: "TCC",
-                        template: [],
+                        phases: [],
                         collaborators: [],
-                        created_at: "",
-                        due_date: "",
+                        startDate: "",
+                        endDate: "",
                     });
                     setCurrentStep(1);
                     setEmailInput("");
@@ -218,12 +218,12 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     // This block might not be strictly necessary if Axios throws on non-2xx by default
                     // For safety, keeping a generic error if it somehow reaches here
                     const errorData = response.data;
-                    throw new Error(errorData.detail || t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }));
+                    throw new Error(errorData.detail || t("messages.errorNewProject"));
                 }
             } catch (err) {
                 if (err.response?.status === 401) {
                     setFormErrors({
-                        submit: t("messages.errorNewProjectBackendNotReady", { defaultValue: "Falha ao criar projeto. O serviço pode estar indisponível ou acesso não autorizado. Tente novamente mais tarde." })
+                        submit: t("messages.errorNewProjectBackendNotReady")
                     });
                 } else if (err.response) { // Other HTTP errors (400, 500, etc.)
                     const errorData = err.response.data;
@@ -233,12 +233,12 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         detailedMessage = Object.values(errorData).flat().join(' ');
                     }
                     setFormErrors({
-                        submit: `${t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." })} ${detailedMessage || err.message}`.trim()
+                        submit: `${t("messages.errorNewProject")} ${detailedMessage || err.message}`.trim()
                     });
                 }
                 else { // Network errors or other issues
                     setFormErrors({
-                        submit: err.message || t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }),
+                        submit: err.message || t("messages.errorNewProject"),
                     });
                 }
             } finally {
@@ -291,7 +291,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
-    const projectTypes = ["TCC", "Artigo Acadêmico", "ABNT"];
+    const projectTypes = ["TCC", t('inputs.academicArticle'), "ABNT"];
 
     return (
         <div className="modal-overlay">
@@ -383,15 +383,15 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                     ))}
                                                 </div>
                                             </div>
-                                            <div className="template mt-4">
-                                                <label htmlFor="projectTemplate">{t("inputs.template")}</label>
+                                            <div className="phases mt-4">
+                                                <label htmlFor="projectphases">{t("inputs.phases")}</label>
                                                 <div className="options">
                                                     {abntTemplates.map((tmpl) => (
                                                         <button
                                                             key={tmpl.value}
                                                             type="button"
-                                                            onClick={() => handleTemplateChange(tmpl?.value)}
-                                                            className={formData.template.includes(tmpl?.value) ? "selected" : ""}
+                                                            onClick={() => handlephasesChange(tmpl?.value)}
+                                                            className={formData.phases.includes(tmpl?.value) ? "selected" : ""}
                                                         >
                                                             {t(tmpl?.label)}
                                                         </button>
@@ -409,26 +409,26 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="created_at">{t("inputs.created_at")}</label>
+                                            <label htmlFor="startDate">{t("inputs.startDate")}</label>
                                             <input
                                                 type="date"
-                                                id="created_at"
-                                                name="created_at"
-                                                value={formData.created_at}
+                                                id="startDate"
+                                                name="startDate"
+                                                value={formData.startDate}
                                                 onChange={handleChange}
                                             />
-                                            {formErrors.created_at && <p className="input-error">{formErrors.created_at}</p>}
+                                            {formErrors.startDate && <p className="input-error">{formErrors.startDate}</p>}
                                         </div>
                                         <div className="input-group">
-                                            <label htmlFor="due_date">{t("inputs.due_date")}</label>
+                                            <label htmlFor="endDate">{t("inputs.endDate")}</label>
                                             <input
                                                 type="date"
-                                                id="due_date"
-                                                name="due_date"
-                                                value={formData.due_date}
+                                                id="endDate"
+                                                name="endDate"
+                                                value={formData.endDate}
                                                 onChange={handleChange}
                                             />
-                                            {formErrors.due_date && <p className="input-error">{formErrors.due_date}</p>}
+                                            {formErrors.endDate && <p className="input-error">{formErrors.endDate}</p>}
                                         </div>
                                     </div>
                                     <div className="form-right">
@@ -495,17 +495,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             )}
                                         </div>
 
-                                        <p><strong>{t("inputs.projectType")}:</strong> {formData.type || t("messages.notSpecified")}</p>
-                                        <p><strong>{t("inputs.template")}:</strong> {
-                                            formData.template.length > 0
-                                                ? formData.template.map(value => (abntTemplates.find(tmpl => tmpl.value === value) || {}).label || value).join(', ')
+                                        <p><strong>{t("inputs.projectType")}:</strong> {t(formData.type) || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("inputs.phases")}:</strong> {
+                                            formData.phases.length > 0
+                                                ? formData.phases.map(value => t((abntTemplates.find(tmpl => tmpl?.value === value) || {}).label)).join(', ')
                                                 : t("messages.notSpecified")
                                         }</p>
                                     </div>
                                     <div className="review-section">
                                         <h4>{t("titles.datesAndCollaborators")}</h4>
-                                        <p><strong>{t("inputs.created_at")}:</strong> {formData.created_at || t("messages.notSpecified")}</p>
-                                        <p><strong>{t("inputs.due_date")}:</strong> {formData.due_date || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("inputs.startDate")}:</strong> {formData.startDate || t("messages.notSpecified")}</p>
+                                        <p><strong>{t("inputs.endDate")}:</strong> {formData.endDate || t("messages.notSpecified")}</p>
                                         <p><strong>{t("titles.collaborators")}:</strong></p>
                                         {formData.collaborators.length > 0 ? (
                                             <ul className="review-collaborators-list">

@@ -197,13 +197,14 @@ const pt = {
     descriptionShort: "Descrição",
     email: "E-mail",
     projectType: "Tipo de Projeto",
-    template: "Template",
+    phases: "Etapas",
     taskName: "Nome da Tarefa",
     taskDescription: "Descrição da Tarefa",
     selectResponsible: "Selecione um responsável:",
-    selectTemplate: "Selecione um template",
+    selectPhase: "Selecione uma Etapa",
     startDate: "Data de Início",
     endDate: "Data de Término",
+    academicArticle: "Artigo Acadêmico"
   },
   placeholders: {
     projectName: "Insira o nome do projeto",

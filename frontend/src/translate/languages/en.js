@@ -197,11 +197,12 @@ const en = {
     descriptionShort: "Description",
     email: "Email",
     projectType: "Project Type",
-    template: "Template",
+    phases: "Steps",
     selectResponsible: "Select responsible:",
-    selectTemplate: "Select a template",
+    selectPhase: "Select a Step",
     startDate: "Start Date",
     endDate: "End Date",
+    academicArticle: "Academic Article"
   },
   placeholders: {
     projectName: "Enter project name",
