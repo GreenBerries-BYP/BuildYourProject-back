@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import '../styles/ViewProject.css';
 import { useTranslation } from 'react-i18next';
-import { MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { MdExpandLess, MdExpandMore } from 'react-icons/md'
+
 
 const ViewProject = ({
   nomeProjeto,
@@ -25,7 +26,7 @@ const ViewProject = ({
         <div className="project-header">
             <div className="project-data">
                 <h1>{nomeProjeto}</h1>
-                <p>{t("viewProject.createdBy", { adm: admProjeto, defaultValue: "Created by: {{adm}}" })}</p>
+                <p>{t("viewProject.createdBy", { adm: admProjeto, defaultValue: "Created by: {adm}" })}</p>
                 <p>{t("viewProject.membersCount", { count: numIntegrantes, defaultValue: "{{count}} member(s)" })}</p>
             </div>
             

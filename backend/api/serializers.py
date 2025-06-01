@@ -32,9 +32,24 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-# alterado pra alinhar com o front
+# # alterado pra alinhar com o front
+# class ProjectSerializer(serializers.ModelSerializer):
+#     # O model não tem 'creator', só created_at e due_date
+#     class Meta:
+#         model = Project
+#         fields = [
+#             'id',  
+#             'name',  
+#             'description',  
+#             'type',
+#             'created_at',  # antes creation_date
+#             'due_date',    # antes delivery_date
+#         ]
+
+
 class ProjectSerializer(serializers.ModelSerializer):
-    # O model não tem 'creator', só created_at e due_date
+    creator_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
         fields = [
@@ -42,10 +57,14 @@ class ProjectSerializer(serializers.ModelSerializer):
             'name',  
             'description',  
             'type',
-            'created_at',  # antes creation_date
-            'due_date',    # antes delivery_date
+            'created_at',
+            'due_date',
+            'creator_name',  # campo adicionado
         ]
 
+    def get_creator_name(self, obj):
+        leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
+        return leader_relation.user.full_name if leader_relation else None
 
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
