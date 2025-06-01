@@ -60,11 +60,24 @@ class ProjectSerializer(serializers.ModelSerializer):
             'created_at',
             'due_date',
             'creator_name',  # campo adicionado
+            'template',  
         ]
 
     def get_creator_name(self, obj):
         leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
         return leader_relation.user.full_name if leader_relation else None
+
+    def validate_template(self, value):
+        """
+        Check that the template list is not empty.
+        """
+        if not value: 
+            raise serializers.ValidationError("O campo de template é obrigatório e não pode estar vazio.")
+        if not isinstance(value, list):
+             raise serializers.ValidationError("Template deve ser uma lista de strings.")
+        if not all(isinstance(item, str) for item in value):
+            raise serializers.ValidationError("Todos os itens da lista de template devem ser strings.")
+        return value
 
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.db.models import JSONField # Usei jsonfield pra lidar com o campo template que tem itens aninhados, então não dava pra usar text 
 
 class SystemRole(models.TextChoices):
     ADMIN = 'admin', 'Admin'
@@ -51,6 +52,7 @@ class Project(models.Model):
     type = models.TextField(default='default_type')
     created_at = models.DateTimeField() # removi a definição automática pelo sistema
     due_date = models.DateTimeField()
+    template = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.name
