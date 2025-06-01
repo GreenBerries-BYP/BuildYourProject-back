@@ -40,14 +40,14 @@ const ViewProject = ({
                 </div>
 
                 <button className='criar-tarefa-btn' onClick={() => setModalAberto(true)}>
-                    <span>{i18n.t('project.newTask')}</span>
+                    <span>{t('buttons.newTask')}</span>
                     <img src="/imgs/icons-project/add.svg" />
                 </button>
             </div>
         </div>
 
         <div className="project-tasks">
-            {tarefasProjeto.map((tarefa, index) => (
+            {tarefasProjeto?.map((tarefa, index) => (
                 <div key={index} className="task-section">
                     <div
                         className="task-header"

@@ -53,7 +53,7 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
             onClose();
         } catch (err) {
             setFormErrors({
-                submit: err.message || i18n.t("messages.errorNewTask"),
+                submit: err.message || t("messages.errorNewTask"),
             });
         } finally {
             setLoading(false);
@@ -91,7 +91,7 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
                     <form onSubmit={handleSubmit} noValidate>
                         <div className="input-group">
                             <input
-                                placeholder={i18n.t("inputs.name")}
+                                placeholder={t("inputs.name")}
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                             />
@@ -100,7 +100,7 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="input-group">
                             <textarea
-                                placeholder={i18n.t("inputs.description")}
+                                placeholder={t("inputs.description")}
                                 value={descricao}
                                 onChange={(e) => setDescricao(e.target.value)}
                             />

@@ -215,7 +215,6 @@ const en = {
   },
   project: {
     yourTasks: "Your Tasks",
-    newTask: "New Task",
   }
 };
 

@@ -232,6 +232,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 }
             } finally {
                 setLoading(false);
+                location.reload();
             }
         } else {
             nextStep();

@@ -180,6 +180,7 @@ const pt = {
     next: "Próximo",
     readLess: "Ler menos",
     readMore: "Ler mais",
+    newTask: "Nova Tarefa",
   },
   sideBar: {
     home: "Início",
@@ -214,7 +215,6 @@ const pt = {
   },
   project: {
     yourTasks: "Suas Tarefas",
-    newTask: "Nova Tarefa",
   }
 };
 
