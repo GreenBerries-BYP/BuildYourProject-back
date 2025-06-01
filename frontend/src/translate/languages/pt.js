@@ -3,6 +3,7 @@ const pt = {
     title: "Build your Project",
     newProject: "Novo Projeto",
     editProject: "Editar Projeto",
+    newTask: "Nova Tarefa"
   },
   messages: {
     welcome: "Bem-vindo ao Build Your Project",

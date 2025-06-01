@@ -3,6 +3,7 @@ const en = {
     title: "Build Your Project",
     newProject: "New Project",
     editProject: "Edit Project",
+    newTask: "Nova Tarefa",
   },
   messages: {
     welcome: "Welcome to Build Your Project",
@@ -31,6 +32,7 @@ const en = {
     delete: "Delete",
     save: "Save",
     saving: "Saving...",
+    newTask: "New Task",
   },
   sideBar: {
     home: "Home",
@@ -51,7 +53,6 @@ const en = {
   },
   project: {
     yourTasks: "Your Tasks",
-      newTask: "New Task",
   }
 };
 

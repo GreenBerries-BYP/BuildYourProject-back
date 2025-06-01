@@ -2,15 +2,17 @@ import { useState } from 'react';
 import '../styles/ViewProject.css';
 import { i18n } from '../translate/i18n';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
+import ModalNewTask from './ModalNewTask';
 
 const ViewProject = ({
   nomeProjeto,
   admProjeto,
   numIntegrantes,
   tarefasProjeto,
-  onVoltar 
+  onVoltar
 }) => {
   const [expandedSections, setExpandedSections] = useState({});
+  const [modalAberto, setModalAberto] = useState(false);
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -36,7 +38,7 @@ const ViewProject = ({
                     <button className='fechar-btn' onClick={onVoltar}><img src="/imgs/icons-project/Close.svg" /></button>
                 </div>
 
-                <button className='criar-tarefa-btn'>
+                <button className='criar-tarefa-btn' onClick={() => setModalAberto(true)}>
                     <span>{i18n.t('project.newTask')}</span>
                     <img src="/imgs/icons-project/add.svg" />
                 </button>
@@ -109,6 +111,7 @@ const ViewProject = ({
                 </div>
             ))}
         </div>
+        <ModalNewTask isOpen={modalAberto} onClose={() => setModalAberto(false)} />
     </div>
   );
 };

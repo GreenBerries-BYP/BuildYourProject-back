@@ -6,7 +6,7 @@ import { i18n } from "../translate/i18n";
 
 const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
 
-const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
+const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
     const modalRef = useRef();
     const [nome, setNome] = useState("");
     const [descricao, setDescricao] = useState("");
@@ -26,37 +26,37 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
         return errors;
     };
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     const errors = validateForm();
-    //     setFormErrors(errors);
-    //     if (Object.keys(errors).length > 0) return;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const errors = validateForm();
+        setFormErrors(errors);
+        if (Object.keys(errors).length > 0) return;
 
-    //     const tarefa = {
-    //         nome,
-    //         descricao,
-    //         dataEntrega,
-    //         responsavel,
-    //         projetoId
-    //     };
+        const tarefa = {
+            nome,
+            descricao,
+            dataEntrega,
+            responsavel,
+            projetoId
+        };
 
-    //     setLoading(true);
-    //     try {
-    //         const token = getToken();
-    //         await api.post("/api/tarefas/", tarefa, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-    //         onClose();
-    //     } catch (err) {
-    //         setFormErrors({
-    //             submit: err.message || i18n.t("messages.errorNewTask"),
-    //         });
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+        setLoading(true);
+        try {
+            const token = getToken();
+            await api.post("/api/tarefas/", tarefa, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            onClose();
+        } catch (err) {
+            setFormErrors({
+                submit: err.message || i18n.t("messages.errorNewTask"),
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -89,7 +89,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
                     <form onSubmit={handleSubmit} noValidate>
                         <div className="input-group">
                             <input
-                                placeholder={i18n.t("inputs.taskName")}
+                                placeholder={i18n.t("inputs.name")}
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                             />
@@ -98,7 +98,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="input-group">
                             <textarea
-                                placeholder={i18n.t("inputs.taskDescription")}
+                                placeholder={i18n.t("inputs.description")}
                                 value={descricao}
                                 onChange={(e) => setDescricao(e.target.value)}
                             />
@@ -138,4 +138,4 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
     );
 };
 
-export default ModalNovaTarefa;
+export default ModalNewTask;
