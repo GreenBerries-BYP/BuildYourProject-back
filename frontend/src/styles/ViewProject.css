@@ -37,11 +37,11 @@
 }
 
 .criar-tarefa-btn{
-    color: var(--white-color);
+    color: white;
     background: var(--green-dark-color);
     padding: 1rem 2rem;
     border-radius: 10px;
-    border: 2px var(--white-color) solid;
+    border: 2px white solid;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
     gap: 1rem;
 }

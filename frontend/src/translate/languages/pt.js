@@ -200,7 +200,7 @@ const pt = {
     template: "Template",
     taskName: "Nome da Tarefa",
     taskDescription: "Descrição da Tarefa",
-    selectResponsible: "Selecione um responsável",
+    selectResponsible: "Selecione um responsável:",
     selectTemplate: "Selecione um template",
     startDate: "Data de Início",
     endDate: "Data de Término",
