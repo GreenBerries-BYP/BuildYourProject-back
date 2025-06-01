@@ -28,16 +28,16 @@ const ViewProject = ({
         <div className="project-header">
             <div className="project-data">
                 <h1>{nomeProjeto}</h1>
-                <p>{t("viewProject.createdBy", { adm: admProjeto, defaultValue: "Created by: {adm}" })}</p>
-                <p>{t("viewProject.membersCount", { count: numIntegrantes, defaultValue: "{{count}} member(s)" })}</p>
+                <p>{t("viewProject.createdBy", { adm: admProjeto })}</p>
+                <p>{t("viewProject.membersCount", { count: numIntegrantes })}</p>
             </div>
             
             <div className="project-options">
                 <div className="btns">
-                    <button className='compartilhar-btn'><img src="/imgs/icons-project/Link.svg" alt={t("altText.shareLink", "Share project")} /></button>
-                    <button className='editar-btn'><img src="/imgs/icons-project/Edit.svg" alt={t("altText.editProject", "Edit project")} /></button>
-                    <button className='calendario-btn'><img src="/imgs/icons-project/Calendar.svg" alt={t("altText.viewCalendar", "View calendar")} /></button>
-                    <button className='fechar-btn' onClick={onVoltar}><img src="/imgs/icons-project/Close.svg" alt={t("altText.closeView", "Close view")} /></button>
+                    <button className='compartilhar-btn'><img src="/imgs/icons-project/Link.svg" alt={t("altText.shareLink")} /></button>
+                    <button className='editar-btn'><img src="/imgs/icons-project/Edit.svg" alt={t("altText.editProject")} /></button>
+                    <button className='calendario-btn'><img src="/imgs/icons-project/Calendar.svg" alt={t("altText.viewCalendar")} /></button>
+                    <button className='fechar-btn' onClick={onVoltar}><img src="/imgs/icons-project/Close.svg" alt={t("altText.closeView")} /></button>
                 </div>
 
                 <button className='criar-tarefa-btn' onClick={() => setModalAberto(true)}>
@@ -82,17 +82,17 @@ const ViewProject = ({
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>{t("viewProject.taskHeaderTask", "Task")}</th>
-                                    <th>{t("viewProject.taskHeaderResponsible", "Responsible")}</th>
-                                    <th>{t("viewProject.taskHeaderStatus", "Status")}</th>
-                                    <th>{t("viewProject.taskHeaderDueDate", "Due Date")}</th>
+                                    <th>{t("viewProject.taskHeaderTask")}</th>
+                                    <th>{t("viewProject.taskHeaderResponsible")}</th>
+                                    <th>{t("viewProject.taskHeaderStatus")}</th>
+                                    <th>{t("viewProject.taskHeaderDueDate")}</th>
                                 </tr>
                                 <tr> {/* linhas horizontais */}
-                                   <th><hr /></th>
-                                   <th><hr /></th>
-                                   <th><hr /></th>
-                                   <th><hr /></th>
-                                   <th><hr /></th>
+                                    <th><hr /></th>
+                                    <th><hr /></th>
+                                    <th><hr /></th>
+                                    <th><hr /></th>
+                                    <th><hr /></th>
                                 </tr>
                             </thead>
                             
@@ -100,7 +100,7 @@ const ViewProject = ({
                                 
                                 {tarefa.tarefas.map((etapa, idx) => (
                                     <tr key={idx}>
-                                        <img src={(etapa.status == 'concluído') ? "/imgs/checked.svg" : "/imgs/unchecked.svg"} alt={etapa.status === 'concluído' ? t("altText.taskCompleted", "Task completed") : t("altText.taskPending", "Task pending")}/>
+                                        <img src={(etapa.status == 'concluído') ? "/imgs/checked.svg" : "/imgs/unchecked.svg"} alt={etapa.status === 'concluído' ? t("altText.taskCompleted") : t("altText.taskPending")}/>
                                         <td>{etapa.nome}</td>
                                         <td>{etapa.responsavel}</td>
                                         <td>{etapa.status}</td>
@@ -118,8 +118,11 @@ const ViewProject = ({
   );
 };
 
-$(function () {
-  $('[data-toggle="popover"]').popover({html: true})
-})
+// Remover a linha jQuery se não estiver sendo usada em outro lugar do arquivo.
+// Se esta linha for essencial para alguma funcionalidade, mantenha-a.
+// Por padrão, estou removendo-a, pois não faz parte do React e 'popover' é geralmente do Bootstrap.
+// $(function () {
+//   $('[data-toggle="popover"]').popover({html: true})
+// })
 
 export default ViewProject;

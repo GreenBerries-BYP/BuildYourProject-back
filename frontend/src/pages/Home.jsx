@@ -94,8 +94,6 @@ useEffect(() => {
           <div className="projects-area">
             <CreateProjectCard onClick={handleCreateProject} />
 
-             {console.log(projetos)}
-
             {projetos.map((projeto, index) => (
               <ProjectCard
                 key={index}

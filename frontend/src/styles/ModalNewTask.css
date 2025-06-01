@@ -15,8 +15,9 @@
   background-color: var(--modal-bg);
   border: 1px solid var(--gray-light-color);
   border-radius: 8px;
-  width: 77.3rem;
-  height: 40.3rem;
+  height: auto;
+  max-height: 90vh;
+  overflow-y: auto;
   font-family: 'Poppins', sans-serif;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   display: flex;
@@ -35,21 +36,24 @@
 .modal-header h2 {
   margin-top: 2rem;
   font-size: 2.5rem;
-  font-weight: normal;
-  color: var(--white-color);
+  font-weight: 500;
+  color: var(--black-color);
 }
 
 .close-btn {
   font-size: 4rem;
-  color: var(--white-color);
+  color: var(--black-color);
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0.5rem;
 }
 
 .modal-body {
   padding: 2rem;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-body form {
@@ -59,29 +63,44 @@
   justify-content: space-between;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
+.form-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
   margin-bottom: 1.6rem;
 }
 
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
 input,
-textarea,
-select {
-  padding: 0.8rem 1.2rem;
-  height: 5rem;
+textarea {
+  padding: 0rem 1.2rem;
+  height: 4.8rem;
   border-radius: 6px;
-  border: 1px solid var(--gray-color);
-  font-size: 2rem;
-  background-color: var(--gray-light-color);
+  border: 1px solid var(--gray-light-color);
+  background-color: var(--form-bg);
   color: var(--black-color);
   width: 100%;
   outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  line-height: calc(4.8rem - 2px);
 }
 
 textarea {
-  height: 10rem;
-  resize: none;
+  height: auto;
+  resize: vertical;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--purple-saturated-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-saturated-color) 20%, transparent);
 }
 
 input::placeholder,
@@ -107,12 +126,12 @@ textarea::placeholder {
 
 .save-btn {
   background: var(--green-dark-color);
-  color: var(--white-color);
+  color: var(--black-color);
   padding: 0.8rem 1.6rem;
   font-size: 1.8rem;
   font-weight: 500;
   border-radius: 6px;
-  border: none;
+  border: 1px solid var(--black-color);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -122,4 +141,44 @@ textarea::placeholder {
 
 .save-btn:hover {
   background: var(--green-color);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+
+  margin-top: 5px;
+  margin-top: 0.5rem;
+}
+
+.options button {
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--gray-light-color);
+  background-color: var(--white-color);
+  color: var(--black-color);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.options .selected {
+  background-color: var(--purple-saturated-color);
+  border-color: var(--purple-saturated-color);
+  color: var(--white-color);
+}
+
+body.dark-theme .options .selected {
+  color: var(--black-color);
+}
+
+.options button:hover {
+  background-color: var(--purple-light-color);
+  border-color: var(--purple-light-color);
+}
+
+.options button.selected:hover {
+  background-color: var(--purple-saturated-color);
 }

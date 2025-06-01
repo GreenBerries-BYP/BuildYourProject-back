@@ -69,17 +69,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const adicionarColaborador = () => {
         if (!emailInput.trim()) {
-            setEmailError(t("messages.emailCantBeEmpty", { defaultValue: "Email não pode estar vazio." }));
+            setEmailError(t("messages.emailCantBeEmpty"));
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
-            setEmailError(t("messages.invalidEmailFormat", { defaultValue: "Formato de email inválido." }));
+            setEmailError(t("messages.invalidEmailFormat"));
             return;
         }
 
         if (formData.collaborators.includes(emailInput)) {
-            setEmailError(t("messages.emailAlreadyAdded", { defaultValue: "Email já adicionado." }));
+            setEmailError(t("messages.emailAlreadyAdded"));
             return;
         }
 
@@ -103,19 +103,19 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const validateForm = () => {
         const errors = {};
-        if (!formData.name.trim()) errors.name = t("messages.projectNameRequired", { defaultValue: "Nome do projeto é obrigatório." });
-        if (!formData.description.trim()) errors.description = t("messages.projectDescriptionRequired", { defaultValue: "Descrição do projeto é obrigatória." });
+        if (!formData.name.trim()) errors.name = t("messages.projectNameRequired");
+        if (!formData.description.trim()) errors.description = t("messages.projectDescriptionRequired");
 
         if (!formData.created_at) {
-            errors.created_at = t("messages.created_atRequired", { defaultValue: "Data de início é obrigatória." });
+            errors.created_at = t("messages.created_atRequired");
         }
         if (!formData.due_date) {
-            errors.due_date = t("messages.due_dateRequired", { defaultValue: "Data de término é obrigatória." });
+            errors.due_date = t("messages.due_dateRequired");
         } else if (formData.created_at && formData.due_date) {
             const start = new Date(formData.created_at);
             const end = new Date(formData.due_date);
             if (end < start) {
-                errors.due_date = t("messages.due_dateAfterStartDate", { defaultValue: "Data de término não pode ser anterior à data de início." });
+                errors.due_date = t("messages.due_dateAfterStartDate");
             }
         }
         return errors;
@@ -203,7 +203,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         name: "",
                         description: "",
                         type: "TCC",
-                        template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
+                        template: [],
                         collaborators: [],
                         created_at: "",
                         due_date: "",
