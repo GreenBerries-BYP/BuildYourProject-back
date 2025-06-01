@@ -1,14 +1,15 @@
 // src/pages/Logout.jsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { removeToken } from '../auth/auth'; 
+import { removeToken } from '../auth/auth';
 
 const Logout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    removeToken();              
-    navigate('/login');         
+    removeToken();
+    document.body.classList.remove('dark-theme');
+    navigate('/login');
   }, [navigate]);
 
   return null; // Não renderiza nada
