@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
@@ -12,7 +12,6 @@ import { fetchUserData } from '../api/userService';
 function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
-
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
@@ -25,6 +24,17 @@ function Home() {
         console.error('Erro ao buscar dados do usuário:', error);
       });
   }, []);
+
+  useEffect(() => {
+    if (modalAberto) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [modalAberto]);
 
   const handleCreateProject = () => {
     setModalAberto(true);
@@ -88,29 +98,32 @@ function Home() {
     <div className="d-flex">
       <Sidebar onToggle={setSidebarAberta} />
       <Header />
-      
-      <div className="projects-area" style={{
-          padding: sidebarAberta ? "12rem 3rem 0 32rem" : "12rem 3rem 0 15rem", 
-          transition: "padding 0.3s ease"
+
+      <div className={`main-page-content ${modalAberto ? "blur-background" : ""}`} style={{
+        padding: sidebarAberta ? "12rem 3rem 0 32rem" : "12rem 3rem 0 15rem",
+        transition: "padding 0.3s ease",
+        flexGrow: 1,
+        overflowY: 'auto'
       }}>
-        <CreateProjectCard onClick={handleCreateProject} />
+        <div className="projects-area">
+          <CreateProjectCard onClick={handleCreateProject} />
 
-        {projetos.map((projeto, index) => (
-          <ProjectCard 
-            key={index}
-            nomeProjeto={projeto.nomeProjeto}
-            progressoProjeto={projeto.progressoProjeto}
-            progressoIndividual={projeto.progressoIndividual}
-            tarefasProjeto={projeto.tarefasProjeto}
-            estaAtrasado={projeto.estaAtrasado}
-          />
-        ))}
-
+          {projetos.map((projeto, index) => (
+            <ProjectCard
+              key={index}
+              nomeProjeto={projeto.nomeProjeto}
+              progressoProjeto={projeto.progressoProjeto}
+              progressoIndividual={projeto.progressoIndividual}
+              tarefasProjeto={projeto.tarefasProjeto}
+              estaAtrasado={projeto.estaAtrasado}
+            />
+          ))}
+        </div>
       </div>
 
-      <ModalNewProject 
-        isOpen={modalAberto} 
-        onClose={() => setModalAberto(false)} 
+      <ModalNewProject
+        isOpen={modalAberto}
+        onClose={() => setModalAberto(false)}
       />
     </div>
   );

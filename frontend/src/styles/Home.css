@@ -3,3 +3,13 @@
     gap: 2.4rem;
     flex-wrap: wrap;
 }
+
+.blur-background {
+    filter: blur(2px);
+    user-select: none;
+    transition: filter 0.8s ease;
+}
+
+body.no-scroll {
+    overflow: hidden;
+}
