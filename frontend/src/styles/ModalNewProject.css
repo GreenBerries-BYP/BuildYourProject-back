@@ -186,7 +186,7 @@ textarea {
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    line-height: 100px
+    line-height: calc(4.8rem - 2px);
 }
 
 input:focus,
@@ -197,7 +197,7 @@ textarea:focus {
 }
 
 input::placeholder {
-    color: var(--placeholder-color);
+    color: var(--placeholder-color);  
 }
 
 textarea {
@@ -256,6 +256,11 @@ textarea#projectDescription {
     padding-top: 2.2rem;
     padding-bottom: 0.6rem;
     line-height: 1.5;
+}
+
+#collaboratorEmail {
+    margin-top: -1.35rem;
+    margin-bottom: -2.6rem;
 }
 
 .floating-label-group {
