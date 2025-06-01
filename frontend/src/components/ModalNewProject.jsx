@@ -14,13 +14,13 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
-        nome: "",
-        descricao: "",
-        tipo: "TCC",
+        name: "",
+        description: "",
+        type: "TCC",
         template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
-        colaboradores: [],
-        startDate: "",
-        endDate: "",
+        collaborators: [],
+        created_at: "",
+        due_date: "",
     });
 
     const [emailInput, setEmailInput] = useState("");
@@ -34,15 +34,15 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         if (formErrors[name]) {
             setFormErrors(prev => ({ ...prev, [name]: "" }));
         }
-        if (name === "descricao") {
+        if (name === "description") {
             setTimeout(() => autoResizeTextarea(descriptionTextareaRef.current), 0);
         }
     };
 
     const handleTypeChange = (type) => {
-        setFormData(prev => ({ ...prev, tipo: type }));
-        if (formErrors.tipo) {
-            setFormErrors(prev => ({ ...prev, tipo: "" }));
+        setFormData(prev => ({ ...prev, type: type }));
+        if (formErrors.type) {
+            setFormErrors(prev => ({ ...prev, type: "" }));
         }
     };
 
@@ -54,7 +54,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
     };
 
     const handleCollaboratorChange = (newColaboradores) => {
-        setFormData(prev => ({ ...prev, colaboradores: newColaboradores }));
+        setFormData(prev => ({ ...prev, collaborators: newColaboradores }));
     };
 
     const adicionarColaborador = () => {
@@ -68,18 +68,18 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             return;
         }
 
-        if (formData.colaboradores.includes(emailInput)) {
+        if (formData.collaborators.includes(emailInput)) {
             setEmailError(t("messages.emailAlreadyAdded", { defaultValue: "Email já adicionado." }));
             return;
         }
 
-        handleCollaboratorChange([...formData.colaboradores, emailInput]);
+        handleCollaboratorChange([...formData.collaborators, emailInput]);
         setEmailInput("");
         setEmailError("");
     };
 
     const removerColaborador = (email) => {
-        handleCollaboratorChange(formData.colaboradores.filter((e) => e !== email));
+        handleCollaboratorChange(formData.collaborators.filter((e) => e !== email));
     };
 
     const handleKeyDown = (e) => {
@@ -93,19 +93,19 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const validateForm = () => {
         const errors = {};
-        if (!formData.nome.trim()) errors.nome = t("messages.projectNameRequired", { defaultValue: "Nome do projeto é obrigatório." });
-        if (!formData.descricao.trim()) errors.descricao = t("messages.projectDescriptionRequired", { defaultValue: "Descrição do projeto é obrigatória." });
+        if (!formData.name.trim()) errors.name = t("messages.projectNameRequired", { defaultValue: "Nome do projeto é obrigatório." });
+        if (!formData.description.trim()) errors.description = t("messages.projectDescriptionRequired", { defaultValue: "Descrição do projeto é obrigatória." });
 
-        if (!formData.startDate) {
-            errors.startDate = t("messages.startDateRequired", { defaultValue: "Data de início é obrigatória." });
+        if (!formData.created_at) {
+            errors.created_at = t("messages.created_atRequired", { defaultValue: "Data de início é obrigatória." });
         }
-        if (!formData.endDate) {
-            errors.endDate = t("messages.endDateRequired", { defaultValue: "Data de término é obrigatória." });
-        } else if (formData.startDate && formData.endDate) {
-            const start = new Date(formData.startDate);
-            const end = new Date(formData.endDate);
+        if (!formData.due_date) {
+            errors.due_date = t("messages.due_dateRequired", { defaultValue: "Data de término é obrigatória." });
+        } else if (formData.created_at && formData.due_date) {
+            const start = new Date(formData.created_at);
+            const end = new Date(formData.due_date);
             if (end < start) {
-                errors.endDate = t("messages.endDateAfterStartDate", { defaultValue: "Data de término não pode ser anterior à data de início." });
+                errors.due_date = t("messages.due_dateAfterStartDate", { defaultValue: "Data de término não pode ser anterior à data de início." });
             }
         }
         return errors;
@@ -116,11 +116,11 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         const allErrors = validateForm();
 
         if (currentStep === 1) {
-            if (allErrors.nome) currentStepErrors.nome = allErrors.nome;
-            if (allErrors.descricao) currentStepErrors.descricao = allErrors.descricao;
+            if (allErrors.name) currentStepErrors.name = allErrors.name;
+            if (allErrors.description) currentStepErrors.description = allErrors.description;
         } else if (currentStep === 2) {
-            if (allErrors.startDate) currentStepErrors.startDate = allErrors.startDate;
-            if (allErrors.endDate) currentStepErrors.endDate = allErrors.endDate;
+            if (allErrors.created_at) currentStepErrors.created_at = allErrors.created_at;
+            if (allErrors.due_date) currentStepErrors.due_date = allErrors.due_date;
         }
 
         if (Object.keys(currentStepErrors).length > 0) {
@@ -129,8 +129,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         }
 
         let relevantErrorKeys = [];
-        if (currentStep === 1) relevantErrorKeys = ['nome', 'descricao'];
-        if (currentStep === 2) relevantErrorKeys = ['startDate', 'endDate'];
+        if (currentStep === 1) relevantErrorKeys = ['name', 'description'];
+        if (currentStep === 2) relevantErrorKeys = ['created_at', 'due_date'];
 
         const newErrors = { ...formErrors };
 
@@ -153,9 +153,9 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             const allErrors = validateForm();
             if (Object.keys(allErrors).length > 0) {
                 setFormErrors(allErrors);
-                if (allErrors.nome || allErrors.descricao) {
+                if (allErrors.name || allErrors.description) {
                     setCurrentStep(1);
-                } else if (allErrors.startDate || allErrors.endDate) {
+                } else if (allErrors.created_at || allErrors.due_date) {
                     setCurrentStep(2);
                 }
                 return;
@@ -165,17 +165,21 @@ const ModalNewProject = ({ isOpen, onClose }) => {
             try {
                 const token = getToken();
                 const submissionData = {
-                    nome: formData.nome,
-                    descricao: formData.descricao,
-                    tipo: formData.tipo,
-                    colaboradores: formData.colaboradores,
+                    name: formData.name,
+                    description: formData.description,
+                    type: formData.type,
+                    collaborators: formData.collaborators,
                     template: formData.template,
-                    startDate: formData.startDate,
-                    endDate: formData.endDate,
+                    created_at: formData.created_at,
+                    due_date: formData.due_date,
                 };
                 // Add a comment about backend dependency
                 // TODO: Ensure backend endpoint /api/projetos/ is fully implemented and handles auth correctly.
-                const response = await api.post("../api/projetos/", submissionData, {
+                const response = await api.post("/projetos/", submissionData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -186,13 +190,13 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     // Successful creation
                     onClose(); 
                     setFormData({
-                        nome: "",
-                        descricao: "",
-                        tipo: "TCC",
+                        name: "",
+                        description: "",
+                        type: "TCC",
                         template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
-                        colaboradores: [],
-                        startDate: "",
-                        endDate: "",
+                        collaborators: [],
+                        created_at: "",
+                        due_date: "",
                     });
                     setCurrentStep(1);
                     setEmailInput("");
@@ -254,7 +258,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         if (currentStep === 1 && descriptionTextareaRef.current) {
             autoResizeTextarea(descriptionTextareaRef.current);
         }
-    }, [formData.descricao, currentStep]);
+    }, [formData.description, currentStep]);
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -314,26 +318,26 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             <label htmlFor="projectName">{t("inputs.name", { defaultValue: "Nome do Projeto" })}</label>
                                             <input
                                                 id="projectName"
-                                                name="nome"
-                                                placeholder={t("placeholders.projectName", { defaultValue: "Insira o nome do projeto" })}
-                                                value={formData.nome}
+                                                name="name"
+                                                placeholder={t("placeholders.projectName", { defaultValue: "Insira o name do projeto" })}
+                                                value={formData.name}
                                                 onChange={handleChange}
                                             />
-                                            {formErrors.nome && (
-                                                <p className="input-error">{formErrors.nome}</p>
+                                            {formErrors.name && (
+                                                <p className="input-error">{formErrors.name}</p>
                                             )}
                                         </div>
-                                        <div className={`input-group floating-label-group ${formData.descricao ? 'has-value' : ''} ${formErrors.descricao ? 'has-error' : ''}`}
+                                        <div className={`input-group floating-label-group ${formData.description ? 'has-value' : ''} ${formErrors.description ? 'has-error' : ''}`}
                                             onClick={() => descriptionTextareaRef.current && descriptionTextareaRef.current.focus()}
                                         >
                                             <textarea
                                                 id="projectDescription"
-                                                name="descricao"
-                                                value={formData.descricao}
+                                                name="description"
+                                                value={formData.description}
                                                 onChange={handleChange}
                                                 onFocus={(e) => e.target.parentElement.classList.add('focused')}
                                                 onBlur={(e) => {
-                                                    if (!formData.descricao) {
+                                                    if (!formData.description) {
                                                         e.target.parentElement.classList.remove('focused');
                                                     }
                                                 }}
@@ -344,11 +348,11 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                 {t("inputs.description", { defaultValue: "Descrição do Projeto" })}
                                             </label>
                                             <div className="char-counter-footer">
-                                                <span>{formData.descricao.length} / 500</span>
+                                                <span>{formData.description.length} / 500</span>
                                             </div>
                                         </div>
-                                        {formErrors.descricao && (
-                                            <p className="input-error" style={{ marginTop: '-0.5rem' }}>{formErrors.descricao}</p>
+                                        {formErrors.description && (
+                                            <p className="input-error" style={{ marginTop: '-0.5rem' }}>{formErrors.description}</p>
                                         )}
                                     </div>
                                     <div className="form-right">
@@ -361,7 +365,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                             key={type}
                                                             type="button"
                                                             onClick={() => handleTypeChange(type)}
-                                                            className={formData.tipo === type ? "selected" : ""}
+                                                            className={formData.type === type ? "selected" : ""}
                                                         >
                                                             {type}
                                                         </button>
@@ -395,26 +399,26 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="startDate">{t("inputs.startDate", { defaultValue: "Data de Início" })}</label>
+                                            <label htmlFor="created_at">{t("inputs.created_at", { defaultValue: "Data de Início" })}</label>
                                             <input
                                                 type="date"
-                                                id="startDate"
-                                                name="startDate"
-                                                value={formData.startDate}
+                                                id="created_at"
+                                                name="created_at"
+                                                value={formData.created_at}
                                                 onChange={handleChange}
                                             />
-                                            {formErrors.startDate && <p className="input-error">{formErrors.startDate}</p>}
+                                            {formErrors.created_at && <p className="input-error">{formErrors.created_at}</p>}
                                         </div>
                                         <div className="input-group">
-                                            <label htmlFor="endDate">{t("inputs.endDate", { defaultValue: "Data de Término" })}</label>
+                                            <label htmlFor="due_date">{t("inputs.due_date", { defaultValue: "Data de Término" })}</label>
                                             <input
                                                 type="date"
-                                                id="endDate"
-                                                name="endDate"
-                                                value={formData.endDate}
+                                                id="due_date"
+                                                name="due_date"
+                                                value={formData.due_date}
                                                 onChange={handleChange}
                                             />
-                                            {formErrors.endDate && <p className="input-error">{formErrors.endDate}</p>}
+                                            {formErrors.due_date && <p className="input-error">{formErrors.due_date}</p>}
                                         </div>
                                     </div>
                                     <div className="form-right">
@@ -434,7 +438,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                         </div>
                                         {emailError && <p className="input-error" style={{ marginTop: '0.5rem' }}>{emailError}</p>}
                                         <div className="email-list">
-                                            {formData.colaboradores.map((email) => (
+                                            {formData.collaborators.map((email) => (
                                                 <span key={email} className="email-chip">
                                                     {email}
                                                     <button
@@ -457,7 +461,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                 <div className="review-grid">
                                     <div className="review-section">
                                         <h4>{t("titles.projectDetails", { defaultValue: "Detalhes do Projeto" })}</h4>
-                                        <p><strong>{t("inputs.name", { defaultValue: "Nome do Projeto" })}:</strong> {formData.nome || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.name", { defaultValue: "Nome do Projeto" })}:</strong> {formData.name || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
 
                                         <div className="review-item review-description-wrapper">
                                             <p style={{ marginBottom: '0.5rem' }}>
@@ -466,9 +470,9 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             <div
                                                 className={`review-description-content ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}
                                             >
-                                                {formData.descricao || t("messages.notSpecified", { defaultValue: "N/A" })}
+                                                {formData.description || t("messages.notSpecified", { defaultValue: "N/A" })}
                                             </div>
-                                            {formData.descricao && formData.descricao.length > 150 && (
+                                            {formData.description && formData.description.length > 150 && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
@@ -481,19 +485,19 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             )}
                                         </div>
 
-                                        <p><strong>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}:</strong> {formData.tipo || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}:</strong> {formData.type || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
                                         <p><strong>{t("inputs.template", { defaultValue: "Template" })}:</strong> {
                                             (abntTemplates.find(tmpl => tmpl.value === formData.template) || {}).label || formData.template || t("messages.notSpecified", { defaultValue: "N/A" })
                                         }</p>
                                     </div>
                                     <div className="review-section">
                                         <h4>{t("titles.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</h4>
-                                        <p><strong>{t("inputs.startDate", { defaultValue: "Data de Início" })}:</strong> {formData.startDate || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{t("inputs.endDate", { defaultValue: "Data de Término" })}:</strong> {formData.endDate || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.created_at", { defaultValue: "Data de Início" })}:</strong> {formData.created_at || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.due_date", { defaultValue: "Data de Término" })}:</strong> {formData.due_date || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
                                         <p><strong>{t("titles.collaborators", { defaultValue: "Colaboradores" })}:</strong></p>
-                                        {formData.colaboradores.length > 0 ? (
+                                        {formData.collaborators.length > 0 ? (
                                             <ul className="review-collaborators-list">
-                                                {formData.colaboradores.map(email => <li key={email}>{email}</li>)}
+                                                {formData.collaborators.map(email => <li key={email}>{email}</li>)}
                                             </ul>
                                         ) : <p>{t("messages.noCollaborators", { defaultValue: "N/A" })}</p>}
                                     </div>

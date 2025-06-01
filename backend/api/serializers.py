@@ -32,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
+# alterado pra alinhar com o front
 class ProjectSerializer(serializers.ModelSerializer):
     # O model não tem 'creator', só created_at e due_date
     class Meta:
@@ -41,10 +41,10 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id',  
             'name',  
             'description',  
+            'type',
             'created_at',  # antes creation_date
             'due_date',    # antes delivery_date
         ]
-        read_only_fields = ['created_at']
 
 
 class UserProjectSerializer(serializers.ModelSerializer):

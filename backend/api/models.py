@@ -43,12 +43,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.full_name
 
-
+# alterado para alinhar com o front
 class Project(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    type = models.TextField(default='default_type')
+    created_at = models.DateTimeField() # removi a definição automática pelo sistema
     due_date = models.DateTimeField()
 
     def __str__(self):

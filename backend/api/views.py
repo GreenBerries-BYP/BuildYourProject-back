@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import CustomTokenObtainPairSerializer, ProjectSerializer
-from api.models import User
+from api.models import Project, User, UserProject, ProjectRole
 from api.serializers import UserSerializer
 from rest_framework import status
 
@@ -20,7 +20,6 @@ class RegisterView(CreateAPIView):
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
-
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
     print('chega no home view')
@@ -33,19 +32,24 @@ class HomeView(APIView):
 
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-
+    
 class ProjectView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        projetos = request.user.projects.all()  # ajuste conforme relacionamento
+        projetos = Project.objects.filter(userproject__user=request.user)
         serializer = ProjectSerializer(projetos, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        print("Dados recebidos no POST:", request.data)  # imprime os dados recebidos
+        print("Dados recebidos no POST:", request.data)
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=request.user)
+            project = serializer.save()
+            UserProject.objects.create(
+                user=request.user,
+                project=project,
+                role=ProjectRole.LEADER  # ou ProjectRole.MEMBER se quiser padrão
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
