@@ -486,6 +486,13 @@ body.dark-theme .navigation-buttons .save-btn {
     border-radius: 6px;
 }
 
+.review-intro-message {
+    color: var(--black-color);
+    margin-bottom: 1.5rem; /* Align with h3 margin or adjust as needed */
+    font-size: 1.5rem; /* Optional: ensure consistent font size */
+    line-height: 1.6; /* Optional: ensure consistent line height */
+}
+
 .review-section h4 {
     font-size: 1.7rem;
     font-weight: 500;
@@ -512,9 +519,10 @@ body.dark-theme .navigation-buttons .save-btn {
 }
 
 .review-description-content {
-    max-height: 100px;
+    max-height: 120px; /* Increased from 100px */
     overflow: hidden;
     transition: max-height 0.3s ease-out;
+    padding-right: 5px; /* Added for a bit of breathing room */
 }
 
 .review-description-content.expanded {
@@ -526,10 +534,15 @@ body.dark-theme .navigation-buttons .save-btn {
     border: none;
     color: var(--purple-saturated-color);
     cursor: pointer;
-    font-size: 0.9em;
-    margin-top: 5px;
-    padding: 0;
+    font-size: 1.3rem; /* Adjusted from 0.9em for better readability */
+    margin-top: 8px; /* Increased slightly */
+    padding: 2px 0; /* Small padding for click area */
     text-decoration: underline;
+    transition: color 0.2s ease; /* Added transition for hover */
+}
+
+.toggle-description-btn:hover {
+    color: var(--purple-dark-color); /* Use a different shade on hover, ensure this var is dark-mode friendly */
 }
 
 .review-collaborators-list {

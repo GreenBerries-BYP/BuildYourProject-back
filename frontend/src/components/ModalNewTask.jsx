@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewTask.css";
 import { getToken } from "../auth/auth";
-import { i18n } from "../translate/i18n";
+import { useTranslation } from "react-i18next";
+import api from "../api/api"; // Assuming api is used in handleSubmit
 
 
 const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
@@ -14,49 +15,50 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
     const [dataEntrega, setDataEntrega] = useState("");
 
 
+    const { t } = useTranslation();
     const [formErrors, setFormErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
     const validateForm = () => {
         const errors = {};
-        if (!nome.trim()) errors.nome = i18n.t("messages.taskNameRequired");
-        if (!descricao.trim()) errors.descricao = i18n.t("messages.taskDescriptionRequired");
-        if (!dataEntrega) errors.dataEntrega = i18n.t("messages.dueDateRequired");
-        if (!responsavel.trim()) errors.responsavel = i18n.t("messages.responsibleRequired");
+        if (!nome.trim()) errors.nome = t("messages.taskNameRequired", "Task name is required");
+        if (!descricao.trim()) errors.descricao = t("messages.taskDescriptionRequired", "Task description is required");
+        if (!dataEntrega) errors.dataEntrega = t("messages.dueDateRequired", "Due date is required");
+        if (!responsavel.trim()) errors.responsavel = t("messages.responsibleRequired", "Responsible is required");
         return errors;
     };
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     const errors = validateForm();
-    //     setFormErrors(errors);
-    //     if (Object.keys(errors).length > 0) return;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const errors = validateForm();
+        setFormErrors(errors);
+        if (Object.keys(errors).length > 0) return;
 
-    //     const tarefa = {
-    //         nome,
-    //         descricao,
-    //         dataEntrega,
-    //         responsavel,
-    //         projetoId
-    //     };
+        const tarefa = {
+            nome,
+            descricao,
+            dataEntrega,
+            responsavel,
+            projetoId
+        };
 
-    //     setLoading(true);
-    //     try {
-    //         const token = getToken();
-    //         await api.post("/api/tarefas/", tarefa, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-    //         onClose();
-    //     } catch (err) {
-    //         setFormErrors({
-    //             submit: err.message || i18n.t("messages.errorNewTask"),
-    //         });
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+        setLoading(true);
+        try {
+            const token = getToken();
+            await api.post("/api/tarefas/", tarefa, { // Assuming this is the correct endpoint
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            onClose(); // Reset form or give feedback as needed
+        } catch (err) {
+            setFormErrors({
+                submit: err.message || t("messages.errorNewTask", "Error creating new task"),
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -82,14 +84,14 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
         <div className="modal-overlay">
             <div className="modal-content" ref={modalRef}>
                 <div className="modal-header">
-                    <h2>{i18n.t("titles.newTask")}</h2>
+                    <h2>{t("titles.newTask", "New Task")}</h2>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
                 <div className="modal-body">
                     <form onSubmit={handleSubmit} noValidate>
                         <div className="input-group">
                             <input
-                                placeholder={i18n.t("inputs.taskName")}
+                                placeholder={t("inputs.taskName", "Task Name")}
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                             />
@@ -98,7 +100,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="input-group">
                             <textarea
-                                placeholder={i18n.t("inputs.taskDescription")}
+                                placeholder={t("inputs.taskDescription", "Task Description")}
                                 value={descricao}
                                 onChange={(e) => setDescricao(e.target.value)}
                             />
@@ -116,10 +118,12 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="input-group">
                              <select value={responsavel} onChange={(e) => setResponsavel(e.target.value)}>
+                                <option value="">{t("inputs.selectResponsible", "Select responsible")}</option>
                                 {responsavelOptions.map((s) => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
+                            {formErrors.responsavel && <p className="input-error">{formErrors.responsavel}</p>}
                         </div>
 
                         {formErrors.submit && (
@@ -128,7 +132,7 @@ const ModalNovaTarefa = ({ isOpen, onClose, projetoId }) => {
 
                         <div className="save-wrapper">
                             <button type="submit" className="save-btn" disabled={loading}>
-                                {loading ? i18n.t("buttons.saving") : i18n.t("buttons.save") + " ✓"}
+                                {loading ? t("buttons.saving", "Saving...") : t("buttons.saveTask", "Save ✓")}
                             </button>
                         </div>
                     </form>

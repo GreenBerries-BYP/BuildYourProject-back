@@ -1,8 +1,140 @@
 const en = {
+  landing: {
+    nav: {
+      home: "home",
+      tools: "tools",
+      preview: "preview",
+      aboutUs: "about us",
+      login: "Sign In",
+      signUp: "Sign Up",
+    },
+    hero: {
+      title: "Transform Your Projects with the Organization You Need",
+      subtitle: "Manage, collaborate, and meet deadlines with smart technology.",
+      ctaButton: "Get started now",
+      block1Text: "Intuitive tools for students and academic groups",
+      block2Text: "handle your projects efficiently",
+      block3TextPart1: "from planning",
+      block3TextPart2: "to final delivery.",
+    },
+    toolsInfo: {
+      title: "Discover our tools",
+      modularPlanning: {
+        title: "Modular Planning",
+        description: "Divide your thesis or project into clear, manageable stages."
+      },
+      deadlineRecalculation: {
+        title: "Deadline Recalculation",
+        description: "Missed a deadline? BYP automatically adjusts your schedule."
+      },
+      realTimeCollaboration: {
+        title: "Real-Time Collaboration",
+        description: "Add colleagues, guide interactions, and track joint progress."
+      },
+      alertsAndReminders: {
+        title: "Alerts and Reminders",
+        description: "Never miss an important deadline or activity."
+      },
+      responsiveWebVersion: {
+        title: "Responsive Web Version",
+        description: "Access from anywhere, on any device."
+      },
+      integratedAI: {
+        title: "Integrated AI",
+        description: "Questions? Ask Berry, our AI assistant!"
+      }
+    },
+    previewInfo: {
+      title: "Preview",
+      subtitle: "See what BYP looks like",
+      altHome: "home preview",
+      altCreateProject: "create project preview",
+      altViewProject: "view project preview",
+      previousSlide: "Previous",
+      nextSlide: "Next",
+    },
+    about: {
+      title: "About GreenBerries",
+      subtitle: "Meet our collaborators",
+      whoWeAreTitle: "Who are we?",
+      whoWeAreParagraph1: "We are a group of students and developers passionate about solving the chaos of academic projects.",
+      whoWeAreParagraph2: "We created BYP based on the common difficulties students face with project organization — and transformed it into an efficient, collaborative, and truly useful solution for any project."
+    },
+    footer: {
+      developedBy: "This project was developed by:",
+      documentationTitle: "Documentation",
+      documentationLinkText: "Documentation:",
+      contactsTitle: "Contacts",
+      emailLabel: "Email:",
+      youtubeLabel: "Youtube:",
+      copyright: "@ 2025 GreenBerries All rights reserved",
+      termsLink: "Terms and conditions",
+      privacyLink: "Privacy policy",
+    }
+  },
+  login: {
+    emailLabel: "Email",
+    emailPlaceholder: "example@domain.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Enter your password",
+    invalidCredentials: "Invalid credentials. Check your email and password.",
+    forgotPasswordLink: "I forgot or want to change my password",
+    keepLoggedIn: "Keep me logged in",
+    signUpLink: "Sign Up",
+    signInButton: "Sign In",
+    loading: "Loading...",
+  },
+  register: {
+    fullNameLabel: "Full name:",
+    fullNamePlaceholder: "Enter your full name",
+    usernameLabel: "Username:",
+    usernamePlaceholder: "Enter your username",
+    emailLabel: "Email:",
+    emailPlaceholder: "Enter your email",
+    passwordLabel: "Password:",
+    passwordPlaceholder: "Enter your password",
+    confirmPasswordLabel: "Confirm Password:",
+    confirmPasswordPlaceholder: "Confirm your password",
+    errorPasswordMismatch: "Passwords do not match.",
+    errorAcceptTerms: "You must accept the terms of use and privacy policies.",
+    errorRegistrationFailed: "Error registering. Check your data and try again.",
+    terms: {
+      intro: "By creating an account in this application, I declare that I accept the",
+      termsLinkText: "terms of use",
+      and: "and the",
+      policyLinkText: "privacy policies",
+    },
+    submitButton: "Register",
+  },
+  projectCard: {
+    progressLabel: "Progress",
+  },
+  viewProject: {
+    createdBy: "Created by: {{adm}}",
+    membersCount: "{{count}} member(s)",
+    taskHeaderTask: "Task",
+    taskHeaderResponsible: "Responsible",
+    taskHeaderStatus: "Status",
+    taskHeaderDueDate: "Due Date",
+  },
+  header: {
+    title: "Build Your Project",
+    notifications: "Notifications",
+    switchToLightMode: "Switch to Light Mode",
+    switchToDarkMode: "Switch to Dark Mode",
+    changeLanguage: "Change Language",
+    userProfile: "User Profile",
+  },
   titles: {
     title: "Build Your Project",
     newProject: "New Project",
     editProject: "Edit Project",
+    step1BasicInfo: "Step 1: Basic Information",
+    step2DatesAndCollabs: "Step 2: Dates and Collaborators",
+    step3Review: "Step 3: Review Project Details",
+    projectDetails: "Project Details",
+    collaborators: "Collaborators",
+    datesAndCollaborators: "Dates and Collaborators", 
   },
   messages: {
     welcome: "Welcome to Build Your Project",
@@ -19,39 +151,69 @@ const en = {
     projectNameRequired: "Project name is required",
     projectDescriptionRequired: "Project description is required",
     errorNewProject: "Error creating new project",
-
-    emailMessage: "Type an email and press Enter",
+    errorNewProjectBackendNotReady: "Failed to create project. The service might be unavailable or access unauthorized. Please try again later.",
+    taskNameRequired: "Task name is required",
+    taskDescriptionRequired: "Task description is required",
+    dueDateRequired: "Due date is required",
+    responsibleRequired: "Responsible is required",
+    errorNewTask: "Error creating new task",
+    emailMessage: "Enter email and press Enter", 
+    reviewProjectDetails: "Please review your project details before submitting.",
+    notSpecified: "N/A",
+    noCollaborators: "N/A",
+    startDateRequired: "Start date is required",
+    endDateRequired: "End date is required",
+    endDateAfterStartDate: "End date cannot be earlier than start date.",
   },
   buttons: {
     createProject: "Create Project",
     deleteProject: 'Delete Project',
+    saveTask: "Save ✓",
     viewDetails: "View Details",
     add: "Add",
     edit: "Edit",
     delete: "Delete",
     save: "Save",
     saving: "Saving...",
+    previous: "Previous",
+    next: "Next",
+    readLess: "Read less",
+    readMore: "Read more",
   },
   sideBar: {
     home: "Home",
     myProjects: "My Projects",
     myTasks: "My Tasks",
-    sharedWithMe: "Shared With Me",
+    sharedWithMe: "Shared\nWith Me", 
     googleCalendar: "Google Calendar",
     info: "Info",
     logOut: "Log Out",
   },
   inputs: {
-    name: "Name",
-    description: "Description",
+    name: "Project Name", 
+    description: "Project Description", 
+    descriptionShort: "Description", 
     email: "Email",
     projectType: "Project Type",
     template: "Template",
-
+    taskName: "Task Name",
+    taskDescription: "Task Description",
+    selectResponsible: "Select responsible",
+    selectTemplate: "Select a template",
+    startDate: "Start Date",
+    endDate: "End Date", 
+  },
+  placeholders: { 
+    projectName: "Enter project name",
+  },
+  steps: { 
+    basicInfo: "Basic Info",
+    datesAndCollaborators: "Dates & Collaborators",
+    review: "Review",
   },
   project: {
     yourTasks: "Your Tasks",
-      newTask: "New Task",
+    newTask: "New Task",
   }
 };
 

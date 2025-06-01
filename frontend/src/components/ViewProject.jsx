@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../styles/ViewProject.css';
-import { i18n } from '../translate/i18n';
+import { useTranslation } from 'react-i18next';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 
 const ViewProject = ({
@@ -10,6 +10,7 @@ const ViewProject = ({
   tarefasProjeto,
   onVoltar 
 }) => {
+  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState({});
 
   const toggleSection = (section) => {
@@ -24,21 +25,21 @@ const ViewProject = ({
         <div className="project-header">
             <div className="project-data">
                 <h1>{nomeProjeto}</h1>
-                <p>Criado por: {admProjeto}</p>
-                <p>{numIntegrantes} integrantes</p>
+                <p>{t("viewProject.createdBy", { adm: admProjeto, defaultValue: "Created by: {{adm}}" })}</p>
+                <p>{t("viewProject.membersCount", { count: numIntegrantes, defaultValue: "{{count}} member(s)" })}</p>
             </div>
             
             <div className="project-options">
                 <div className="btns">
-                    <button className='compartilhar-btn'><img src="/imgs/icons-project/Link.svg" /></button>
-                    <button className='editar-btn'><img src="/imgs/icons-project/Edit.svg" /></button>
-                    <button className='calendario-btn'><img src="/imgs/icons-project/Calendar.svg" /></button>
-                    <button className='fechar-btn' onClick={onVoltar}><img src="/imgs/icons-project/Close.svg" /></button>
+                    <button className='compartilhar-btn'><img src="/imgs/icons-project/Link.svg" alt={t("altText.shareLink", "Share project")} /></button>
+                    <button className='editar-btn'><img src="/imgs/icons-project/Edit.svg" alt={t("altText.editProject", "Edit project")} /></button>
+                    <button className='calendario-btn'><img src="/imgs/icons-project/Calendar.svg" alt={t("altText.viewCalendar", "View calendar")} /></button>
+                    <button className='fechar-btn' onClick={onVoltar}><img src="/imgs/icons-project/Close.svg" alt={t("altText.closeView", "Close view")} /></button>
                 </div>
 
                 <button className='criar-tarefa-btn'>
-                    <span>{i18n.t('project.newTask')}</span>
-                    <img src="/imgs/icons-project/add.svg" />
+                    <span>{t('project.newTask', "New Task")}</span>
+                    <img src="/imgs/icons-project/add.svg" alt={t("altText.addTask", "Add task")} />
                 </button>
             </div>
         </div>
@@ -78,10 +79,10 @@ const ViewProject = ({
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Tarefa</th>
-                                    <th>Responsável</th>
-                                    <th>Status</th>
-                                    <th>Prazo</th>
+                                    <th>{t("viewProject.taskHeaderTask", "Task")}</th>
+                                    <th>{t("viewProject.taskHeaderResponsible", "Responsible")}</th>
+                                    <th>{t("viewProject.taskHeaderStatus", "Status")}</th>
+                                    <th>{t("viewProject.taskHeaderDueDate", "Due Date")}</th>
                                 </tr>
                                 <tr> {/* linhas horizontais */}
                                    <th><hr /></th>
@@ -96,7 +97,7 @@ const ViewProject = ({
                                 
                                 {tarefa.tarefas.map((etapa, idx) => (
                                     <tr key={idx}>
-                                        <img src={(etapa.status == 'concluído') ? "/imgs/checked.svg" : "/imgs/unchecked.svg"}/>
+                                        <img src={(etapa.status == 'concluído') ? "/imgs/checked.svg" : "/imgs/unchecked.svg"} alt={etapa.status === 'concluído' ? t("altText.taskCompleted", "Task completed") : t("altText.taskPending", "Task pending")}/>
                                         <td>{etapa.nome}</td>
                                         <td>{etapa.responsavel}</td>
                                         <td>{etapa.status}</td>

@@ -4,8 +4,10 @@ import { saveToken } from '../auth/auth';
 import { useNavigate, Link } from 'react-router-dom';
 
 import '../styles/LoginCadastro.css';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -22,7 +24,7 @@ const Login = () => {
       saveToken(res.data.access);
       setTimeout(() => navigate('/home'), 300);
     } catch {
-      setErro('Credenciais inválidas. Verifique seu e-mail e senha.');
+      setErro(t("login.invalidCredentials", "Invalid credentials. Check your email and password."));
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ const Login = () => {
           <div className="col-12 col-lg-6 d-none d-lg-flex justify-content-center align-items-center">
             <img
               src="/imgs/problem-solving.svg"
-              alt="Duas pessoas montando um quebra-cabeça"
+              alt={t("altText.puzzlePeople", "Two people doing a puzzle")}
               className="img-fluid"
             />
           </div>
@@ -45,17 +47,17 @@ const Login = () => {
             <img
               className="logo-h align-self-center mb-4"
               src="/imgs/logo_vert_BYP.svg"
-              alt="Logo amigosConnect"
+              alt={t("altText.logoBYPVertical", "BYP Vertical Logo")}
             />
 
             <form className="row p-4 d-flex justify-content-between flex-column gap-3" onSubmit={handleLogin}>
               <div>
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t("login.emailLabel", "Email")}</label>
                 <input
                   className="input-text"
                   type="email"
                   id="email"
-                  placeholder="exemplo@dominio.com"
+                  placeholder={t("login.emailPlaceholder", "example@domain.com")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -63,12 +65,12 @@ const Login = () => {
               </div>
 
               <div>
-                <label htmlFor="senha">Senha</label>
+                <label htmlFor="senha">{t("login.passwordLabel", "Password")}</label>
                 <input
                   className="input-text"
                   type="password"
                   id="senha"
-                  placeholder="Digite sua senha"
+                  placeholder={t("login.passwordPlaceholder", "Enter your password")}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   required
@@ -83,7 +85,7 @@ const Login = () => {
 
               <div className="d-flex justify-content-end">
                 <Link className="link-esqueci" to="/forgot_password">
-                  Esqueci ou quero alterar minha senha
+                  {t("login.forgotPasswordLink", "I forgot or want to change my password")}
                 </Link>
               </div>
 
@@ -94,13 +96,13 @@ const Login = () => {
                   id="manter_logado"
                 />
                 <label className="check-label" htmlFor="manter_logado">
-                  Manter-me logado
+                  {t("login.keepLoggedIn", "Keep me logged in")}
                 </label>
               </div>
 
               <div className="d-flex justify-content-between gap-5">
                 <Link to="/register" className="link-cadastre flex-fill text-center">
-                  Cadastre-se
+                  {t("login.signUpLink", "Sign Up")}
                 </Link>
 
                 <button
@@ -114,10 +116,10 @@ const Login = () => {
                       style={{ width: '2rem', height: '2rem' }}
                       role="status"
                     >
-                      <span className="visually-hidden">Carregando...</span>
+                      <span className="visually-hidden">{t("login.loading", "Loading...")}</span>
                     </div>
                   ) : (
-                    'Entrar'
+                    t("login.signInButton", "Sign In")
                   )}
                 </button>
               </div>

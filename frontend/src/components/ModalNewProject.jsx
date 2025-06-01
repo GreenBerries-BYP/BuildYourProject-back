@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
 import api from "../api/api";
+import { useTranslation } from "react-i18next"; // Added
 
 import { getToken } from "../auth/auth";
 import { abntTemplates } from "../mocks/abntMock";
-import { i18n } from "../translate/i18n";
+// import { i18n } from "../translate/i18n"; // Removed
 
 const ModalNewProject = ({ isOpen, onClose }) => {
+    const { t } = useTranslation(); // Added
     const modalRef = useRef();
     const descriptionTextareaRef = useRef(null);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -57,17 +59,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const adicionarColaborador = () => {
         if (!emailInput.trim()) {
-            setEmailError(i18n.t("messages.emailCantBeEmpty", { defaultValue: "Email não pode estar vazio." }));
+            setEmailError(t("messages.emailCantBeEmpty", { defaultValue: "Email não pode estar vazio." }));
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
-            setEmailError(i18n.t("messages.invalidEmailFormat", { defaultValue: "Formato de email inválido." }));
+            setEmailError(t("messages.invalidEmailFormat", { defaultValue: "Formato de email inválido." }));
             return;
         }
 
         if (formData.colaboradores.includes(emailInput)) {
-            setEmailError(i18n.t("messages.emailAlreadyAdded", { defaultValue: "Email já adicionado." }));
+            setEmailError(t("messages.emailAlreadyAdded", { defaultValue: "Email já adicionado." }));
             return;
         }
 
@@ -91,19 +93,19 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
     const validateForm = () => {
         const errors = {};
-        if (!formData.nome.trim()) errors.nome = i18n.t("messages.projectNameRequired", { defaultValue: "Nome do projeto é obrigatório." });
-        if (!formData.descricao.trim()) errors.descricao = i18n.t("messages.projectDescriptionRequired", { defaultValue: "Descrição do projeto é obrigatória." });
+        if (!formData.nome.trim()) errors.nome = t("messages.projectNameRequired", { defaultValue: "Nome do projeto é obrigatório." });
+        if (!formData.descricao.trim()) errors.descricao = t("messages.projectDescriptionRequired", { defaultValue: "Descrição do projeto é obrigatória." });
 
         if (!formData.startDate) {
-            errors.startDate = i18n.t("messages.startDateRequired", { defaultValue: "Data de início é obrigatória." });
+            errors.startDate = t("messages.startDateRequired", { defaultValue: "Data de início é obrigatória." });
         }
         if (!formData.endDate) {
-            errors.endDate = i18n.t("messages.endDateRequired", { defaultValue: "Data de término é obrigatória." });
+            errors.endDate = t("messages.endDateRequired", { defaultValue: "Data de término é obrigatória." });
         } else if (formData.startDate && formData.endDate) {
             const start = new Date(formData.startDate);
             const end = new Date(formData.endDate);
             if (end < start) {
-                errors.endDate = i18n.t("messages.endDateAfterStartDate", { defaultValue: "Data de término não pode ser anterior à data de início." });
+                errors.endDate = t("messages.endDateAfterStartDate", { defaultValue: "Data de término não pode ser anterior à data de início." });
             }
         }
         return errors;
@@ -171,37 +173,59 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     startDate: formData.startDate,
                     endDate: formData.endDate,
                 };
+                // Add a comment about backend dependency
+                // TODO: Ensure backend endpoint /api/projetos/ is fully implemented and handles auth correctly.
                 const response = await api.post("../api/projetos/", submissionData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    handleErrorLocally: true // Add this flag
                 });
 
                 if (response.status && response.status >= 200 && response.status < 300) {
-                    
+                    // Successful creation
+                    onClose(); 
+                    setFormData({
+                        nome: "",
+                        descricao: "",
+                        tipo: "TCC",
+                        template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
+                        colaboradores: [],
+                        startDate: "",
+                        endDate: "",
+                    });
+                    setCurrentStep(1);
+                    setEmailInput("");
+                    setFormErrors({});
+                    setIsDescriptionExpanded(false);
+                    // Maybe add a success notification/toast here in a real app
                 } else {
-                    const errorData = response.data;
-                    throw new Error(errorData.detail || i18n.t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }));
+                    // This block might not be strictly necessary if Axios throws on non-2xx by default
+                    // For safety, keeping a generic error if it somehow reaches here
+                    const errorData = response.data; 
+                    throw new Error(errorData.detail || t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }));
                 }
-
-                onClose();
-                setFormData({
-                    nome: "",
-                    descricao: "",
-                    tipo: "TCC",
-                    template: abntTemplates.length > 0 ? abntTemplates[0].value : "",
-                    colaboradores: [],
-                    startDate: "",
-                    endDate: "",
-                });
-                setCurrentStep(1);
-                setEmailInput("");
-                setFormErrors({});
-                setIsDescriptionExpanded(false);
             } catch (err) {
-                setFormErrors({
-                    submit: err.message || i18n.t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }),
-                });
+                if (err.response?.status === 401) {
+                    setFormErrors({
+                        submit: t("messages.errorNewProjectBackendNotReady", { defaultValue: "Falha ao criar projeto. O serviço pode estar indisponível ou acesso não autorizado. Tente novamente mais tarde." })
+                    });
+                } else if (err.response) { // Other HTTP errors (400, 500, etc.)
+                    const errorData = err.response.data;
+                    let detailedMessage = "";
+                    if (typeof errorData === 'object' && errorData !== null) {
+                        // Try to extract messages if backend sends structured errors like DRF
+                        detailedMessage = Object.values(errorData).flat().join(' ');
+                    }
+                    setFormErrors({
+                        submit: `${t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." })} ${detailedMessage || err.message}`.trim()
+                    });
+                }
+                else { // Network errors or other issues
+                    setFormErrors({
+                        submit: err.message || t("messages.errorNewProject", { defaultValue: "Erro ao criar novo projeto." }),
+                    });
+                }
             } finally {
                 setLoading(false);
             }
@@ -258,7 +282,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         <div className="modal-overlay">
             <div className="modal-content" ref={modalRef}>
                 <div className="modal-header">
-                    <h2>{i18n.t("titles.newProject", { defaultValue: "Novo Projeto" })}</h2>
+                    <h2>{t("titles.newProject", { defaultValue: "Novo Projeto" })}</h2>
                     <button className="close-btn" onClick={onClose}>
                         ×
                     </button>
@@ -267,31 +291,31 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     <div className="step-indicator">
                         <div className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
                             <span className="step-number">1</span>
-                            <span className="step-label">{i18n.t("steps.basicInfo", { defaultValue: "Info Básicas" })}</span>
+                            <span className="step-label">{t("steps.basicInfo", { defaultValue: "Info Básicas" })}</span>
                         </div>
                         <div className="step-connector"></div>
                         <div className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
                             <span className="step-number">2</span>
-                            <span className="step-label">{i18n.t("steps.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</span>
+                            <span className="step-label">{t("steps.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</span>
                         </div>
                         <div className="step-connector"></div>
                         <div className={`step-item ${currentStep === 3 ? 'active' : ''}`}>
                             <span className="step-number">3</span>
-                            <span className="step-label">{i18n.t("steps.review", { defaultValue: "Revisão" })}</span>
+                            <span className="step-label">{t("steps.review", { defaultValue: "Revisão" })}</span>
                         </div>
                     </div>
                     <form onSubmit={handleSubmit} noValidate>
                         {currentStep === 1 && (
                             <div>
-                                <h3>{i18n.t("titles.step1BasicInfo", { defaultValue: "Etapa 1: Informações Básicas" })}</h3>
+                                <h3>{t("titles.step1BasicInfo", { defaultValue: "Etapa 1: Informações Básicas" })}</h3>
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="projectName">{i18n.t("inputs.name", { defaultValue: "Nome do Projeto" })}</label>
+                                            <label htmlFor="projectName">{t("inputs.name", { defaultValue: "Nome do Projeto" })}</label>
                                             <input
                                                 id="projectName"
                                                 name="nome"
-                                                placeholder={i18n.t("placeholders.projectName", { defaultValue: "Insira o nome do projeto" })}
+                                                placeholder={t("placeholders.projectName", { defaultValue: "Insira o nome do projeto" })}
                                                 value={formData.nome}
                                                 onChange={handleChange}
                                             />
@@ -317,7 +341,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                 rows="4"
                                             />
                                             <label htmlFor="projectDescription">
-                                                {i18n.t("inputs.description", { defaultValue: "Descrição do Projeto" })}
+                                                {t("inputs.description", { defaultValue: "Descrição do Projeto" })}
                                             </label>
                                             <div className="char-counter-footer">
                                                 <span>{formData.descricao.length} / 500</span>
@@ -330,7 +354,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                     <div className="form-right">
                                         <div className="form-options">
                                             <div className="project-type">
-                                                <label>{i18n.t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}</label>
+                                                <label>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}</label>
                                                 <div className="type-options">
                                                     {projectTypes.map((type) => (
                                                         <button
@@ -345,14 +369,14 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                 </div>
                                             </div>
                                             <div className="template-select">
-                                                <label htmlFor="projectTemplate">{i18n.t("inputs.template", { defaultValue: "Template" })}</label>
+                                                <label htmlFor="projectTemplate">{t("inputs.template", { defaultValue: "Template" })}</label>
                                                 <select
                                                     id="projectTemplate"
                                                     name="template"
                                                     value={formData.template}
                                                     onChange={(e) => handleTemplateChange(e.target.value)}
                                                 >
-                                                    <option value="">{i18n.t("inputs.selectTemplate", { defaultValue: "Selecione um template" })}</option>
+                                                    <option value="">{t("inputs.selectTemplate", { defaultValue: "Selecione um template" })}</option>
                                                     {abntTemplates.map((tmpl) => (
                                                         <option key={tmpl.value} value={tmpl.value}>
                                                             {tmpl.label}
@@ -367,11 +391,11 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         )}
                         {currentStep === 2 && (
                             <div>
-                                <h3>{i18n.t("titles.step2DatesAndCollabs", { defaultValue: "Etapa 2: Datas e Colaboradores" })}</h3>
+                                <h3>{t("titles.step2DatesAndCollabs", { defaultValue: "Etapa 2: Datas e Colaboradores" })}</h3>
                                 <div className="form-grid">
                                     <div className="form-left">
                                         <div className="input-group">
-                                            <label htmlFor="startDate">{i18n.t("inputs.startDate", { defaultValue: "Data de Início" })}</label>
+                                            <label htmlFor="startDate">{t("inputs.startDate", { defaultValue: "Data de Início" })}</label>
                                             <input
                                                 type="date"
                                                 id="startDate"
@@ -382,7 +406,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                             {formErrors.startDate && <p className="input-error">{formErrors.startDate}</p>}
                                         </div>
                                         <div className="input-group">
-                                            <label htmlFor="endDate">{i18n.t("inputs.endDate", { defaultValue: "Data de Término" })}</label>
+                                            <label htmlFor="endDate">{t("inputs.endDate", { defaultValue: "Data de Término" })}</label>
                                             <input
                                                 type="date"
                                                 id="endDate"
@@ -394,12 +418,12 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                         </div>
                                     </div>
                                     <div className="form-right">
-                                        <h4>{i18n.t("titles.collaborators", { defaultValue: "Colaboradores" })}</h4>
+                                        <h4>{t("titles.collaborators", { defaultValue: "Colaboradores" })}</h4>
                                         <div className="input-group">
                                             <input
                                                 id="collaboratorEmail"
                                                 type="email"
-                                                placeholder={i18n.t("messages.emailMessage", { defaultValue: "Insira o email e pressione Enter" })}
+                                                placeholder={t("messages.emailMessage", { defaultValue: "Insira o email e pressione Enter" })}
                                                 value={emailInput}
                                                 onChange={(e) => {
                                                     setEmailInput(e.target.value);
@@ -428,21 +452,21 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         )}
                         {currentStep === 3 && (
                             <div>
-                                <h3>{i18n.t("titles.step3Review", { defaultValue: "Etapa 3: Revisão dos Detalhes do Projeto" })}</h3>
-                                <p>{i18n.t("messages.reviewProjectDetails", { defaultValue: "Por favor, revise os detalhes do seu projeto antes de enviar." })}</p>
+                                <h3>{t("titles.step3Review", { defaultValue: "Etapa 3: Revisão dos Detalhes do Projeto" })}</h3>
+        <p className="review-intro-message">{t("messages.reviewProjectDetails", { defaultValue: "Por favor, revise os detalhes do seu projeto antes de enviar." })}</p>
                                 <div className="review-grid">
                                     <div className="review-section">
-                                        <h4>{i18n.t("titles.projectDetails", { defaultValue: "Detalhes do Projeto" })}</h4>
-                                        <p><strong>{i18n.t("inputs.name", { defaultValue: "Nome do Projeto" })}:</strong> {formData.nome || i18n.t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <h4>{t("titles.projectDetails", { defaultValue: "Detalhes do Projeto" })}</h4>
+                                        <p><strong>{t("inputs.name", { defaultValue: "Nome do Projeto" })}:</strong> {formData.nome || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
 
                                         <div className="review-item review-description-wrapper">
                                             <p style={{ marginBottom: '0.5rem' }}>
-                                                <strong>{i18n.t("inputs.description", { defaultValue: "Descrição" })}:</strong>
+                                                <strong>{t("inputs.descriptionShort", { defaultValue: "Descrição" })}:</strong>
                                             </p>
                                             <div
                                                 className={`review-description-content ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}
                                             >
-                                                {formData.descricao || i18n.t("messages.notSpecified", { defaultValue: "N/A" })}
+                                                {formData.descricao || t("messages.notSpecified", { defaultValue: "N/A" })}
                                             </div>
                                             {formData.descricao && formData.descricao.length > 150 && (
                                                 <button
@@ -451,27 +475,27 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                     className="toggle-description-btn"
                                                 >
                                                     {isDescriptionExpanded
-                                                        ? i18n.t("buttons.readLess", { defaultValue: "Ler menos" })
-                                                        : i18n.t("buttons.readMore", { defaultValue: "Ler mais" })}
+                                                        ? t("buttons.readLess", { defaultValue: "Ler menos" })
+                                                        : t("buttons.readMore", { defaultValue: "Ler mais" })}
                                                 </button>
                                             )}
                                         </div>
 
-                                        <p><strong>{i18n.t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}:</strong> {formData.tipo || i18n.t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{i18n.t("inputs.template", { defaultValue: "Template" })}:</strong> {
-                                            (abntTemplates.find(t => t.value === formData.template) || {}).label || formData.template || i18n.t("messages.notSpecified", { defaultValue: "N/A" })
+                                        <p><strong>{t("inputs.projectType", { defaultValue: "Tipo de Projeto" })}:</strong> {formData.tipo || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.template", { defaultValue: "Template" })}:</strong> {
+                                            (abntTemplates.find(tmpl => tmpl.value === formData.template) || {}).label || formData.template || t("messages.notSpecified", { defaultValue: "N/A" })
                                         }</p>
                                     </div>
                                     <div className="review-section">
-                                        <h4>{i18n.t("titles.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</h4>
-                                        <p><strong>{i18n.t("inputs.startDate", { defaultValue: "Data de Início" })}:</strong> {formData.startDate || i18n.t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{i18n.t("inputs.endDate", { defaultValue: "Data de Término" })}:</strong> {formData.endDate || i18n.t("messages.notSpecified", { defaultValue: "N/A" })}</p>
-                                        <p><strong>{i18n.t("titles.collaborators", { defaultValue: "Colaboradores" })}:</strong></p>
+                                        <h4>{t("titles.datesAndCollaborators", { defaultValue: "Datas e Colaboradores" })}</h4>
+                                        <p><strong>{t("inputs.startDate", { defaultValue: "Data de Início" })}:</strong> {formData.startDate || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("inputs.endDate", { defaultValue: "Data de Término" })}:</strong> {formData.endDate || t("messages.notSpecified", { defaultValue: "N/A" })}</p>
+                                        <p><strong>{t("titles.collaborators", { defaultValue: "Colaboradores" })}:</strong></p>
                                         {formData.colaboradores.length > 0 ? (
                                             <ul className="review-collaborators-list">
                                                 {formData.colaboradores.map(email => <li key={email}>{email}</li>)}
                                             </ul>
-                                        ) : <p>{i18n.t("messages.noCollaborators", { defaultValue: "N/A" })}</p>}
+                                        ) : <p>{t("messages.noCollaborators", { defaultValue: "N/A" })}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -480,17 +504,17 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                         <div className="navigation-buttons">
                             {currentStep > 1 && (
                                 <button type="button" className="prev-btn" onClick={prevStep}>
-                                    {i18n.t("buttons.previous", { defaultValue: "Anterior" })}
+                                    {t("buttons.previous", { defaultValue: "Anterior" })}
                                 </button>
                             )}
                             {currentStep < 3 && (
                                 <button type="button" className="next-btn" onClick={nextStep}>
-                                    {i18n.t("buttons.next", { defaultValue: "Próximo" })}
+                                    {t("buttons.next", { defaultValue: "Próximo" })}
                                 </button>
                             )}
                             {currentStep === 3 && (
                                 <button type="submit" className="save-btn" disabled={loading}>
-                                    {loading ? i18n.t('buttons.saving', { defaultValue: 'Salvando...' }) : i18n.t('buttons.createProject', { defaultValue: 'Criar Projeto' })}
+                                    {loading ? t('buttons.saving', { defaultValue: 'Salvando...' }) : t('buttons.createProject', { defaultValue: 'Criar Projeto' })}
                                 </button>
                             )}
                         </div>

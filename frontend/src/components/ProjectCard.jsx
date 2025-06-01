@@ -51,7 +51,7 @@ const ProjectCard = ({
           }
         },
       },
-      labels: ['Progresso'],
+      labels: [t('projectCard.progressLabel', "Progress")],
     };
 
     const chart = new ApexCharts(chartRef.current, options);
@@ -68,7 +68,7 @@ const ProjectCard = ({
               <button class="btn-popover">apagar projeto<button/>
             '>
 
-                <img src="/imgs/more_vert.svg" alt="mais opções no projeto" />
+                <img src="/imgs/more_vert.svg" alt={t("altText.projectOptions", "Project options")} />
             </button>
         </div>
         <div className="project-progress d-flex">
@@ -90,7 +90,7 @@ const ProjectCard = ({
        
       <div className='individual-progress d-flex align-items-center justify-content-end'>
         <span className={estaAtrasado ? "" : "d-none"}>
-          <img src="/imgs/alert.svg" />
+          <img src="/imgs/alert.svg" alt={t("altText.alertIcon", "Alert")} />
         </span>
 
         <span className='text-center mx-3'>{t('project.yourTasks')}</span>
