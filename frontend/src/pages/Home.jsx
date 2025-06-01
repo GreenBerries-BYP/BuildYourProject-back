@@ -50,6 +50,7 @@ function Home() {
 
   const handleVoltar = () => {
     setProjetoSelecionado(null);
+    console.log(projetoSelecionado)
   };
 
   const [projetos, setProjetos] = useState([]);
@@ -83,9 +84,9 @@ useEffect(() => {
           <div className='d-flex w-100 justify-content-center align-items-center'>
             <ViewProject
               nomeProjeto={projetoSelecionado.name}
-              admProjeto={projetoSelecionado.admProjeto}
+              admProjeto={projetoSelecionado.creator_name}
               numIntegrantes={projetoSelecionado.numIntegrantes}
-              tarefasProjeto={projetoSelecionado.tarefasProjeto}
+              tarefasProjeto={projetoSelecionado.tarefasProjeto || []}
               onVoltar={handleVoltar}
             />
           </div>
