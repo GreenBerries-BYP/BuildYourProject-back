@@ -34,8 +34,12 @@ const ProjectCard = ({
   }, [t]);
 
   useEffect(() => {
+     if (!chartRef.current) return;
+
+    const safeProgressoIndividual = typeof progressoIndividual === 'number' ? progressoIndividual : 0;
+
     const options = {
-      series: [progressoIndividual],
+      series: [safeProgressoIndividual],
       chart: {
         height: 60,
         type: 'radialBar',

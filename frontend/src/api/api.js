@@ -52,4 +52,15 @@ export const fetchUserData = async () => {
   }
 };
 
+// Função específica para buscar dados do projeto
+export const fetchProjects = async () => {
+  try {
+    const response = await instance.get('/projetos/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar projetos:', error);
+    throw error;
+  }
+};
+
 export default instance;
