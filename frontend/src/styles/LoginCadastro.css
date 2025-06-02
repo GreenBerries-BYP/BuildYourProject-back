@@ -50,15 +50,11 @@ label {
 }
 
 .btn-acesso-verde,
-.link-cadastre, .btn-acesso-roxo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22rem;
-  height: 5rem;
-  text-align: center;
-  font-size: 2rem;
-  padding: 0.7rem 1.2rem;
+.btn-change-page {
+  font-size: 2.4rem;
+  color: var(--white-color);
+  display: block;
+  padding: 10px;
   border-radius: 30px;
   transition: all 200ms ease-in-out;
 }
@@ -74,27 +70,14 @@ label {
   background-color: var(--green-dark-color);
 }
 
-.btn-acesso-roxo {
-  color: var(--white-color);
-  background: var(--btn-purple);
-  border: none;
-}
-
-.btn-acesso-roxo:hover {
-  transform: scale(1.05);
-  background-color: var(--purple-dark-color);
-}
-
-.link-cadastre {
+.btn-change-page {
   color: var(--green-dark-color);
   border: 2px solid var(--green-dark-color);
   background-color: transparent;
-}
 
-.link-cadastre:hover {
-  background: var(--btn-green);
-  color: var(--white-color);
-  transform: scale(1.05);
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .check-label {

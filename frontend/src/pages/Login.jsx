@@ -1,30 +1,35 @@
-import React, { useState } from 'react';
-import api from '../api/api';
-import { saveToken } from '../auth/auth';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import api from "../api/api";
+import { saveToken } from "../auth/auth";
+import { useNavigate, Link } from "react-router-dom";
 
-import '../styles/LoginCadastro.css';
-import { useTranslation } from 'react-i18next';
+import "../styles/LoginCadastro.css";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const { t } = useTranslation();
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErro('');
+    setErro("");
 
     try {
-      const res = await api.post('/login/', { email, password: senha });
+      const res = await api.post("/login/", { email, password: senha });
       saveToken(res.data.access);
-      setTimeout(() => navigate('/home'), 300);
+      setTimeout(() => navigate("/home"), 300);
     } catch {
-      setErro(t("login.invalidCredentials", "Invalid credentials. Check your email and password."));
+      setErro(
+        t(
+          "login.invalidCredentials",
+          "Invalid credentials. Check your email and password."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -34,7 +39,6 @@ const Login = () => {
     <div className="container-fluid login d-flex justify-content-center align-items-center p-0">
       <div className="col-10 card-login rounded d-flex justify-content-center align-items-center bg-white shadow-lg">
         <div className="row w-100 justify-content-center">
-
           <div className="col-12 col-lg-6 d-none d-lg-flex justify-content-center align-items-center">
             <img
               src="/imgs/problem-solving.svg"
@@ -50,14 +54,20 @@ const Login = () => {
               alt={t("altText.logoBYPVertical", "BYP Vertical Logo")}
             />
 
-            <form className="row p-4 d-flex justify-content-between flex-column gap-3" onSubmit={handleLogin}>
+            <form
+              className="row p-4 d-flex justify-content-between flex-column gap-3"
+              onSubmit={handleLogin}
+            >
               <div>
                 <label htmlFor="email">{t("login.emailLabel", "Email")}</label>
                 <input
                   className="input-text"
                   type="email"
                   id="email"
-                  placeholder={t("login.emailPlaceholder", "example@domain.com")}
+                  placeholder={t(
+                    "login.emailPlaceholder",
+                    "example@domain.com"
+                  )}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -65,27 +75,32 @@ const Login = () => {
               </div>
 
               <div>
-                <label htmlFor="senha">{t("login.passwordLabel", "Password")}</label>
+                <label htmlFor="senha">
+                  {t("login.passwordLabel", "Password")}
+                </label>
                 <input
                   className="input-text"
                   type="password"
                   id="senha"
-                  placeholder={t("login.passwordPlaceholder", "Enter your password")}
+                  placeholder={t(
+                    "login.passwordPlaceholder",
+                    "Enter your password"
+                  )}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   required
                 />
                 {erro && (
-                  <div className="alert alert-danger text-center">
-                    {erro}
-                  </div>
+                  <div className="alert alert-danger text-center">{erro}</div>
                 )}
               </div>
 
-
               <div className="d-flex justify-content-end">
                 <Link className="link-esqueci" to="/forgot_password">
-                  {t("login.forgotPasswordLink", "I forgot or want to change my password")}
+                  {t(
+                    "login.forgotPasswordLink",
+                    "I forgot or want to change my password"
+                  )}
                 </Link>
               </div>
 
@@ -101,9 +116,12 @@ const Login = () => {
               </div>
 
               <div className="d-flex justify-content-between gap-5">
-                <Link to="/register" className="link-cadastre flex-fill text-center">
-                  {t("login.signUpLink", "Sign Up")}
-                </Link>
+                <button
+                  className="btn-change-page flex-fill text-center"
+                  onClick={() => navigate("/register")}
+                >
+                  {t("login.register")}
+                </button>
 
                 <button
                   className="btn-acesso-verde flex-fill d-flex justify-content-center align-items-center"
@@ -113,13 +131,15 @@ const Login = () => {
                   {loading ? (
                     <div
                       className="spinner-border text-light"
-                      style={{ width: '2rem', height: '2rem' }}
+                      style={{ width: "2rem", height: "2rem" }}
                       role="status"
                     >
-                      <span className="visually-hidden">{t("login.loading", "Loading...")}</span>
+                      <span className="visually-hidden">
+                        {t("login.loading", "Loading...")}
+                      </span>
                     </div>
                   ) : (
-                    t("login.signInButton", "Sign In")
+                    t("login.signIn")
                   )}
                 </button>
               </div>
