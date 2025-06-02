@@ -51,8 +51,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     creator_name = serializers.SerializerMethodField()
     collaborators = serializers.SerializerMethodField()
     collaborator_count = serializers.SerializerMethodField()
-    startDate = serializers.DateTimeField(source='start_date') 
-    endDate = serializers.DateTimeField(source='end_date')  
+    start_date = serializers.DateTimeField(source='start_date') 
+    end_date = serializers.DateTimeField(source='end_date')  
 
     class Meta:
         model = Project
@@ -61,8 +61,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             'name',  
             'description',  
             'type',
-            'startDate', 
-            'endDate',
+            'start_date', 
+            'end_date',
             'creator_name',  # campo adicionado
             'phares',  
             'collaborators',

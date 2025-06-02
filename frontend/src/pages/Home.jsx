@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchProjects } from '../api/api';
+import { fetchProjects, fetchUserData } from '../api/api';
 
 
 import Sidebar from "../components/Sidebar";
@@ -10,7 +10,6 @@ import ViewProject from "../components/ViewProject";
 import ModalNewProject from "../components/ModalNewProject";
 
 import '../styles/Home.css';
-import { fetchUserData } from '../api/userService';
 
 function Home() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -42,6 +41,11 @@ function Home() {
 
   const handleCreateProject = () => {
     setModalAberto(true);
+  };
+
+  const handleProjectCreated = (newProject) => {
+    setProjetos(prevProjetos => [newProject, ...prevProjetos]);
+    setModalAberto(false); // Close modal after project is created
   };
 
   const handleAbrirProjeto = (projeto) => {
@@ -113,6 +117,7 @@ useEffect(() => {
       <ModalNewProject
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
+        onProjectCreated={handleProjectCreated} // Pass the new handler
       />
     </div>
   );

@@ -8,8 +8,7 @@ from .serializers import CustomTokenObtainPairSerializer, ProjectSerializer
 from api.models import Project, User, UserProject, ProjectRole
 from api.serializers import UserSerializer
 from rest_framework import status
-from django.core.mail import send_mail
-from django.conf import settings
+from .utils import send_project_invitation_email
 
 # Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
 # Sempre retorne em JSON pro front conseguir tratar bem
@@ -61,18 +60,7 @@ class ProjectView(APIView):
                     UserProject.objects.create(user=found_user, project=project, role=ProjectRole.MEMBER)
                 except User.DoesNotExist:
                     print(f"Usuário com email: {email} não encontrado. Enviando convite")
-                    subject = "Você foi convidado para colaborar em um projeto!"
-                    message = f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}' na nossa plataforma. " \
-                              f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso ao projeto." \
-                              f"\n\nLink do projeto: http://localhost:5173/register"
-                    from_email = settings.DEFAULT_FROM_EMAIL
-                    recipient_list = [email]
-                    
-                    try:
-                        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-                        print(f"Convite enviado para: {email}")
-                    except Exception as e:
-                        print(f"Falha ao enviar convite para: {email}: {e}")
+                    send_project_invitation_email(email, project.name)
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

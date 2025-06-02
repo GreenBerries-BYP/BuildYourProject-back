@@ -7,7 +7,7 @@ import { getToken } from "../auth/auth";
 import { abntTemplates } from "../mocks/abntMock";
 // import { i18n } from "../translate/i18n"; // Removed
 
-const ModalNewProject = ({ isOpen, onClose }) => {
+const ModalNewProject = ({ isOpen, onClose, onProjectCreated }) => { // Added onProjectCreated prop
     const { t } = useTranslation(); // Added
     const modalRef = useRef();
     const descriptionTextareaRef = useRef(null);
@@ -17,7 +17,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         name: "",
         description: "",
         type: "TCC",
-        phases: [],
+        phares: [], // Renamed from phases
         collaborators: [],
         startDate: "",
         endDate: "",
@@ -46,18 +46,19 @@ const ModalNewProject = ({ isOpen, onClose }) => {
         }
     };
 
-    const handlephasesChange = (selectedphasesValue) => {
+    // Renamed function and updated logic
+    const handlePhasesChange = (selectedphasesValue) => {
         setFormData((prevData) => {
-            const currentphasess = prevData.phases;
-            if (currentphasess.includes(selectedphasesValue)) {
+            const currentPhases = prevData.phares; // Changed to phares
+            if (currentPhases.includes(selectedphasesValue)) {
                 return {
                     ...prevData,
-                    phases: currentphasess.filter((tmpl) => tmpl !== selectedphasesValue),
+                    phares: currentPhases.filter((tmpl) => tmpl !== selectedphasesValue), // Changed to phares
                 };
             } else {
                 return {
                     ...prevData,
-                    phases: [...currentphasess, selectedphasesValue],
+                    phares: [...currentPhases, selectedphasesValue], // Changed to phares
                 };
             }
         });
@@ -179,7 +180,7 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     description: formData.description,
                     type: formData.type,
                     collaborators: formData.collaborators,
-                    phases: formData.phases,
+                    phares: formData.phares, // Changed to phares
                     startDate: formData.startDate,
                     endDate: formData.endDate,
                 };
@@ -188,22 +189,23 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                 const response = await api.post("/projetos/", submissionData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json" // Merged headers
                     },
                     handleErrorLocally: true // Add this flag
                 });
 
                 if (response.status && response.status >= 200 && response.status < 300) {
                     // Successful creation
-                    onClose();
+                    // onClose(); // Call onClose handled by onProjectCreated or separately if needed
+                    if (onProjectCreated) {
+                        onProjectCreated(response.data);
+                    }
+                    // Resetting form state is still good practice
                     setFormData({
                         name: "",
                         description: "",
                         type: "TCC",
-                        phases: [],
+                        phares: [], 
                         collaborators: [],
                         startDate: "",
                         endDate: "",
@@ -212,8 +214,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                     setEmailInput("");
                     setFormErrors({});
                     setIsDescriptionExpanded(false);
-                   
-                    location.reload();
+                    // location.reload(); // Removed location.reload()
+                    // onClose() will be called by the Home component after updating projects
                 } else {
                     // This block might not be strictly necessary if Axios throws on non-2xx by default
                     // For safety, keeping a generic error if it somehow reaches here
@@ -390,8 +392,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
                                                         <button
                                                             key={tmpl.value}
                                                             type="button"
-                                                            onClick={() => handlephasesChange(tmpl?.value)}
-                                                            className={formData.phases.includes(tmpl?.value) ? "selected" : ""}
+                                                            onClick={() => handlePhasesChange(tmpl?.value)} // Renamed function usage
+                                                            className={formData.phares.includes(tmpl?.value) ? "selected" : ""} // Changed to phares
                                                         >
                                                             {t(tmpl?.label)}
                                                         </button>
@@ -497,8 +499,8 @@ const ModalNewProject = ({ isOpen, onClose }) => {
 
                                         <p><strong>{t("inputs.projectType")}:</strong> {t(formData.type) || t("messages.notSpecified")}</p>
                                         <p><strong>{t("inputs.phases")}:</strong> {
-                                            formData.phases.length > 0
-                                                ? formData.phases.map(value => t((abntTemplates.find(tmpl => tmpl?.value === value) || {}).label)).join(', ')
+                                            formData.phares.length > 0 // Changed to phares
+                                                ? formData.phares.map(value => t((abntTemplates.find(tmpl => tmpl?.value === value) || {}).label)).join(', ') // Changed to phares
                                                 : t("messages.notSpecified")
                                         }</p>
                                     </div>
