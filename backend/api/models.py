@@ -52,7 +52,7 @@ class Project(models.Model):
     type = models.TextField(default='default_type')
     start_date = models.DateTimeField() # removi a definição automática pelo sistema
     end_date = models.DateTimeField()
-    phares = models.JSONField(null=True, blank=True)
+    phases = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.name

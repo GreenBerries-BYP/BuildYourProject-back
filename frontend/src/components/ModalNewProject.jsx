@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewProject.css";
 import api from "../api/api";
-import { useTranslation } from "react-i18next"; // Added
+import { useTranslation } from "react-i18next";
 
 import { getToken } from "../auth/auth";
 import { abntTemplates } from "../mocks/abntMock";
-// import { i18n } from "../translate/i18n"; // Removed
 
 const ModalNewProject = ({ isOpen, onClose }) => {
-    const { t } = useTranslation(); // Added
+    const { t } = useTranslation();
     const modalRef = useRef();
     const descriptionTextareaRef = useRef(null);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);

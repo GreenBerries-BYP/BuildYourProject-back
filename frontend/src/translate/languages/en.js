@@ -80,8 +80,8 @@ const en = {
     invalidCredentials: "Invalid credentials. Check your email and password.",
     forgotPasswordLink: "I forgot or want to change my password",
     keepLoggedIn: "Keep me logged in",
-    signUpLink: "Sign Up",
-    signInButton: "Sign In",
+    register: "Register",
+    signIn: "Sign In",
     loading: "Loading...",
   },
   register: {

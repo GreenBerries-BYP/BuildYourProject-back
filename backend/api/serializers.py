@@ -64,7 +64,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'startDate', 
             'endDate',
             'creator_name',  # campo adicionado
-            'phares',  
+            'phases',  
             'collaborators',
             'collaborator_count',
         ]
@@ -80,7 +80,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_collaborator_count(self, obj):
         return UserProject.objects.filter(project=obj).count()
 
-    def validate_phares(self, value):
+    def validate_phases(self, value):
         if not value: 
             raise serializers.ValidationError("O campo fases é obrigatório e não pode estar vazio.")
         if not isinstance(value, list):
