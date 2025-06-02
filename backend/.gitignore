@@ -1,0 +1,46 @@
+# Ignorar arquivos do ambiente
+.env
+
+# Ignorar arquivos de banco de dados SQLite
+*.sqlite3
+*.sqlite3-journal
+
+# Ignorar pastas de cache Python
+__pycache__/
+*.pyc
+
+# Ignorar pastas de migrações geradas (exceto __init__.py)
+# Isso é útil para evitar conflitos de migração em equipes,
+# mas significa que cada desenvolvedor precisará rodar makemigrations
+# após pull de mudanças nos modelos.
+# Se você está trabalhando sozinho, pode ser menos crítico,
+# mas ainda é uma boa prática.
+*/migrations/[0-9]*.py
+*/migrations/__pycache__/
+
+# Ignorar arquivos de log
+*.log
+*.log.*
+
+# Ignorar diretórios de ambiente virtual (se você usa venv, poetry, etc.)
+venv/
+.venv/
+env/
+.env/
+
+# Ignorar arquivos de IDEs (ex: VS Code)
+.vscode/
+.idea/
+
+# Ignorar arquivos de teste (se você tiver)
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ignorar arquivos de pacotes Python
+dist/
+build/
+*.egg-info/
+
+# Ignorar arquivos de upload de mídia (se você tiver FileField/ImageField)
+# media/

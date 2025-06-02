@@ -218,9 +218,9 @@ const Landing = () => {
 window.addEventListener("scroll", function () {
   const header = document.getElementById("landing_header");
   if (window.scrollY > 100) {
-    header.classList.add("sticky");
+    header?.classList?.add("sticky");
   } else {
-    header.classList.remove("sticky");
+    header?.classList?.remove("sticky");
   }
 });
 

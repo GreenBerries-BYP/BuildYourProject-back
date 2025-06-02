@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, HomeView, ProjectView
+from .views import RegisterView, LoginView, HomeView, ProjectView, ProjectCollaboratorsView
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
 # Url que o usuário vai ver, nome da url na view, apelido pra referenciar a url no front
@@ -9,4 +9,5 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("home/", HomeView.as_view(), name='home'),
     path('projetos/', ProjectView.as_view(), name='projetos'),
+    path('projetos/<int:project_id>/collaborators/', ProjectCollaboratorsView.as_view(), name='project-collaborators'),
 ]

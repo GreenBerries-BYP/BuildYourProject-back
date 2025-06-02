@@ -293,7 +293,7 @@ body.dark-theme .floating-label-group.has-value label[for="projectDescription"] 
 }
 
 .project-type label,
-.template label,
+.phases label,
 .input-group label:not(.floating-label-group label) {
     font-size: 1.6rem;
     color: var(--black-color);

@@ -2,17 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import "../styles/ModalNewTask.css";
 import { getToken } from "../auth/auth";
 import { useTranslation } from "react-i18next";
-import api from "../api/api"; // Assuming api is used in handleSubmit
+import api from "../api/api";
 
 
-const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
+// const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
 
 const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
     const modalRef = useRef();
     const [nome, setNome] = useState("");
     const [descricao, setDescricao] = useState("");
-    const [responsavel, setResponsavel] = useState("");
+    const [responsavel, setResponsavel] = useState(null); // Will store collaborator's ID
     const [dataEntrega, setDataEntrega] = useState("");
+    const [collaborators, setCollaborators] = useState([]);
 
 
     const { t } = useTranslation();
@@ -24,7 +25,7 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
         if (!nome.trim()) errors.nome = t("messages.taskNameRequired");
         if (!descricao.trim()) errors.descricao = t("messages.taskDescriptionRequired");
         if (!dataEntrega) errors.dataEntrega = t("messages.dueDateRequired");
-        if (!responsavel.trim()) errors.responsavel = t("messages.responsibleRequired");
+        if (!responsavel) errors.responsavel = t("messages.responsibleRequired"); // Changed check for ID
         return errors;
     };
 
@@ -38,7 +39,7 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
             nome,
             descricao,
             dataEntrega,
-            responsavel,
+            user: responsavel, // responsavel now holds the user ID
             projetoId
         };
 
@@ -77,6 +78,40 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
+
+    useEffect(() => {
+        if (isOpen && projetoId) {
+            const fetchCollaborators = async () => {
+                try {
+                    const token = getToken();
+                    const response = await api.get(`/api/projetos/${projetoId}/collaborators/`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    // The new endpoint directly returns the list of users (collaborators)
+                    if (response.data && Array.isArray(response.data)) {
+                        setCollaborators(response.data);
+                    } else {
+                        console.error("Fetched collaborators data is not an array or is missing:", response.data);
+                        setCollaborators([]); // Ensure it's an array
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch collaborators:", error);
+                    setCollaborators([]); // Reset or handle error appropriately
+                }
+            };
+            fetchCollaborators();
+        } else if (!isOpen) {
+            setCollaborators([]); // Clear collaborators when modal is closed
+            // Optionally reset other form fields here if needed
+            // setNome("");
+            // setDescricao("");
+            // setResponsavel("");
+            // setDataEntrega("");
+            // setFormErrors({});
+        }
+    }, [isOpen, projetoId]);
 
     if (!isOpen) return null;
 
@@ -125,16 +160,20 @@ const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
                             <div className="input-group">
                                 <label>{t("inputs.selectResponsible")}</label>
                                 <div className="options">
-                                    {responsavelOptions.map((option) => (
-                                        <button
-                                            key={option}
-                                            type="button"
-                                            onClick={() => setResponsavel(option)}
-                                            className={responsavel === option ? "selected" : ""}
-                                        >
-                                            {option}
-                                        </button>
-                                    ))}
+                                    {collaborators.length > 0 ? (
+                                        collaborators.map((collaborator) => (
+                                            <button
+                                                key={collaborator.id} // Use id for key
+                                                type="button"
+                                                onClick={() => setResponsavel(collaborator.id)} // Set ID
+                                                className={responsavel === collaborator.id ? "selected" : ""} // Compare with ID
+                                            >
+                                                {collaborator.full_name || collaborator.email} {/* Display name or email */}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <p>{t("messages.noCollaborators")}</p> // Inform user if no collaborators
+                                    )}
                                 </div>
                                 {formErrors.responsavel && <p className="input-error">{formErrors.responsavel}</p>}
                             </div>

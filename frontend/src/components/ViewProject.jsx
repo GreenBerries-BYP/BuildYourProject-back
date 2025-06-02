@@ -9,6 +9,7 @@ const ViewProject = ({
   nomeProjeto,
   admProjeto,
   numIntegrantes,
+  collaborators, // Added collaborators prop
   tarefasProjeto,
   onVoltar
 }) => {
@@ -30,6 +31,19 @@ const ViewProject = ({
                 <h1>{nomeProjeto}</h1>
                 <p>{t("viewProject.createdBy", { adm: admProjeto })}</p>
                 <p>{t("viewProject.membersCount", { count: numIntegrantes })}</p>
+                {/* Displaying collaborators */}
+                {collaborators && collaborators.length > 0 && (
+                  <div className="project-collaborators">
+                    <h4>{t("viewProject.collaboratorsTitle", "Collaborators")}:</h4>
+                    <ul>
+                      {collaborators.map(collab => (
+                        <li key={collab.id || collab.email}>
+                          {collab.full_name || collab.email}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
             </div>
             
             <div className="project-options">
