@@ -85,7 +85,8 @@ useEffect(() => {
             <ViewProject
               nomeProjeto={projetoSelecionado.name}
               admProjeto={projetoSelecionado.creator_name}
-              numIntegrantes={projetoSelecionado.numIntegrantes}
+              numIntegrantes={projetoSelecionado.collaborator_count}
+              collaborators={projetoSelecionado.collaborators || []}
               tarefasProjeto={projetoSelecionado.tarefasProjeto || []}
               onVoltar={handleVoltar}
             />

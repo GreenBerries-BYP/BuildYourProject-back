@@ -49,6 +49,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     creator_name = serializers.SerializerMethodField()
+    collaborators = serializers.SerializerMethodField()
+    collaborator_count = serializers.SerializerMethodField()
+    startDate = serializers.DateTimeField(source='start_date') 
+    endDate = serializers.DateTimeField(source='end_date')  
 
     class Meta:
         model = Project
@@ -57,26 +61,32 @@ class ProjectSerializer(serializers.ModelSerializer):
             'name',  
             'description',  
             'type',
-            'created_at',
-            'due_date',
+            'startDate', 
+            'endDate',
             'creator_name',  # campo adicionado
-            'template',  
+            'phares',  
+            'collaborators',
+            'collaborator_count',
         ]
 
     def get_creator_name(self, obj):
         leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
         return leader_relation.user.full_name if leader_relation else None
 
-    def validate_template(self, value):
-        """
-        Check that the template list is not empty.
-        """
+    def get_collaborators(self, obj):
+        user_projects = UserProject.objects.filter(project=obj).select_related('user')
+        return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
+
+    def get_collaborator_count(self, obj):
+        return UserProject.objects.filter(project=obj).count()
+
+    def validate_phares(self, value):
         if not value: 
-            raise serializers.ValidationError("O campo de template é obrigatório e não pode estar vazio.")
+            raise serializers.ValidationError("O campo fases é obrigatório e não pode estar vazio.")
         if not isinstance(value, list):
-             raise serializers.ValidationError("Template deve ser uma lista de strings.")
+             raise serializers.ValidationError("Fases deve ser uma lista de strings.")
         if not all(isinstance(item, str) for item in value):
-            raise serializers.ValidationError("Todos os itens da lista de template devem ser strings.")
+            raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
         return value
 
 class UserProjectSerializer(serializers.ModelSerializer):

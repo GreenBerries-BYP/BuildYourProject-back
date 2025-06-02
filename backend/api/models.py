@@ -50,9 +50,9 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     type = models.TextField(default='default_type')
-    created_at = models.DateTimeField() # removi a definição automática pelo sistema
-    due_date = models.DateTimeField()
-    template = models.JSONField(null=True, blank=True)
+    start_date = models.DateTimeField() # removi a definição automática pelo sistema
+    end_date = models.DateTimeField()
+    phares = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.name
