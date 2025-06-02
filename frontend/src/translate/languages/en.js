@@ -6,7 +6,7 @@ const en = {
       preview: "preview",
       aboutUs: "about us",
       login: "Sign In",
-      signUp: "Sign Up",
+      signUp: "Register",
     },
     hero: {
       title: "Transform Your Projects with the Organization You Need",
@@ -80,8 +80,8 @@ const en = {
     invalidCredentials: "Invalid credentials. Check your email and password.",
     forgotPasswordLink: "I forgot or want to change my password",
     keepLoggedIn: "Keep me logged in",
-    signUpLink: "Sign Up",
-    signInButton: "Sign In",
+    register: "Register",
+    signIn: "Sign In",
     loading: "Loading...",
   },
   register: {

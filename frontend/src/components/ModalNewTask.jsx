@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 import api from "../api/api";
 
 
-// const responsavelOptions = ["lelerudeli@gmail.com", "rodrigobettio@gmail.com"];
-
 const ModalNewTask = ({ isOpen, onClose, projetoId }) => {
     const modalRef = useRef();
     const [nome, setNome] = useState("");

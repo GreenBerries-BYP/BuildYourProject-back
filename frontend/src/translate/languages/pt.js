@@ -80,8 +80,8 @@ const pt = {
     invalidCredentials: "Credenciais inválidas. Verifique seu e-mail e senha.",
     forgotPasswordLink: "Esqueci ou quero alterar minha senha",
     keepLoggedIn: "Manter-me logado",
-    signUpLink: "Cadastre-se",
-    signInButton: "Entrar",
+    register: "Cadastre-se",
+    signIn: "Entrar",
     loading: "Carregando...",
   },
   register: {
