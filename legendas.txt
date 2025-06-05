@@ -1,0 +1,24 @@
+745955019|First Commit BYP
+1745957140|Conecta frontend React com backend Django
+1746027832|Comentários explicativos adicionados
+1746031106|Adicionado README
+1747521966|Adição dos models do projeto
+1747522797|Criação dos serializers
+1747533642|Login backend funcionando (Testado com postman)
+1747536747|Cadastro e Login frontend funcionando
+1747850058|Criando a home com sidebar e header
+1748313698|Melhorando animação da sidebar
+1748357253|Header pronto
+1748467120|Botão de criar projeto adicionado (modal faltando)
+1748469502|Modal de Criar Projeto implementado
+1748511185|Dark mode criado
+1748526899|Implementando logout
+1748534791|Adicionando pt / en e mudando select
+1748743360|Estilização e refatoração do modal new project
+1748763326|Internacionalização em todas as páginas
+1748780591|Salvando projeto no banco de dados
+1748789823|Modal de nova tarefa implementado
+1748792478|Exibindo informações do projeto
+1748814823|Add template no banco de dados com validação
+1748826436|Envio de email para colaboradores com Green Berries
+1748875601|Bootstrap instalado localmente e removido CDN
