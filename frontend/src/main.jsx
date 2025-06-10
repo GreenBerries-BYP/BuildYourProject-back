@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 
 import './styles/Main.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 // Main.jsx é o ponto de entrada da aplicação React. Ele importa o React e o ReactDOM, além do componente App.
 
