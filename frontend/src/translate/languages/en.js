@@ -6,7 +6,7 @@ const en = {
       preview: "preview",
       aboutUs: "about us",
       login: "Sign In",
-      signUp: "Sign Up",
+      signUp: "Register",
     },
     hero: {
       title: "Transform Your Projects with the Organization You Need",

@@ -33,8 +33,8 @@ const Header = () => {
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "pt-BR" ? "en-US" : "pt-BR"));
     localStorage.setItem(
-      I18N_STORAGE_KEY,
-      language === "pt-BR" ? "en-US" : "pt-BR"
+      language === "pt-BR" ? "en-US" : "pt-BR",
+      I18N_STORAGE_KEY
     );
     i18n.changeLanguage(language === "pt-BR" ? "en-US" : "pt-BR");
   };
@@ -88,7 +88,7 @@ const Header = () => {
           {isDark ?  <MdOutlineWbSunny /> : <MdDarkMode />}
         </button>
 
-        <button onClick={toggleLanguage} className="header-icon" aria-label={t("header.changeLanguage", "Change Language")}>
+        <button onClick={toggleLanguage} className="header-icon" aria-label={t("header.changeLanguage")}>
           <img src={flagSrc} alt={flagAlt} className="bandeira" />
         </button>
         <FaRegUserCircle className="header-icon" aria-label={t("header.userProfile", "User Profile")} />
