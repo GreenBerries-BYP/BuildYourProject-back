@@ -41,6 +41,8 @@ Com o repositório clonado:
 cd backend
 poetry install
 poetry env activate 
+pip install dj-database-url psycopg2-binary
+
 
 # Frontend
 cd ../frontend

@@ -10,6 +10,9 @@ from api.serializers import UserSerializer
 from rest_framework import status
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import connection
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 # Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
 # Sempre retorne em JSON pro front conseguir tratar bem
@@ -92,3 +95,4 @@ class ProjectCollaboratorsView(APIView):
         users = [up.user for up in user_projects]
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+

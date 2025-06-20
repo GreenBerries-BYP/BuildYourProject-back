@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import dj_database_url
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+
 
 load_dotenv()
 
@@ -86,6 +88,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Se a variável DATABASE_URL estiver definida (Render), usa PostgreSQL
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
 
 # Password validation
