@@ -1,0 +1,1 @@
+web: gunicorn BYP_Backend.wsgi
