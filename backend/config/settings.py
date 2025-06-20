@@ -140,7 +140,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 CORS_ALLOWED_ORIGINS = [
-    'https://buildyourproject-front.onrender.com',
+    "https://buildyourproject-front.onrender.com",
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
