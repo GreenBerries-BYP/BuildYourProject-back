@@ -115,7 +115,12 @@ STATIC_URL = 'static/'
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    'https://buildyourproject-front.onrender.com',
+    "https://buildyourproject-front.onrender.com",
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
