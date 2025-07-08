@@ -67,7 +67,7 @@ class ProjectView(APIView):
                     subject = "Você foi convidado para colaborar em um projeto!"
                     message = f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}' na nossa plataforma. " \
                               f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso ao projeto." \
-                              f"\n\nLink do projeto: http://localhost:5173/register"
+                              f"\n\nLink do projeto: https://buildyourproject-front.onrender.com/register"
                     from_email = settings.DEFAULT_FROM_EMAIL
                     recipient_list = [email]
                     
