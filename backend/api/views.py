@@ -96,3 +96,15 @@ class ProjectCollaboratorsView(APIView):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class ProjectShareWithMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        projetos = Project.objects.filter(
+            userproject__user=request.user,
+            userproject__role=ProjectRole.MEMBER
+        ).distinct()
+
+        serializer = ProjectSerializer(projetos, many=True)
+        return Response(serializer.data)
