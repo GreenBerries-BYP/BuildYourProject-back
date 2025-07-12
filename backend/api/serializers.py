@@ -1,9 +1,12 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
+import re 
 from .models import (
     User, Project, UserProject, Phase, ProjectPhase,
     Task, TaskAssignee, Chat
 )
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,14 +17,35 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'password',
             'full_name',  
-            'registration_date',  # campo correto do model
-            'role'  
+            'registration_date',
+            'role'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
             'registration_date': {'read_only': True},
-            'role': {'required': False, 'default': 'user'},  # padronizando para 'user'
+            'role': {'required': False, 'default': 'user'},  # valor padrão
         }
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("A senha deve ter no mínimo 8 caracteres.")
+        if not re.search(r"[A-Z]", value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
+        if not re.search(r"[a-z]", value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
+        if not re.search(r"\d", value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um número.")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um caractere especial.")
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)  
+        user.save()
+        return user
+
 
     def create(self, validated_data):
         password = validated_data.pop('password')
