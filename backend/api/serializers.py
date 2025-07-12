@@ -1,6 +1,8 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 import re 
+
+
 from .models import (
     User, Project, UserProject, Phase, ProjectPhase,
     Task, TaskAssignee, Chat
@@ -70,24 +72,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     creator_name = serializers.SerializerMethodField()
-    collaborators = serializers.SerializerMethodField()
+    collaborators_info = serializers.SerializerMethodField()  # só para exibir no GET
     collaborator_count = serializers.SerializerMethodField()
-    startDate = serializers.DateTimeField(source='start_date') 
-    endDate = serializers.DateTimeField(source='end_date')  
-    phases = serializers.ListField(child=serializers.CharField(), write_only=True)  # torna write_only para receber no input
+
+    startDate = serializers.DateTimeField(source='start_date')
+    endDate = serializers.DateTimeField(source='end_date')
+
+    phases = serializers.ListField(child=serializers.CharField(), write_only=True)
+    collaborators = serializers.ListField(
+        child=serializers.EmailField(), write_only=True, required=False
+    )
 
     class Meta:
         model = Project
         fields = [
-            'id',  
-            'name',  
-            'description',  
+            'id',
+            'name',
+            'description',
             'type',
-            'startDate', 
+            'startDate',
             'endDate',
             'creator_name',
             'phases',
             'collaborators',
+            'collaborators_info',
             'collaborator_count',
         ]
 
@@ -95,7 +103,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
         return leader_relation.user.full_name if leader_relation else None
 
-    def get_collaborators(self, obj):
+    def get_collaborators_info(self, obj):
         user_projects = UserProject.objects.filter(project=obj).select_related('user')
         return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
 
@@ -103,26 +111,26 @@ class ProjectSerializer(serializers.ModelSerializer):
         return UserProject.objects.filter(project=obj).count()
 
     def validate_phases(self, value):
-        if not value: 
+        if not value:
             raise serializers.ValidationError("O campo fases é obrigatório e não pode estar vazio.")
         if not isinstance(value, list):
-             raise serializers.ValidationError("Fases deve ser uma lista de strings.")
+            raise serializers.ValidationError("Fases deve ser uma lista de strings.")
         if not all(isinstance(item, str) for item in value):
             raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
         return value
 
     def create(self, validated_data):
         phases_data = validated_data.pop('phases', [])
+        collaborators_data = validated_data.pop('collaborators', [])
+
         project = Project.objects.create(**validated_data)
+        project.phases = phases_data
+        project.save()
 
         # Criar fases, relacionar e criar tarefas
-        for idx, phase_name in enumerate(phases_data):
+        for phase_name in phases_data:
             phase_obj, created = Phase.objects.get_or_create(name=phase_name)
-            project_phase = ProjectPhase.objects.create(
-                project=project,
-                phase=phase_obj,
-                order=idx + 1
-            )
+            project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
             Task.objects.create(
                 project_phase=project_phase,
                 title=phase_name,
@@ -130,6 +138,8 @@ class ProjectSerializer(serializers.ModelSerializer):
                 is_completed=False,
                 due_date=project.end_date
             )
+
+        # Note: Criação dos UserProject para colaboradores fica na view (como você fez)
 
         return project
 
@@ -148,6 +158,7 @@ class UserProjectSerializer(serializers.ModelSerializer):
 
 class PhaseSerializer(serializers.ModelSerializer):
     class Meta:
+        print('chega no phaseSerializer')
         model = Phase
         fields = [
             'id',  
@@ -163,8 +174,7 @@ class ProjectPhaseSerializer(serializers.ModelSerializer):
         fields = [
             'id',  
             'project',  
-            'phase',  
-            'order',
+            'phase'
         ]
 
 # alterado pra alinhar com o front

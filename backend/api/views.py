@@ -81,10 +81,11 @@ class ProjectView(APIView):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             project = serializer.save()
+            # Cria o líder do projeto
             UserProject.objects.create(
                 user=request.user,
                 project=project,
-                role=ProjectRole.LEADER  # ou ProjectRole.MEMBER se quiser padrão
+                role=ProjectRole.LEADER
             )
 
             collaborator_emails = request.data.get('collaborators', [])
@@ -100,39 +101,28 @@ class ProjectView(APIView):
                               f"\n\nLink do projeto: https://buildyourproject-front.onrender.com/register"
                     from_email = settings.DEFAULT_FROM_EMAIL
                     recipient_list = [email]
-                    
                     try:
                         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
                         print(f"Convite enviado para: {email}")
                     except Exception as e:
                         print(f"Falha ao enviar convite para: {email}: {e}")
 
-         # Aqui: criar tarefas a partir das fases
-        fases = project.phases or []
-        for idx, fase_nome in enumerate(fases):
-            # 1) Criar/pegar a Phase no banco (ou crie temporariamente se for só nome)
-            phase_obj, created = Phase.objects.get_or_create(name=fase_nome)
+            # Criar tarefas a partir das fases (se quiser reforçar aqui)
+            fases = project.phases or []
+            for fase_nome in fases:
+                phase_obj, created = Phase.objects.get_or_create(name=fase_nome)
+                project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
+                Task.objects.create(
+                    project_phase=project_phase,
+                    title=fase_nome,
+                    description=f"Fase inicial do projeto: {fase_nome}",
+                    is_completed=False,
+                    due_date=project.end_date
+                )
 
-            # 2) Criar relação ProjectPhase para ligar projeto à fase
-            project_phase = ProjectPhase.objects.create(
-                project=project,
-                phase=phase_obj,
-                order=idx + 1
-            )
-
-            # 3) Criar a tarefa (Task) para essa fase (como tarefa inicial)
-            Task.objects.create(
-                project_phase=project_phase,
-                title=fase_nome,
-                description=f"Fase inicial do projeto: {fase_nome}",
-                is_completed=False,
-                due_date=project.end_date  # ou algum critério de data
-            )
-
-            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
