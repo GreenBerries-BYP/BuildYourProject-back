@@ -71,47 +71,62 @@ class UserSerializer(serializers.ModelSerializer):
 #         ]
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    creator_name = serializers.SerializerMethodField()
-    collaborators = serializers.SerializerMethodField()
-    collaborator_count = serializers.SerializerMethodField()
-    startDate = serializers.DateTimeField(source='start_date') 
-    endDate = serializers.DateTimeField(source='end_date')  
+class Meta:
+    model = Project
+    fields = [
+        'id',
+        'name',
+        'description',
+        'type',
+        'startDate',
+        'endDate',
+        'creator_name',
+        'phases',  # ← mantém aqui para o write_only funcionar
+        'collaborators',
+        'collaborator_count',
+    ]
 
-    class Meta:
-        model = Project
-        fields = [
-            'id',  
-            'name',  
-            'description',  
-            'type',
-            'startDate', 
-            'endDate',
-            'creator_name',  # campo adicionado
-            'phases',  
-            'collaborators',
-            'collaborator_count',
-        ]
+def get_creator_name(self, obj):
+    leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
+    return leader_relation.user.full_name if leader_relation else None
 
-    def get_creator_name(self, obj):
-        leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
-        return leader_relation.user.full_name if leader_relation else None
+def get_collaborators(self, obj):
+    user_projects = UserProject.objects.filter(project=obj).select_related('user')
+    return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
 
-    def get_collaborators(self, obj):
-        user_projects = UserProject.objects.filter(project=obj).select_related('user')
-        return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
+def get_collaborator_count(self, obj):
+    return UserProject.objects.filter(project=obj).count()
 
-    def get_collaborator_count(self, obj):
-        return UserProject.objects.filter(project=obj).count()
+def validate_phases(self, value):
+    if not value:
+        raise serializers.ValidationError("O campo fases é obrigatório e não pode estar vazio.")
+    if not isinstance(value, list):
+        raise serializers.ValidationError("Fases deve ser uma lista de strings.")
+    if not all(isinstance(item, str) for item in value):
+        raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
+    return value
 
-    def validate_phases(self, value):
-        if not value: 
-            raise serializers.ValidationError("O campo fases é obrigatório e não pode estar vazio.")
-        if not isinstance(value, list):
-             raise serializers.ValidationError("Fases deve ser uma lista de strings.")
-        if not all(isinstance(item, str) for item in value):
-            raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
-        return value
+def create(self, validated_data):
+    phases_data = validated_data.pop('phases', [])
+    project = Project.objects.create(**validated_data)
+
+    for idx, phase_name in enumerate(phases_data):
+        phase_obj, _ = Phase.objects.get_or_create(name=phase_name)
+        project_phase = ProjectPhase.objects.create(
+            project=project,
+            phase=phase_obj,
+            order=idx + 1
+        )
+        Task.objects.create(
+            project_phase=project_phase,
+            title=phase_name,
+            description=f"Fase inicial do projeto: {phase_name}",
+            is_completed=False,
+            due_date=project.end_date
+        )
+
+    return project
+
 
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
