@@ -121,21 +121,29 @@ class ProjectPhaseSerializer(serializers.ModelSerializer):
             'order',
         ]
 
-
+# alterado pra alinhar com o front
 class TaskSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source='title')
+    prazo = serializers.DateTimeField(source='due_date')
+    responsavel = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
         fields = [
-            'id',  
-            'project_phase',  
-            'title',  
-            'description',  
-            'is_completed',  
-            'created_at',  # antes creation_date
-            'due_date'     # antes delivery_date
+            'id',
+            'nome',
+            'responsavel',
+            'prazo',
+            'status',
         ]
-        read_only_fields = ['created_at']
 
+    def get_responsavel(self, obj):
+        assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
+        return assignee.user.full_name if assignee else None
+
+    def get_status(self, obj):
+        return 'concluído' if obj.is_completed else 'pendente'
 
 class TaskAssigneeSerializer(serializers.ModelSerializer):
     class Meta:
