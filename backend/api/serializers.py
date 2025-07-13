@@ -237,3 +237,27 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         attrs['username'] = attrs.get('email')
         return super().validate(attrs)
+    
+# serializers.py
+
+class SimpleTaskSerializer(serializers.ModelSerializer):
+    title = serializers.CharField()
+    is_completed = serializers.BooleanField()  
+
+    class Meta:
+        model = Task
+        fields = ['title', 'is_completed']
+
+
+class ProjectWithTasksSerializer(serializers.ModelSerializer):
+    tasks = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'tasks']
+
+    def get_tasks(self, project):
+        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
+        tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
+        return SimpleTaskSerializer(tarefas, many=True).data
+

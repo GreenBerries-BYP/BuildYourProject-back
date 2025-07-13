@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Task, ProjectPhase, Phase
 from .serializers import TaskSerializer
+from .serializers import ProjectWithTasksSerializer
+
 
 class ProjectTasksView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -72,9 +74,10 @@ class ProjectView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        projetos = Project.objects.filter(userproject__user=request.user)
-        serializer = ProjectSerializer(projetos, many=True)
+        projetos = Project.objects.filter(userproject__user=request.user).distinct()
+        serializer = ProjectWithTasksSerializer(projetos, many=True)
         return Response(serializer.data)
+
 
     def post(self, request):
         print("Dados recebidos no POST:", request.data)

@@ -16,9 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print("DATABASE_URL:", DATABASE_URL)
-
-
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "chave-de-desenvolvimento")
 
 DEBUG = True
@@ -166,4 +163,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
-print("EMAIL:", EMAIL_HOST_USER)
