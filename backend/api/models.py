@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from django.db.models import JSONField # Usei jsonfield pra lidar com o campo template que tem itens aninhados, então não dava pra usar text 
 
+# Usei jsonfield pra lidar com o campo template que tem itens aninhados, então não dava pra usar text 
 class SystemRole(models.TextChoices):
     ADMIN = 'admin', 'Admin'
     USER = 'user', 'User'
@@ -28,7 +28,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.BigAutoField(primary_key=True)
     username = models.CharField(max_length=150)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, db_index=True)
     password = models.CharField(max_length=128)
     full_name = models.CharField(max_length=255)
     role = models.CharField(max_length=10, choices=SystemRole.choices)
@@ -59,16 +59,19 @@ class Project(models.Model):
 
 class UserProject(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_participations')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='user_relations')
     role = models.CharField(max_length=10, choices=ProjectRole.choices)
+
+    class Meta:
+        unique_together = ('user', 'project')
 
     def __str__(self):
         return f"{self.user.full_name} - {self.project.name} ({self.role})"
 
 class Phase(models.Model):
     id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     parent_phase = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
@@ -77,7 +80,7 @@ class Phase(models.Model):
 
 class ProjectPhase(models.Model):
     id = models.BigAutoField(primary_key=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='phases_relations')
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -89,16 +92,16 @@ class Task(models.Model):
     description = models.TextField()
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField()
-    project_phase = models.ForeignKey(ProjectPhase, on_delete=models.CASCADE)
+    due_date = models.DateTimeField(db_index=True)
+    project_phase = models.ForeignKey(ProjectPhase, on_delete=models.CASCADE, related_name='tasks')
 
     def __str__(self):
         return self.title
 
 class TaskAssignee(models.Model):
     id = models.BigAutoField(primary_key=True)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='assignees')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_tasks')
 
     def __str__(self):
         return f"{self.task.title} - {self.user.full_name}"
@@ -107,17 +110,8 @@ class Chat(models.Model):
     id = models.BigAutoField(primary_key=True)
     content = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='messages')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.user.full_name}: {self.content[:30]}..."
-
-# class TaskAttachment(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-#     file = models.FileField(upload_to='attachments/')
-#     uploaded_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f"Attachment for Task {self.task.title}"

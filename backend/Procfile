@@ -1,1 +1,2 @@
-web: gunicorn BYP_Backend.wsgi
+web: gunicorn BYP_Backend.wsgi --log-file -
+worker: celery -A BYP_Backend worker -l info
