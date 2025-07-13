@@ -23,6 +23,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost'),
     'localhost',
+    '127.0.0.1',
 ]
 
 INSTALLED_APPS = [

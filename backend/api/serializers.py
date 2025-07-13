@@ -2,7 +2,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 import re 
 
-
 from .models import (
     User, Project, UserProject, Phase, ProjectPhase,
     Task, TaskAssignee, Chat
@@ -12,13 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',  
-            'username',
-            'email',
-            'password',
-            'full_name',  
-            'registration_date',
-            'role'
+            'id', 'username', 'email', 'password', 'full_name', 
+            'registration_date', 'role'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -42,37 +36,13 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  
-        user.save()
-        return user
-
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        role = validated_data.get('role', 'user')
-        user = User(**validated_data)
-        user.role = role
         user.set_password(password)
         user.save()
         return user
 
-# # alterado pra alinhar com o front
-# class ProjectSerializer(serializers.ModelSerializer):
-#     # O model não tem 'creator', só created_at e due_date
-#     class Meta:
-#         model = Project
-#         fields = [
-#             'id',  
-#             'name',  
-#             'description',  
-#             'type',
-#             'created_at',  # antes creation_date
-#             'due_date',    # antes delivery_date
-#         ]
-
 class ProjectSerializer(serializers.ModelSerializer):
     creator_name = serializers.SerializerMethodField()
-    collaborators_info = serializers.SerializerMethodField()  # só para exibir no GET
+    collaborators_info = serializers.SerializerMethodField()
     collaborator_count = serializers.SerializerMethodField()
 
     startDate = serializers.DateTimeField(source='start_date')
@@ -86,17 +56,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = [
-            'id',
-            'name',
-            'description',
-            'type',
-            'startDate',
-            'endDate',
-            'creator_name',
-            'phases',
-            'collaborators',
-            'collaborators_info',
-            'collaborator_count',
+            'id', 'name', 'description', 'type',
+            'startDate', 'endDate', 'creator_name', 'phases',
+            'collaborators', 'collaborators_info', 'collaborator_count',
         ]
 
     def get_creator_name(self, obj):
@@ -121,15 +83,14 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         phases_data = validated_data.pop('phases', [])
-        collaborators_data = validated_data.pop('collaborators', [])
+        validated_data.pop('collaborators', []) # Removido pois a lógica está na view
 
         project = Project.objects.create(**validated_data)
-        project.phases = phases_data
-        project.save()
-
-        # Criar fases, relacionar e criar tarefas
+        
+        # A lógica de associar o criador e colaboradores permanece na view,
+        # mas a criação das fases e tarefas pode ser feita aqui.
         for phase_name in phases_data:
-            phase_obj, created = Phase.objects.get_or_create(name=phase_name)
+            phase_obj, _ = Phase.objects.get_or_create(name=phase_name)
             project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
             Task.objects.create(
                 project_phase=project_phase,
@@ -138,44 +99,22 @@ class ProjectSerializer(serializers.ModelSerializer):
                 is_completed=False,
                 due_date=project.end_date
             )
-
-        # Note: Criação dos UserProject para colaboradores fica na view (como você fez)
-
         return project
-
-
 
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProject
-        fields = [
-            'id',  
-            'user',  
-            'project',  
-            'role'  
-        ]
-
+        fields = ['id', 'user', 'project', 'role']
 
 class PhaseSerializer(serializers.ModelSerializer):
     class Meta:
-        print('chega no phaseSerializer')
         model = Phase
-        fields = [
-            'id',  
-            'name',  
-            'description',  
-            'parent_phase'  
-        ]
-
+        fields = ['id', 'name', 'description', 'parent_phase']
 
 class ProjectPhaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectPhase
-        fields = [
-            'id',  
-            'project',  
-            'phase'
-        ]
+        fields = ['id', 'project', 'phase']
 
 # alterado pra alinhar com o front
 class TaskSerializer(serializers.ModelSerializer):
@@ -186,13 +125,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = [
-            'id',
-            'nome',
-            'responsavel',
-            'prazo',
-            'status',
-        ]
+        fields = ['id', 'nome', 'responsavel', 'prazo', 'status']
 
     def get_responsavel(self, obj):
         assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
@@ -204,29 +137,15 @@ class TaskSerializer(serializers.ModelSerializer):
 class TaskAssigneeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskAssignee
-        fields = [
-            'id',  
-            'task',  
-            'user'  # model aponta para user, não user_project
-        ]
-
+        fields = ['id', 'task', 'user']  # model aponta para user, não user_project
 
 class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
-        fields = [
-            'id',  
-            'project',  
-            'user',  # antes sender
-            'content',  
-            'sent_at'  
-        ]
+        fields = ['id', 'project', 'user', 'content', 'sent_at'] # antes sender
         read_only_fields = ['sent_at']
 
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = User.USERNAME_FIELD
-
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -237,17 +156,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         attrs['username'] = attrs.get('email')
         return super().validate(attrs)
-    
+
 # serializers.py
 
 class SimpleTaskSerializer(serializers.ModelSerializer):
-    title = serializers.CharField()
-    is_completed = serializers.BooleanField()  
-
     class Meta:
         model = Task
         fields = ['title', 'is_completed']
-
 
 class ProjectWithTasksSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
@@ -261,3 +176,30 @@ class ProjectWithTasksSerializer(serializers.ModelSerializer):
         tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
         return SimpleTaskSerializer(tarefas, many=True).data
 
+class TaskFullInfoSerializer(serializers.ModelSerializer):
+    responsaveis = serializers.SerializerMethodField()
+    fase = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        fields = [
+            'id', 'title', 'description', 'is_completed',
+            'created_at', 'due_date', 'fase', 'responsaveis',
+        ]
+
+    def get_responsaveis(self, obj):
+        return [a.user.full_name for a in TaskAssignee.objects.filter(task=obj).select_related('user')]
+
+    def get_fase(self, obj):
+        return obj.project_phase.phase.name if obj.project_phase and obj.project_phase.phase else None
+
+class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
+    tasks = serializers.SerializerMethodField()
+
+    class Meta(ProjectSerializer.Meta):
+        fields = ProjectSerializer.Meta.fields + ['tasks']
+
+    def get_tasks(self, project):
+        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
+        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
+        return TaskFullInfoSerializer(tarefas, many=True).data
