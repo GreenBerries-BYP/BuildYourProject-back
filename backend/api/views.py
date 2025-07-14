@@ -20,6 +20,8 @@ from .serializers import (
     TaskSerializer
 )
 
+# Lista de convites pendentes (email -> lista de IDs de projetos)
+invited_users = {}
 
 # Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
 # Sempre retorne em JSON pro front conseguir tratar bem
@@ -27,6 +29,31 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()  # Pega todos os usuários do banco de dados
     serializer_class = UserSerializer  # Serializa os dados do usuário
     permission_classes = [AllowAny]  # Permite acesso a qualquer usuário, mesmo não autenticado
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+
+        # Importa o dicionário de convites
+        from .views import invited_users
+        from .models import Project, UserProject, ProjectRole
+
+        # Verifica se o email do novo usuário está na lista de convites pendentes
+        projetos_convidados = invited_users.get(user.email, [])
+
+        for project_id in projetos_convidados:
+            try:
+                project = Project.objects.get(id=project_id)
+                UserProject.objects.get_or_create(
+                    user=user,
+                    project=project,
+                    role=ProjectRole.MEMBER
+                )
+            except Project.DoesNotExist:
+                continue
+
+        # Remove o email do dicionário após tratar
+        if user.email in invited_users:
+            del invited_users[user.email]
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -63,10 +90,15 @@ class ProjectView(APIView):
                     found_user = User.objects.get(email=email)
                     UserProject.objects.create(user=found_user, project=project, role=ProjectRole.MEMBER)
                 except User.DoesNotExist:
+                    # Salva convite na memória
+                    if email not in invited_users:
+                        invited_users[email] = []
+                    invited_users[email].append(project.id)
+
                     subject = "Você foi convidado para colaborar em um projeto!"
                     message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
                                f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
-                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/register")
+                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
                     try:
