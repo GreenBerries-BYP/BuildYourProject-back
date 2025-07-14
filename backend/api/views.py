@@ -72,6 +72,7 @@ class ProjectView(APIView):
                     try:
                         send_mail(subject, message, from_email, [email], fail_silently=False)
                     except Exception as e:
+                        print("Erro ao enviar e-mail:", e)
                         # Em um projeto real, é ideal usar o sistema de logging do Django
                         # em vez de print() para registrar falhas.
                         pass
