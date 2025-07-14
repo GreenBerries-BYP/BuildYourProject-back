@@ -98,7 +98,7 @@ class ProjectView(APIView):
                     subject = "Você foi convidado para colaborar em um projeto!"
                     message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
                                f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
-                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/register")
+                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
                     try:
