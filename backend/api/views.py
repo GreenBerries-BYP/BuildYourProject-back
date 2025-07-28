@@ -5,9 +5,10 @@ from django.core.mail import send_mail
 # Imports do Django Rest Framework
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
+from api.responses import success_response, error_response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase
@@ -63,7 +64,7 @@ class HomeView(APIView):
 
     def get(self, request):
         serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        return success_response("Usuário autenticado com sucesso", serializer.data)
     
 class ProjectView(APIView):
     permission_classes = [IsAuthenticated]
@@ -71,7 +72,7 @@ class ProjectView(APIView):
     def get(self, request):
         projetos = Project.objects.filter(userproject__user=request.user).distinct()
         serializer = ProjectWithTasksSerializer(projetos, many=True)
-        return Response(serializer.data)
+        return success_response("Projetos listados com sucesso", serializer.data)
 
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
@@ -122,9 +123,9 @@ class ProjectView(APIView):
                     due_date=project.end_date
                 )
             
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return success_response("Projeto criado com sucesso!", serializer.data, status.HTTP_201_CREATED)
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("Erro ao criar projeto", serializer.errors)
 
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -133,15 +134,15 @@ class ProjectCollaboratorsView(APIView):
         try:
             project = Project.objects.get(pk=project_id)
             if not UserProject.objects.filter(user=request.user, project=project).exists():
-                return Response({"error": "Você não tem permissão para acessar este recurso."}, status=status.HTTP_403_FORBIDDEN)
+                return error_response("Você não tem permissão para acessar este recurso.", status_code=status.HTTP_403_FORBIDDEN)
         except Project.DoesNotExist:
-            return Response({"error": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            return error_response("Projeto não encontrado.", status_code=status.HTTP_404_NOT_FOUND)
 
         user_projects = UserProject.objects.filter(project=project).select_related('user')
         users = [up.user for up in user_projects]
         serializer = UserSerializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
+        return success_response("Colaboradores listados com sucesso", serializer.data)
+    
 class ProjectShareWithMeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -151,22 +152,22 @@ class ProjectShareWithMeView(APIView):
             userproject__role=ProjectRole.MEMBER
         ).distinct()
         serializer = ProjectSerializer(projetos, many=True)
-        return Response(serializer.data)
+        return success_response("Projetos compartilhados listados com sucesso", serializer.data)
 
 class ProjectTasksView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, project_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
-            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+            return error_response("Você não tem acesso a este projeto.", status_code=status.HTTP_403_FORBIDDEN)
 
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
-            return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            return error_response("Projeto não encontrado.", status_code=status.HTTP_404_NOT_FOUND)
 
         serializer = ProjectWithCollaboratorsAndTasksSerializer(project)
-        return Response(serializer.data)
+        return success_response("Projeto com colaboradores e tarefas carregado", serializer.data)
 
 class TaskUpdateStatusView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -178,12 +179,12 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         is_completed = request.data.get('is_completed')
 
         if is_completed is None:
-            return Response({"error": "O campo 'is_completed' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response("Erro de validação", {"is_completed": "O campo 'is_completed' é obrigatório."})
         
         if not isinstance(is_completed, bool):
-             return Response({"error": "O campo 'is_completed' deve ser um valor booleano (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
+             return error_response("Erro de validação", {"is_completed": "O campo 'is_completed' deve ser um valor booleano (true/false)."})
 
         task.is_completed = is_completed
         task.save()
         serializer = self.get_serializer(task)
-        return Response(serializer.data)
+        return success_response("Status da tarefa atualizado", serializer.data)
