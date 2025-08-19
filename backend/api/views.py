@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Imports do projeto
-from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase
+from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
 from .serializers import (
     UserSerializer,
     CustomTokenObtainPairSerializer,
@@ -156,7 +156,9 @@ class ProjectShareWithMeView(APIView):
 class ProjectTasksView(APIView):
     permission_classes = [IsAuthenticated]
 
+    # READ: retorna projeto com colaboradores e tarefas no formato do front
     def get(self, request, project_id):
+        # Verifica se o usuário pertence ao projeto
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -165,8 +167,115 @@ class ProjectTasksView(APIView):
         except Project.DoesNotExist:
             return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProjectWithCollaboratorsAndTasksSerializer(project)
-        return Response(serializer.data)
+        # líder do projeto
+        leader = UserProject.objects.filter(project=project, role=ProjectRole.LEADER).first()
+        admProjeto = leader.user.full_name if leader else None
+
+        # colaboradores
+        collaborators_qs = UserProject.objects.filter(project=project)
+        collaborators = [up.user.full_name for up in collaborators_qs]
+
+        # tarefas do projeto (phases)
+        tarefasProjeto = []
+        project_phases = ProjectPhase.objects.filter(project=project)
+        for pp in project_phases:
+            phase = pp.phase
+            tasks = Task.objects.filter(project_phase=pp)
+
+            # progresso da fase
+            total_tasks = tasks.count()
+            completed_tasks = tasks.filter(is_completed=True).count()
+            progresso = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
+
+            subTarefas = []
+            for task in tasks:
+                assignees = TaskAssignee.objects.filter(task=task)
+                responsaveis = [a.user.full_name for a in assignees]
+
+                subTarefas.append({
+                    "id": task.id,
+                    "nome": task.title,
+                    "responsavel": ", ".join(responsaveis) if responsaveis else None,
+                    "prazo": task.due_date.strftime("%d/%m/%Y"),
+                    "status": "concluído" if task.is_completed else "pendente"
+                })
+
+            tarefasProjeto.append({
+                "id": phase.id,
+                "nomeTarefa": phase.name,
+                "progresso": progresso,
+                "subTarefas": subTarefas
+            })
+
+        projeto_data = {
+            "nomeProjeto": project.name,
+            "admProjeto": admProjeto,
+            "numIntegrantes": collaborators_qs.count(),
+            "collaborators": collaborators,
+            "tarefasProjeto": tarefasProjeto
+        }
+
+        return Response(projeto_data, status=status.HTTP_200_OK)
+
+    # CREATE: cria nova tarefa dentro de uma fase
+    def post(self, request, project_id):
+        if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
+            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        data = request.data.copy()
+        # espera que o front envie 'phase_id' para saber onde criar a tarefa
+        try:
+            phase = ProjectPhase.objects.get(id=data.get("phase_id"), project_id=project_id)
+        except ProjectPhase.DoesNotExist:
+            return Response({"detail": "Fase não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        task = Task.objects.create(
+            title=data.get("title"),
+            description=data.get("description", ""),
+            is_completed=data.get("is_completed", False),
+            due_date=data.get("due_date"),
+            project_phase=phase
+        )
+
+        # atribuir responsáveis se houver
+        assignee_ids = data.get("assignee_ids", [])
+        for uid in assignee_ids:
+            user = User.objects.get(id=uid)
+            TaskAssignee.objects.create(task=task, user=user)
+
+        return Response({"detail": "Tarefa criada com sucesso.", "task_id": task.id}, status=status.HTTP_201_CREATED)
+
+    # UPDATE: atualiza status da tarefa
+    def patch(self, request, project_id, task_id):
+        if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
+            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            task = Task.objects.get(id=task_id, project_phase__project_id=project_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Tarefa não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        is_completed = request.data.get("is_completed")
+        if is_completed is None or not isinstance(is_completed, bool):
+            return Response({"error": "O campo 'is_completed' deve ser booleano."}, status=status.HTTP_400_BAD_REQUEST)
+
+        task.is_completed = is_completed
+        task.save()
+        return Response({"detail": "Status atualizado com sucesso."})
+
+    # DELETE: remove tarefa
+    def delete(self, request, project_id, task_id):
+        if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
+            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            task = Task.objects.get(id=task_id, project_phase__project_id=project_id)
+        except Task.DoesNotExist:
+            return Response({"detail": "Tarefa não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        task.delete()
+        return Response({"detail": "Tarefa excluída com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+
 
 class TaskUpdateStatusView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -187,3 +296,28 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         task.save()
         serializer = self.get_serializer(task)
         return Response(serializer.data)
+
+class UserConfigurationView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Retorna o usuário logado
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)  # PATCH
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        # Se vier senha, usar set_password
+        if 'password' in serializer.validated_data:
+            instance.set_password(serializer.validated_data.pop('password'))
+
+        # Atualiza outros campos
+        for attr, value in serializer.validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -7,7 +7,8 @@ from .views import (
     ProjectCollaboratorsView, 
     ProjectShareWithMeView, 
     ProjectTasksView, 
-    TaskUpdateStatusView
+    TaskUpdateStatusView,
+    UserConfigurationView
 )
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
@@ -26,4 +27,5 @@ urlpatterns = [
     path('projetos/<int:project_id>/collaborators/', ProjectCollaboratorsView.as_view(), name='project-collaborators'),
     path('projetos/<int:project_id>/tasks/', ProjectTasksView.as_view(), name='project-tasks'),
     path('tasks/<int:pk>/', TaskUpdateStatusView.as_view(), name='task-update-status'),
+    path('user/', UserConfigurationView.as_view(), name='user-config'),
 ]

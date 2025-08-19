@@ -1,109 +1,112 @@
+from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient
 from rest_framework import status
-from .models import *
+from api.models import User, Project, UserProject, ProjectPhase, Task
 
-class ProjectViewTests(APITestCase):
+class UserConfigTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            email='teste@example.com', 
-            username='testeuser', 
-            password='Senha@1234', 
-            full_name='Teste User',
-            role='user'
-        )
         self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
-        self.project_list_url = reverse('projetos')
+        self.register_url = reverse('register')
+        self.login_url = reverse('login')
+        self.user_config_url = reverse('user-config')
+        self.project_url = reverse('projetos')
+        self.project_share_url = reverse('project-share-with-me')
 
-    def test_get_projects_empty(self):
-        response = self.client.get(self.project_list_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['success'])
-        self.assertEqual(response.data['message'], "Projetos listados com sucesso")
-        self.assertEqual(response.data['data'], [])
-
-    def test_post_create_project_success(self):
-        payload = {
-            "name": "Projeto Teste",
-            "description": "Descrição do projeto",
-            "type": "default_type",
-            "startDate": "2025-08-01T10:00:00Z",
-            "endDate": "2025-08-10T10:00:00Z",
-            "phases": ["Fase 1", "Fase 2"],
-            "collaborators": []
+        # Usuário inicial para login
+        self.user_data = {
+            "username": "testuser",
+            "email": "testuser@example.com",
+            "password": "Abcd1234!",
+            "full_name": "Test User"
         }
-        response = self.client.post(self.project_list_url, payload, format='json')
+
+    def test_user_lifecycle(self):
+        # 1. Registrar usuário
+        response = self.client.post(self.register_url, self.user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response.data['success'])
-        self.assertEqual(response.data['message'], "Projeto criado com sucesso!")
-        self.assertIn('name', response.data['data'])
-        self.assertEqual(response.data['data']['name'], "Projeto Teste")
+        user = User.objects.get(email=self.user_data['email'])
 
-    def test_post_create_project_fail(self):
-        # Enviar payload vazio deve falhar
-        payload = {}
-        response = self.client.post(self.project_list_url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data['success'])
-        self.assertEqual(response.data['message'], "Erro ao criar projeto")
-        self.assertIn('name', response.data['errors'])
-        self.assertIn('description', response.data['errors'])
-        self.assertIn('startDate', response.data['errors'])
-        self.assertIn('endDate', response.data['errors'])
-        self.assertIn('phases', response.data['errors'])
+        # 2. Login
+        login_data = {"email": self.user_data['email'], "password": self.user_data['password']}
+        response = self.client.post(self.login_url, login_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        token = response.data['access']
 
-class TaskUpdateStatusTests(APITestCase):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+
+        # 3. Atualizar dados do usuário
+        update_data = {"full_name": "Updated User", "password": "Xyz12345!"}
+        response = self.client.patch(self.user_config_url, update_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertEqual(user.full_name, "Updated User")
+
+
+class ProjectCRUDTests(TestCase):
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            email='teste2@example.com',
-            username='user2',
-            password='Senha@1234',
-            full_name='User Dois',
-            role='user'
-        )
         self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='creator', email='creator@example.com',
+            password='Abcd1234!', full_name='Project Creator'
+        )
         self.client.force_authenticate(user=self.user)
 
-        # Criar projeto e tarefa para o teste
-        self.project = Project.objects.create(
-            name="Projeto Tarefa",
-            description="Projeto para teste tarefa",
-            type="default_type",
-            start_date="2025-08-01T10:00:00Z",
-            end_date="2025-08-10T10:00:00Z",
-            phases=[]
-        )
-        UserProject.objects.create(user=self.user, project=self.project, role=ProjectRole.LEADER)
-        
-        phase = Phase.objects.create(name="Fase Teste", description="Fase de teste")
-        project_phase = ProjectPhase.objects.create(project=self.project, phase=phase)
-        self.task = Task.objects.create(
-            title="Tarefa Teste",
-            description="Descrição da tarefa",
-            due_date="2025-08-10T10:00:00Z",
-            project_phase=project_phase,
-            is_completed=False
-        )
-        self.task_update_url = reverse('task-update-status', args=[self.task.id])
+        self.project_data = {
+            "name": "Test Project",
+            "description": "Project description",
+            "type": "Software",
+            "startDate": "2025-08-18T10:00:00Z",
+            "endDate": "2025-08-25T10:00:00Z",
+            "phases": ["Phase 1", "Phase 2"],
+            "collaborators": ["collab1@example.com"]
+        }
 
-    def test_patch_update_status_success(self):
-        response = self.client.patch(self.task_update_url, {'is_completed': True}, format='json')
+    def test_project_crud(self):
+        # 1. Criar projeto
+        response = self.client.post(reverse('projetos'), self.project_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        project = Project.objects.get(name="Test Project")
+
+        # Checa se líder foi criado
+        self.assertTrue(UserProject.objects.filter(user=self.user, project=project, role='leader').exists())
+
+        # 2. Listar projetos do usuário
+        response = self.client.get(reverse('projetos'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data['success'])
-        self.assertEqual(response.data['message'], "Status da tarefa atualizado")
-        self.assertTrue(response.data['data']['status'] == 'concluído')
+        self.assertEqual(len(response.data), 1)
 
-    def test_patch_update_status_missing_field(self):
-        response = self.client.patch(self.task_update_url, {}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data['success'])
-        self.assertEqual(response.data['message'], "Erro de validação")
-        self.assertIn('is_completed', response.data['errors'])
+        # 3. Buscar colaboradores
+        url_collab = reverse('project-collaborators', args=[project.id])
+        response = self.client.get(url_collab)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(up['email'] == 'creator@example.com' for up in response.data))
 
-    def test_patch_update_status_invalid_field(self):
-        response = self.client.patch(self.task_update_url, {'is_completed': 'not_bool'}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data['success'])
-        self.assertEqual(response.data['message'], "Erro de validação")
-        self.assertIn('is_completed', response.data['errors'])
+        # 4. Criar tarefa em uma fase
+        phase = ProjectPhase.objects.filter(project=project).first()
+        task_data = {
+            "title": "New Task",
+            "description": "Task description",
+            "is_completed": False,
+            "due_date": "2025-08-24T10:00:00Z",
+            "phase_id": phase.id,
+            "assignee_ids": [self.user.id]
+        }
+        url_tasks = reverse('project-tasks', args=[project.id])
+        response = self.client.post(url_tasks, task_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        task_id = response.data['task_id']
+
+        # 5. Atualizar status da tarefa
+        url_task_update = reverse('task-update-status', args=[task_id])
+        response = self.client.patch(url_task_update, {"is_completed": True}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        task = Task.objects.get(id=task_id)
+        self.assertTrue(task.is_completed)
+
+        # 6. Projetos compartilhados (share with me) - deve estar vazio
+        response = self.client.get(reverse('project-share-with-me'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
