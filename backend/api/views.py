@@ -169,7 +169,7 @@ class ProjectTasksView(APIView):
 
         # líder do projeto
         leader = UserProject.objects.filter(project=project, role=ProjectRole.LEADER).first()
-        admProjeto = leader.user.full_name if leader else None
+        creator_name = leader.user.full_name if leader else None
 
         # colaboradores
         collaborators_qs = UserProject.objects.filter(project=project)
@@ -207,15 +207,17 @@ class ProjectTasksView(APIView):
                 "subTarefas": subTarefas
             })
 
+        # >>> AQUI adaptamos os nomes p/ bater com o React <<<
         projeto_data = {
-            "nomeProjeto": project.name,
-            "admProjeto": admProjeto,
-            "numIntegrantes": collaborators_qs.count(),
+            "name": project.name,  # antes era nomeProjeto
+            "creator_name": creator_name,  # antes era admProjeto
+            "collaborator_count": collaborators_qs.count(),  # antes era numIntegrantes
             "collaborators": collaborators,
             "tarefasProjeto": tarefasProjeto
         }
 
         return Response(projeto_data, status=status.HTTP_200_OK)
+
 
     # CREATE: cria nova tarefa dentro de uma fase
     def post(self, request, project_id):
