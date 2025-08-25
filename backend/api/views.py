@@ -2,14 +2,16 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.views.generic import TemplateView
+from django.contrib.auth import get_user_model
 
 # Imports do Django Rest Framework
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+import requests #precisa usar o pip install requests
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
@@ -24,6 +26,8 @@ from .serializers import (
 
 # Lista de convites pendentes (email -> lista de IDs de projetos)
 invited_users = {}
+
+User = get_user_model()
 
 # Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
 # Sempre retorne em JSON pro front conseguir tratar bem
@@ -59,6 +63,60 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+class GoogleAuthView(APIView):
+    def post(self, request):
+        access_token = request.data.get("access_token")
+        if not access_token:
+            return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 1. Valida o token no Google
+        try:
+            google_response = requests.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            user_info = google_response.json()
+        except Exception as e:
+            return Response({"error": f"Erro ao validar token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if "email" not in user_info:
+            return Response({"error": "Token inválido"}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = user_info["email"]
+        full_name = user_info.get("name", "")
+        username = email.split("@")[0]
+
+        # 2. Cria ou recupera usuário
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                "username": username,
+                "full_name": full_name,
+                "role": "user",  # ou outro default que faça sentido
+                "is_active": True
+            }
+        )
+
+        # Atualiza nome caso necessário
+        if not user.full_name:
+            user.full_name = full_name
+            user.save()
+
+        # 3. Gera tokens JWT
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "username": user.username,
+                "role": user.role
+            }
+        })
 
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
