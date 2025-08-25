@@ -72,87 +72,34 @@ User = get_user_model()
 class GoogleAuthView(APIView):
     def post(self, request):
         id_token_str = request.data.get("access_token")
-        print(f"Token recebido: {id_token_str}")  # Debug
+        print(f"Token recebido: {id_token_str}")
         
         if not id_token_str:
+            print("Erro: Token não fornecido")
             return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # VALIDAÇÃO DO TOKEN COM SEU CLIENT ID REAL
+            # Debug: Verifique se o client ID está correto
+            print(f"Client ID esperado: {settings.GOOGLE_OAUTH2_CLIENT_ID}")
+            
             id_info = id_token.verify_oauth2_token(
                 id_token_str,
                 google_requests.Request(),
                 audience=settings.GOOGLE_OAUTH2_CLIENT_ID  
             )
             
-            print(f"Informações do token: {id_info}")  # Debug
+            print(f"Informações do token: {id_info}")
             
-            # Verifica se o token é para sua aplicação
             if id_info['aud'] != settings.GOOGLE_OAUTH2_CLIENT_ID:
+                print(f"Audience mismatch: {id_info['aud']} != {settings.GOOGLE_OAUTH2_CLIENT_ID}")
                 return Response({"error": "Audience do token não corresponde"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except ValueError as e:
-            print(f"Erro na validação: {str(e)}")  # Debug
+            print(f"Erro na validação do token: {str(e)}")
             return Response({"error": f"Token inválido: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Extrai informações do usuário
-        email = id_info.get("email")
-        full_name = id_info.get("name", "")
-        given_name = id_info.get("given_name", "")
-        family_name = id_info.get("family_name", "")
-        
-        # Gera username único a partir do email
-        username = email.split("@")[0] if email else None
-        
-        # Verifica se username já existe e adiciona sufixo se necessário
-        base_username = username
-        counter = 1
-        while User.objects.filter(username=username).exists():
-            username = f"{base_username}{counter}"
-            counter += 1
-
-        if not email:
-            return Response({"error": "Email não encontrado no token"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            # Tenta encontrar usuário pelo email
-            user = User.objects.filter(email=email).first()
-            
-            if user:
-                # Usuário existe - atualiza nome se necessário
-                if not user.full_name and full_name:
-                    user.full_name = full_name
-                    user.save()
-            else:
-                # Cria novo usuário
-                user = User.objects.create_user(
-                    email=email,
-                    username=username,
-                    full_name=full_name,
-                    first_name=given_name,
-                    last_name=family_name,
-                    is_active=True
-                )
-                user.set_unusable_password()  # Usuário não usa senha tradicional
-                user.save()
-
-            # Gera tokens JWT
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user.full_name,
-                    "username": user.username,
-                }
-            })
-
         except Exception as e:
-            print(f"Erro ao criar/recuperar usuário: {str(e)}")  # Debug
-            return Response({"error": f"Erro interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"Erro inesperado na validação: {str(e)}")
+            return Response({"error": f"Erro na validação: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
     
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]

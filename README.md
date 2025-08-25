@@ -42,6 +42,7 @@ cd backend
 poetry install
 poetry env activate 
 pip install dj-database-url psycopg2-binary
+pip install google-auth
 
 
 # Frontend
