@@ -69,7 +69,7 @@ class LoginView(TokenObtainPairView):
 
 class GoogleAuthView(APIView):
     def post(self, request):
-        id_token_str = request.data.get("credential")  # agora usamos "credential"
+        id_token_str = request.data.get("access_token")
         if not id_token_str:
             return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
 
