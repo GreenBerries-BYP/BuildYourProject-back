@@ -192,13 +192,14 @@ class ProjectTasksView(APIView):
                 assignees = TaskAssignee.objects.filter(task=task)
                 responsaveis = [a.user.full_name for a in assignees]
 
-                subTarefas.append({
-                    "id": task.id,
-                    "nome": task.title,
-                    "responsavel": ", ".join(responsaveis) if responsaveis else None,
-                    "prazo": task.due_date.strftime("%d/%m/%Y"),
-                    "status": "concluído" if task.is_completed else "pendente"
-                })
+            subTarefas.append({
+                "id": task.id,
+                "title": task.title,  # o front espera title
+                "is_completed": task.is_completed,  # o front espera is_completed
+                "responsavel": ", ".join(responsaveis) if responsaveis else None,
+                "prazo": task.due_date.strftime("%d/%m/%Y") if task.due_date else None,
+                "status": "concluído" if task.is_completed else "pendente"
+            })
 
             tarefasProjeto.append({
                 "id": phase.id,
