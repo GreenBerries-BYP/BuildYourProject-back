@@ -82,7 +82,7 @@ class GoogleAuthView(APIView):
             id_info = id_token.verify_oauth2_token(
                 id_token_str,
                 google_requests.Request(),
-                audience=settings.GOOGLE_OAUTH2_CLIENT_ID  # ← CLIENT ID REAL AQUI
+                audience=settings.GOOGLE_OAUTH2_CLIENT_ID  
             )
             
             print(f"Informações do token: {id_info}")  # Debug
