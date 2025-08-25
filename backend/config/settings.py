@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Carrega variáveis de ambiente do arquivo .env
@@ -17,6 +19,8 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "chave-de-desenvolvimento")
+
+GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 DEBUG = True
 

@@ -67,60 +67,92 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+User = get_user_model()
+
 class GoogleAuthView(APIView):
     def post(self, request):
         id_token_str = request.data.get("access_token")
+        print(f"Token recebido: {id_token_str}")  # Debug
+        
         if not id_token_str:
             return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Valida o ID token
+            # VALIDAÇÃO DO TOKEN COM SEU CLIENT ID REAL
             id_info = id_token.verify_oauth2_token(
                 id_token_str,
                 google_requests.Request(),
-                audience="<SEU_CLIENT_ID_DO_GOOGLE>"
+                audience=settings.GOOGLE_OAUTH2_CLIENT_ID  # ← CLIENT ID REAL AQUI
             )
+            
+            print(f"Informações do token: {id_info}")  # Debug
+            
+            # Verifica se o token é para sua aplicação
+            if id_info['aud'] != settings.GOOGLE_OAUTH2_CLIENT_ID:
+                return Response({"error": "Audience do token não corresponde"}, status=status.HTTP_400_BAD_REQUEST)
+                
         except ValueError as e:
+            print(f"Erro na validação: {str(e)}")  # Debug
             return Response({"error": f"Token inválido: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Extraindo informações do usuário
+        # Extrai informações do usuário
         email = id_info.get("email")
         full_name = id_info.get("name", "")
+        given_name = id_info.get("given_name", "")
+        family_name = id_info.get("family_name", "")
+        
+        # Gera username único a partir do email
         username = email.split("@")[0] if email else None
+        
+        # Verifica se username já existe e adiciona sufixo se necessário
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
 
         if not email:
             return Response({"error": "Email não encontrado no token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cria ou recupera usuário
-        user, created = User.objects.get_or_create(
-            email=email,
-            defaults={
-                "username": username,
-                "full_name": full_name,
-                "role": "user",
-                "is_active": True
-            }
-        )
+        try:
+            # Tenta encontrar usuário pelo email
+            user = User.objects.filter(email=email).first()
+            
+            if user:
+                # Usuário existe - atualiza nome se necessário
+                if not user.full_name and full_name:
+                    user.full_name = full_name
+                    user.save()
+            else:
+                # Cria novo usuário
+                user = User.objects.create_user(
+                    email=email,
+                    username=username,
+                    full_name=full_name,
+                    first_name=given_name,
+                    last_name=family_name,
+                    is_active=True
+                )
+                user.set_unusable_password()  # Usuário não usa senha tradicional
+                user.save()
 
-        # Atualiza nome caso necessário
-        if not user.full_name:
-            user.full_name = full_name
-            user.save()
+            # Gera tokens JWT
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user.full_name,
+                    "username": user.username,
+                }
+            })
 
-        # Gera tokens JWT
-        refresh = RefreshToken.for_user(user)
-
-        return Response({
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "full_name": user.full_name,
-                "username": user.username,
-                "role": user.role
-            }
-        })
+        except Exception as e:
+            print(f"Erro ao criar/recuperar usuário: {str(e)}")  # Debug
+            return Response({"error": f"Erro interno: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
