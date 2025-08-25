@@ -246,7 +246,7 @@ class ProjectShareWithMeView(APIView):
             userproject__user=request.user,
             userproject__role=ProjectRole.MEMBER
         ).distinct()
-        serializer = ProjectWithCollaboratorsAndTasksSerializer(projetos, many=True)
+        serializer = ProjectSerializer(projetos, many=True)
         return Response(serializer.data)
 
 class ProjectTasksView(APIView):
