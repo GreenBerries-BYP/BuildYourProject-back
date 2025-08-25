@@ -1,6 +1,7 @@
 # Imports do Django
 from django.conf import settings
 from django.core.mail import send_mail
+from django.views.generic import TemplateView
 
 # Imports do Django Rest Framework
 from rest_framework import status, generics
@@ -8,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
@@ -324,3 +326,9 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
             setattr(instance, attr, value)
         instance.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+        
+class TermsView(TemplateView):
+    template_name = "index.html" 
+
+class PoliticsView(TemplateView): 
+    template_name = "index.html"
