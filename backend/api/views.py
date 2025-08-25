@@ -12,6 +12,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 import requests #precisa usar o pip install requests
+from rest_framework_simplejwt.tokens import RefreshToken
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
@@ -66,34 +69,35 @@ class LoginView(TokenObtainPairView):
 
 class GoogleAuthView(APIView):
     def post(self, request):
-        access_token = request.data.get("access_token")
-        if not access_token:
+        id_token_str = request.data.get("credential")  # agora usamos "credential"
+        if not id_token_str:
             return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Valida o token no Google
         try:
-            google_response = requests.get(
-                "https://www.googleapis.com/oauth2/v3/userinfo",
-                headers={"Authorization": f"Bearer {access_token}"}
+            # Valida o ID token
+            id_info = id_token.verify_oauth2_token(
+                id_token_str,
+                google_requests.Request(),
+                audience="<SEU_CLIENT_ID_DO_GOOGLE>"
             )
-            user_info = google_response.json()
-        except Exception as e:
-            return Response({"error": f"Erro ao validar token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({"error": f"Token inválido: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if "email" not in user_info:
-            return Response({"error": "Token inválido"}, status=status.HTTP_400_BAD_REQUEST)
+        # Extraindo informações do usuário
+        email = id_info.get("email")
+        full_name = id_info.get("name", "")
+        username = email.split("@")[0] if email else None
 
-        email = user_info["email"]
-        full_name = user_info.get("name", "")
-        username = email.split("@")[0]
+        if not email:
+            return Response({"error": "Email não encontrado no token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Cria ou recupera usuário
+        # Cria ou recupera usuário
         user, created = User.objects.get_or_create(
             email=email,
             defaults={
                 "username": username,
                 "full_name": full_name,
-                "role": "user",  # ou outro default que faça sentido
+                "role": "user",
                 "is_active": True
             }
         )
@@ -103,7 +107,7 @@ class GoogleAuthView(APIView):
             user.full_name = full_name
             user.save()
 
-        # 3. Gera tokens JWT
+        # Gera tokens JWT
         refresh = RefreshToken.for_user(user)
 
         return Response({
@@ -117,7 +121,7 @@ class GoogleAuthView(APIView):
                 "role": user.role
             }
         })
-
+    
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
 
