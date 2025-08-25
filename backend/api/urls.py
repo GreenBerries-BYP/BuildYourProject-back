@@ -8,7 +8,9 @@ from .views import (
     ProjectShareWithMeView, 
     ProjectTasksView, 
     TaskUpdateStatusView,
-    UserConfigurationView
+    UserConfigurationView, 
+    TermsView, 
+    PoliticsView
 )
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
