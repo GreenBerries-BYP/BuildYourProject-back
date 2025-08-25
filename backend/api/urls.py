@@ -23,8 +23,8 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("home/", HomeView.as_view(), name='home'),
     path('projetos/', ProjectView.as_view(), name='projetos'),
-    path('UseTerms/', TermsView.as_view(), name='UseTerms'),
-    path('PrivacyPolicy/', PoliticsView.as_view(), name='PrivacyPolicy'),
+    path('use_terms/', TermsView.as_view(), name='use_terms'),
+    path('politics/', PoliticsView.as_view(), name='politics'),
     path('projetos/sharewithme/', ProjectShareWithMeView.as_view(), name='project-share-with-me'),
 
     # Rotas dinamicas
