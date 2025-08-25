@@ -28,6 +28,7 @@ ALLOWED_HOSTS = [
     os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost'),
     'localhost',
     '127.0.0.1',
+    'buildyourproject-back.onrender.com',
 ]
 
 INSTALLED_APPS = [
@@ -163,3 +164,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+
+CORS_ALLOW_ALL_ORIGINS = True  # ← PERMITE TODAS AS ORIGENS
+CORS_ALLOW_CREDENTIALS = True  # ← PERMITE CREDENCIAIS
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'unsafe-none'
