@@ -15,6 +15,7 @@ import requests #precisa usar o pip install requests
 from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+import random
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
@@ -30,6 +31,9 @@ from .serializers import (
 
 # Lista de convites pendentes (email -> lista de IDs de projetos)
 invited_users = {}
+
+# Armazenamento temporário de códigos (para teste rápido, em produção use DB ou cache)
+verification_codes = {}  # {email: code}
 
 User = get_user_model()
 
@@ -415,6 +419,49 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
             setattr(instance, attr, value)
         instance.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+        
+# envio de código de verificação (func: "esqueci minha senha")
+class SendResetCodeView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "O e-mail é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "E-mail não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Gerar código de 6 dígitos
+        code = "".join([str(random.randint(0, 9)) for _ in range(6)])
+        verification_codes[email] = code  # salva temporariamente
+
+        subject = "Código de verificação"
+        message = f"Olá {user.username},\n\nSeu código de verificação é: {code}\n\nNão compartilhe este código com ninguém."
+        from_email = settings.DEFAULT_FROM_EMAIL
+
+        try:
+            send_mail(subject, message, from_email, [email], fail_silently=False)
+            return Response({"message": "Código enviado com sucesso."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print("Erro ao enviar e-mail:", e)
+            return Response({"error": "Erro ao enviar e-mail."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# verificação de código
+class VerifyResetCodeView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+
+        if not email or not code:
+            return Response({"error": "E-mail e código são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if verification_codes.get(email) == code:
+            # Aqui você poderia permitir redefinir a senha
+            return Response({"message": "Código verificado com sucesso."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
+
         
 class TermsView(TemplateView):
     template_name = "index.html" 

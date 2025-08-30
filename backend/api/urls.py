@@ -12,7 +12,9 @@ from .views import (
     TermsView, 
     PoliticsView, 
     GoogleAuthView,
-    CreateTaskView
+    CreateTaskView,
+    SendResetCodeView,
+    VerifyResetCodeView
 )
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
@@ -34,5 +36,7 @@ urlpatterns = [
     path('tasks/<int:pk>/', TaskUpdateStatusView.as_view(), name='task-update-status'),
     path('user/', UserConfigurationView.as_view(), name='user-config'),
     path("auth/google/", GoogleAuthView.as_view(), name="google-auth"),
-    path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task')
+    path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task'),
+    path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
+    path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
 ]
