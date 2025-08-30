@@ -100,7 +100,51 @@ class ProjectSerializer(serializers.ModelSerializer):
                 due_date=project.end_date
             )
         return project
+    
+class SharedTaskSerializer(serializers.ModelSerializer):
+    nomeTarefa = serializers.CharField(source='title')
+    descricao = serializers.CharField(source='description')
+    prazo = serializers.DateTimeField(source='due_date')
+    status = serializers.SerializerMethodField()
+    responsavel = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Task
+        fields = ['id', 'nomeTarefa', 'descricao', 'prazo', 'status', 'responsavel']
+
+    def get_status(self, obj):
+        return "concluído" if obj.is_completed else "pendente"
+
+    def get_responsavel(self, obj):
+        assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
+        return assignee.user.full_name if assignee else None
+
+
+class SharedProjectSerializer(serializers.ModelSerializer):
+    colaboradores = serializers.SerializerMethodField()
+    tarefasProjeto = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'colaboradores', 'tarefasProjeto']
+
+    def get_colaboradores(self, project):
+        user_projects = UserProject.objects.filter(project=project)
+        return [
+            {
+                "id": up.user.id,
+                "nome": up.user.full_name,
+                "email": up.user.email,
+                "papel": up.role
+            }
+            for up in user_projects
+        ]
+
+    def get_tarefasProjeto(self, project):
+        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
+        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
+        return SharedTaskSerializer(tarefas, many=True).data
+    
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProject

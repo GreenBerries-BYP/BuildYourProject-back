@@ -24,7 +24,8 @@ from .serializers import (
     ProjectSerializer,
     ProjectWithCollaboratorsAndTasksSerializer,
     ProjectWithTasksSerializer,
-    TaskSerializer
+    TaskSerializer,
+    SharedProjectSerializer
 )
 
 # Lista de convites pendentes (email -> lista de IDs de projetos)
@@ -193,7 +194,7 @@ class ProjectShareWithMeView(APIView):
             userproject__user=request.user,
             userproject__role=ProjectRole.MEMBER
         ).distinct()
-        serializer = ProjectSerializer(projetos, many=True)
+        serializer = SharedProjectSerializer(projetos, many=True)
         return Response(serializer.data)
 
 class ProjectTasksView(APIView):
