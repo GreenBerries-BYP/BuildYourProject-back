@@ -167,8 +167,21 @@ class ProjectView(APIView):
                 )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            # DELETE: remove projeto
+    def delete(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Só o líder pode apagar
+        user_project = UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).first()
+        if not user_project:
+            return Response({"detail": "Você não tem permissão para apagar este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        project.delete()
+        return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
 
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -264,7 +277,7 @@ class ProjectTasksView(APIView):
         return Response(projeto_data, status=status.HTTP_200_OK)
 
 
-    # CREATE: cria nova tarefa dentro de uma fase
+    # CREATE: cria nova tarefa a partir de uma fase
     def post(self, request, project_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
@@ -323,6 +336,40 @@ class ProjectTasksView(APIView):
         task.delete()
         return Response({"detail": "Tarefa excluída com sucesso."}, status=status.HTTP_204_NO_CONTENT)
 
+# cria a tarefa do zero
+class CreateTaskView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        # Verifica se usuário pertence ao projeto
+        if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
+            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        data = request.data.copy()
+
+        # Criar fase automática que é a própria tarefa
+        phase_obj, _ = Phase.objects.get_or_create(name=data.get("nome"))
+        project_phase = ProjectPhase.objects.create(project_id=project_id, phase=phase_obj)
+
+        # Criar a tarefa
+        task = Task.objects.create(
+            project_phase=project_phase,
+            title=data.get("nome"),
+            description=data.get("descricao", ""),
+            is_completed=False,
+            due_date=data.get("dataEntrega")
+        )
+
+        # Atribuir responsável se houver
+        responsavel_id = data.get("responsavel")
+        if responsavel_id:
+            try:
+                user = User.objects.get(id=responsavel_id)
+                TaskAssignee.objects.create(task=task, user=user)
+            except User.DoesNotExist:
+                pass
+
+        return Response({"detail": "Tarefa criada com sucesso.", "task_id": task.id}, status=status.HTTP_201_CREATED)
 
 class TaskUpdateStatusView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]

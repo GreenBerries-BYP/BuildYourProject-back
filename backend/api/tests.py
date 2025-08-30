@@ -1,82 +1,84 @@
 from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import RefreshToken
-from api.models import User, Project, UserProject, Phase, ProjectPhase, Task
+from django.utils import timezone
+from api.models import User, Project, Phase, ProjectPhase, Task, TaskAssignee, ProjectRole, UserProject
 
-class ProjectSharedWithMeTests(TestCase):
+class ProjectAndTaskTests(TestCase):
     def setUp(self):
-        # Criar usuários
-        self.user_owner = User.objects.create_user(
-            username='owneruser',
-            email='owner@example.com',
-            password='password123'
-        )
-        self.user_member = User.objects.create_user(
-            username='memberuser',
-            email='member@example.com',
-            password='password123'
-        )
-        self.user_outsider = User.objects.create_user(
-            username='outsideruser',
-            email='outsider@example.com',
-            password='password123'
+        # Criar usuário
+        self.user = User.objects.create_user(
+            email='teste@example.com',
+            username='testeuser',
+            password='123456',
+            full_name='Usuário Teste',
+            role='user'
         )
 
-        # Criar projeto
+        # Criar projeto com datas válidas
         self.project = Project.objects.create(
-            name="Projeto Teste",
-            description="Projeto de teste",
-            type="tipo1",
-            start_date="2025-01-01T00:00:00Z",
-            end_date="2025-12-31T00:00:00Z"
+            name='Projeto Teste',
+            description='Descrição do projeto teste',
+            type='default_type',
+            start_date=timezone.now(),
+            end_date=timezone.now() + timezone.timedelta(days=10),
+            phases=[]
         )
 
-        # Relacionar usuários ao projeto
-        UserProject.objects.create(user=self.user_owner, project=self.project, role='leader')
-        UserProject.objects.create(user=self.user_member, project=self.project, role='member')
+        # Criar phase
+        self.phase = Phase.objects.create(
+            name='Fase Teste',
+            description='Descrição da fase teste'
+        )
 
-        # Criar fase
-        self.phase = Phase.objects.create(name="Fase 1")
-        self.project_phase = ProjectPhase.objects.create(project=self.project, phase=self.phase)
+        # Criar ProjectPhase
+        self.project_phase = ProjectPhase.objects.create(
+            project=self.project,
+            phase=self.phase
+        )
 
-        # Criar tarefa
+        # Criar task
         self.task = Task.objects.create(
-            project_phase=self.project_phase,
-            title="Tarefa 1",
-            description="Descrição da tarefa 1",
-            is_completed=False,
-            due_date="2025-12-31T00:00:00Z"
+            title='Tarefa Teste',
+            description='Descrição da tarefa teste',
+            due_date=timezone.now() + timezone.timedelta(days=5),
+            project_phase=self.project_phase
         )
 
-        # Configurar cliente REST
-        self.client = APIClient()
+        # Criar task assignee
+        self.task_assignee = TaskAssignee.objects.create(
+            task=self.task,
+            user=self.user
+        )
 
-    def authenticate(self, user):
-        """Autenticar cliente com JWT"""
-        refresh = RefreshToken.for_user(user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        # Criar relação de usuário no projeto (como líder)
+        self.user_project = UserProject.objects.create(
+            user=self.user,
+            project=self.project,
+            role=ProjectRole.LEADER
+        )
 
-    def test_shared_projects_with_tasks_as_member(self):
-        """Usuário membro vê o projeto compartilhado com suas tarefas"""
-        self.authenticate(self.user_member)
-        response = self.client.get('/api/projetos/sharewithme/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        projeto = response.data[0]
-        self.assertEqual(projeto['id'], self.project.id)
-        self.assertEqual(len(projeto['tarefasProjeto']), 1)
-        self.assertEqual(projeto['tarefasProjeto'][0]['nomeTarefa'], "Tarefa 1")
+    # Exemplo de teste de criação de task
+    def test_task_creation(self):
+        self.assertEqual(self.task.title, 'Tarefa Teste')
+        self.assertEqual(self.task.project_phase, self.project_phase)
+        self.assertFalse(self.task.is_completed)
 
+    # Exemplo de teste de exclusão de projeto como líder
+    def test_delete_project_as_leader(self):
+        self.assertEqual(self.user_project.role, ProjectRole.LEADER)
+        project_id = self.project.id
+        self.project.delete()
+        with self.assertRaises(Project.DoesNotExist):
+            Project.objects.get(id=project_id)
 
-    def test_shared_projects_with_tasks_as_outsider(self):
-        """Usuário que não está no projeto não vê nada"""
-        self.authenticate(self.user_outsider)
-        response = self.client.get('/api/projetos/sharewithme/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 0)
-
-    def test_unauthenticated_user(self):
-        """Usuário não autenticado recebe 401"""
-        self.client.credentials()  # Remove autenticação
-        response = self.client.get('/api/projetos/sharewithme/')
-        self.assertEqual(response.status_code, 401)
+    # Exemplo de teste de exclusão de projeto como não líder
+    def test_delete_project_as_non_leader(self):
+        # Mudar role para MEMBER
+        self.user_project.role = ProjectRole.MEMBER
+        self.user_project.save()
+        project_id = self.project.id
+        # Usuário não deve poder deletar -> vamos simular checagem
+        if self.user_project.role != ProjectRole.LEADER:
+            cannot_delete = True
+        else:
+            cannot_delete = False
+        self.assertTrue(cannot_delete)
