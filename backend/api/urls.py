@@ -39,4 +39,5 @@ urlpatterns = [
     path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task'),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
+    path('projetos/<int:project_id>/', ProjectView.as_view(), name='delete-project'), # delete project
 ]
