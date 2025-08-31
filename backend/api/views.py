@@ -74,6 +74,7 @@ class LoginView(TokenObtainPairView):
 
 User = get_user_model()
 
+'''
 class GoogleAuthView(APIView):
     def post(self, request):
         id_token_str = request.data.get("access_token")
@@ -105,7 +106,7 @@ class GoogleAuthView(APIView):
         except Exception as e:
             print(f"Erro inesperado na validação: {str(e)}")
             return Response({"error": f"Erro na validação: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-    
+    '''
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
 

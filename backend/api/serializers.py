@@ -1,7 +1,8 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 import re 
-
+from datetime import timedelta
+from django.utils import timezone
 from .models import (
     User, Project, UserProject, Phase, ProjectPhase,
     Task, TaskAssignee, Chat
@@ -80,6 +81,26 @@ class ProjectSerializer(serializers.ModelSerializer):
         if not all(isinstance(item, str) for item in value):
             raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
         return value
+    
+    # --- Validação da data de início ---
+    def validate_start_date(self, value):
+        hoje = timezone.now().date()
+        limite = hoje - timedelta(days=30)
+        if value.date() < limite:
+            raise serializers.ValidationError("A data de início não pode ser mais antiga do que 30 dias.")
+        return value
+
+    # --- Validação cruzada (start < end) ---
+    def validate(self, data):
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+
+        if start_date and end_date and end_date < start_date:
+            raise serializers.ValidationError({
+                "endDate": "A data de término não pode ser anterior à data de início."
+            })
+
+        return data
 
     def create(self, validated_data):
         phases_data = validated_data.pop('phases', [])
