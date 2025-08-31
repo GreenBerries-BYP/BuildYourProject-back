@@ -88,7 +88,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         limite = hoje - timedelta(days=30)
         if value.date() < limite:
              raise serializers.ValidationError({
-                "startDate": "A data de início não pode ser mais antiga do que 30 dias."
+                "A data de início não pode ser mais antiga do que 30 dias."
             })
         return value
 
