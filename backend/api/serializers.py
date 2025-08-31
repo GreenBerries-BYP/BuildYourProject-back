@@ -83,11 +83,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value
     
     # --- Validação da data de início ---
-    def validate_start_date(self, value):
+    def validate_startDate(self, value):  
         hoje = timezone.now().date()
         limite = hoje - timedelta(days=30)
         if value.date() < limite:
-            raise serializers.ValidationError("A data de início não pode ser mais antiga do que 30 dias.")
+             raise serializers.ValidationError({
+                "startDate": "A data de início não pode ser mais antiga do que 30 dias."
+            })
         return value
 
     # --- Validação cruzada (start < end) ---
