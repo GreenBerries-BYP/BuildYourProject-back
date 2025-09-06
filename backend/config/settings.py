@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
-from corsheaders.defaults import default_headers
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -172,21 +172,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",  # Adicione para desenvolvimento
     "http://127.0.0.1:3000",  # Adicione para desenvolvimento
-    "http://localhost:5173",                        # dev Vite
-    "http://127.0.0.1:5173",
-]
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    "authorization",  # necessário para JWT
-]
-
-CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
 ]
 
 # Domínios permitidos para redirecionamento pós-autenticação
