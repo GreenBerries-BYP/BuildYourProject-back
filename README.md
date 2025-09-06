@@ -43,7 +43,9 @@ poetry install
 poetry env activate 
 pip install dj-database-url psycopg2-binary
 pip install google-auth
-
+pip install python-dotenv
+pip install djangorestframework
+pip install django-cors-headers
 
 # Frontend
 cd ../frontend
