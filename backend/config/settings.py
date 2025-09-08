@@ -187,3 +187,17 @@ SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "OPTIONS",
+]
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-csrftoken",
+]
