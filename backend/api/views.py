@@ -178,7 +178,11 @@ class ProjectView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             # DELETE: remove projeto
-    def delete(self, request, project_id):
+    def delete(self, request, *args, **kwargs):
+        project_id = kwargs.get('project_id')
+        if not project_id:
+            return Response({"detail": "ID do projeto não informado."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
@@ -191,6 +195,7 @@ class ProjectView(APIView):
 
         project.delete()
         return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+
 
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
