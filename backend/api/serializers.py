@@ -211,6 +211,8 @@ class ChatSerializer(serializers.ModelSerializer):
         read_only_fields = ['sent_at']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    '''
+    
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -221,8 +223,34 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         attrs['username'] = attrs.get('email')
         return super().validate(attrs)
+        '''
+    
+    username_field = "email"
 
-# serializers.py
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("E-mail ou senha inválidos.")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("E-mail ou senha inválidos.")
+
+        if not user.is_active:
+            raise serializers.ValidationError("Usuário inativo.")
+
+        data = super().validate(attrs)
+        data["user"] = {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+        }
+        return data
+
 
 class SimpleTaskSerializer(serializers.ModelSerializer):
     class Meta:

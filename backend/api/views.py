@@ -74,39 +74,43 @@ class LoginView(TokenObtainPairView):
 
 User = get_user_model()
 
-'''
-class GoogleAuthView(APIView):
+class GoogleLoginView(APIView):
     def post(self, request):
-        id_token_str = request.data.get("access_token")
-        print(f"Token recebido: {id_token_str}")
-        
-        if not id_token_str:
-            print("Erro: Token não fornecido")
-            return Response({"error": "Token não fornecido"}, status=status.HTTP_400_BAD_REQUEST)
-
+        token = request.data.get("access_token")
         try:
-            # Debug: Verifique se o client ID está correto
-            print(f"Client ID esperado: {settings.GOOGLE_OAUTH2_CLIENT_ID}")
-            
-            id_info = id_token.verify_oauth2_token(
-                id_token_str,
-                google_requests.Request(),
-                audience=settings.GOOGLE_OAUTH2_CLIENT_ID  
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request())
+            email = idinfo["email"]
+            name = idinfo.get("name", "")
+
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "username": email.split("@")[0],
+                    "full_name": name,
+                    "role": "user",
+                },
             )
-            
-            print(f"Informações do token: {id_info}")
-            
-            if id_info['aud'] != settings.GOOGLE_OAUTH2_CLIENT_ID:
-                print(f"Audience mismatch: {id_info['aud']} != {settings.GOOGLE_OAUTH2_CLIENT_ID}")
-                return Response({"error": "Audience do token não corresponde"}, status=status.HTTP_400_BAD_REQUEST)
-                
-        except ValueError as e:
-            print(f"Erro na validação do token: {str(e)}")
-            return Response({"error": f"Token inválido: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "full_name": user.full_name,
+                        "role": user.role,
+                    },
+                },
+                status=status.HTTP_200_OK
+            )
         except Exception as e:
-            print(f"Erro inesperado na validação: {str(e)}")
-            return Response({"error": f"Erro na validação: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-    '''
+            return Response(
+                {"error": "Token inválido", "details": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
 

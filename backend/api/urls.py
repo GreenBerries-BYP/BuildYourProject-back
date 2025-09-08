@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView, 
     LoginView, 
@@ -11,7 +12,7 @@ from .views import (
     UserConfigurationView, 
     TermsView, 
     PoliticsView, 
-   # GoogleAuthView,
+    GoogleLoginView,
     CreateTaskView,
     SendResetCodeView,
     VerifyResetCodeView
@@ -35,9 +36,11 @@ urlpatterns = [
     path('projects/<int:project_id>/tasks/', ProjectTasksView.as_view(), name='project-tasks'),
     path('tasks/<int:pk>/', TaskUpdateStatusView.as_view(), name='task-update-status'),
     path('user/', UserConfigurationView.as_view(), name='user-config'),
-    # path("auth/google/", GoogleAuthView.as_view(), name="google-auth"),
+    path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task'),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
     path('projetos/<int:project_id>/', ProjectView.as_view(), name='delete-project'), # delete project
+     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
 ]
