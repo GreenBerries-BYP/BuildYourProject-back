@@ -15,6 +15,7 @@ import requests #precisa usar o pip install requests
 from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from django.shortcuts import get_object_or_404
 import random
 
 # Imports do projeto
@@ -196,7 +197,20 @@ class ProjectView(APIView):
         project.delete()
         return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
 
+# DELETE
+class ProjectDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def delete(self, request, project_id):
+        project = get_object_or_404(Project, id=project_id)
+
+        # Só o líder pode deletar
+        if not UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).exists():
+            return Response({"detail": "Você não tem permissão para apagar este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        project.delete()
+        return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
 
