@@ -5,7 +5,7 @@ from api.models import User, Project, Phase, ProjectPhase, Task, TaskAssignee, P
 class ProjectAndTaskTests(TestCase):
     def setUp(self):
         # Criar usuário
-        self.user = User.objects.create_user(
+        self.user = User.objects.create_user( #type:ignore
             email='teste@example.com',
             username='testeuser',
             password='123456',

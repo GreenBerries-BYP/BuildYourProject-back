@@ -236,14 +236,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError("E-mail ou senha inválidos.")
 
-        if not user.check_password(password):
+        if not user.check_password(password):  #type: ignore
             raise serializers.ValidationError("E-mail ou senha inválidos.")
 
         if not user.is_active:
             raise serializers.ValidationError("Usuário inativo.")
 
         data = super().validate(attrs)
-        data["user"] = {
+        data["user"] = { #type: ignore
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,

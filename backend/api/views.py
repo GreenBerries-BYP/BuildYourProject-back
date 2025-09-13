@@ -79,7 +79,7 @@ class GoogleLoginView(APIView):
     def post(self, request):
         token = request.data.get("access_token")
         try:
-            idinfo = id_token.verify_oauth2_token(token, google_requests.Request())
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH2_CLIENT_ID)
             email = idinfo["email"]
             name = idinfo.get("name", "")
 
@@ -98,10 +98,10 @@ class GoogleLoginView(APIView):
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
                     "user": {
-                        "id": user.id,
+                        "id": user.id, # type: ignore
                         "email": user.email,
-                        "full_name": user.full_name,
-                        "role": user.role,
+                        "full_name": user.full_name, # type: ignore
+                        "role": user.role, # type: ignore
                     },
                 },
                 status=status.HTTP_200_OK
@@ -147,12 +147,12 @@ class ProjectView(APIView):
                     # Salva convite na memória
                     if email not in invited_users:
                         invited_users[email] = []
-                    invited_users[email].append(project.id)
+                    invited_users[email].append(project.id) # type: ignore
 
                     subject = "Você foi convidado para colaborar em um projeto!"
-                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
+                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n" # type: ignore
                                f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
-                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
+                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/") 
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
                     try:
@@ -164,7 +164,7 @@ class ProjectView(APIView):
                         pass
 
             # Criar tarefas a partir das fases (se quiser reforçar aqui)
-            fases = project.phases or []
+            fases = project.phases or [] # type: ignore
             for fase_nome in fases:
                 phase_obj, _ = Phase.objects.get_or_create(name=fase_nome)
                 project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
@@ -173,7 +173,7 @@ class ProjectView(APIView):
                     title=fase_nome,
                     description=f"Fase inicial do projeto: {fase_nome}",
                     is_completed=False,
-                    due_date=project.end_date
+                    due_date=project.end_date # type: ignore
                 )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
