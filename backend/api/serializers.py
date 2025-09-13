@@ -112,7 +112,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         # mas a criação das fases e tarefas pode ser feita aqui.
         for phase_name in phases_data:
             phase_obj, _ = Phase.objects.get_or_create(name=phase_name)
-            project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
+            project_phase = ProjectPhase.objects.create(
+                project=project, 
+                phase=phase_obj,
+                start_date=project.start_date,  # exemplo: usa datas do projeto
+                end_date=project.end_date
+            )
             Task.objects.create(
                 project_phase=project_phase,
                 title=phase_name,
@@ -180,6 +185,22 @@ class ProjectPhaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectPhase
         fields = ['id', 'project', 'phase']
+    
+    def validate(self, data):
+        project = data.get('project')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        if start_date and project and start_date < project.start_date:
+            raise serializers.ValidationError("A data de início da fase não pode ser antes do início do projeto.")
+
+        if end_date and project and end_date > project.end_date:
+            raise serializers.ValidationError("A data de fim da fase não pode ser depois do fim do projeto.")
+
+        if start_date and end_date and end_date < start_date:
+            raise serializers.ValidationError("A data de fim da fase não pode ser antes da data de início.")
+
+        return data
 
 # alterado pra alinhar com o front
 class TaskSerializer(serializers.ModelSerializer):
@@ -242,7 +263,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError("Usuário inativo.")
 
-        data = super().validate(attrs)
+        data = super().validate({"username": email, "password": password})
         data["user"] = { #type: ignore
             "id": user.id,
             "email": user.email,
