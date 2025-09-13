@@ -112,12 +112,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         # mas a criação das fases e tarefas pode ser feita aqui.
         for phase_name in phases_data:
             phase_obj, _ = Phase.objects.get_or_create(name=phase_name)
-            project_phase = ProjectPhase.objects.create(
-                project=project, 
-                phase=phase_obj,
-                start_date=project.start_date,  # exemplo: usa datas do projeto
-                end_date=project.end_date
-            )
+            project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
             Task.objects.create(
                 project_phase=project_phase,
                 title=phase_name,
@@ -185,22 +180,6 @@ class ProjectPhaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectPhase
         fields = ['id', 'project', 'phase']
-    
-    def validate(self, data):
-        project = data.get('project')
-        start_date = data.get('start_date')
-        end_date = data.get('end_date')
-
-        if start_date and project and start_date < project.start_date:
-            raise serializers.ValidationError("A data de início da fase não pode ser antes do início do projeto.")
-
-        if end_date and project and end_date > project.end_date:
-            raise serializers.ValidationError("A data de fim da fase não pode ser depois do fim do projeto.")
-
-        if start_date and end_date and end_date < start_date:
-            raise serializers.ValidationError("A data de fim da fase não pode ser antes da data de início.")
-
-        return data
 
 # alterado pra alinhar com o front
 class TaskSerializer(serializers.ModelSerializer):
@@ -263,7 +242,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError("Usuário inativo.")
 
-        data = super().validate({"username": email, "password": password})
+        data = super().validate(attrs)
         data["user"] = { #type: ignore
             "id": user.id,
             "email": user.email,
@@ -348,27 +327,18 @@ class TaskFullInfoSerializer(serializers.ModelSerializer):
         return TaskFullInfoSerializer(subtasks, many=True).data
 
 
-class ProjectWithCollaboratorsAndTasksSerializer(serializers.ModelSerializer):
+class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
     colaboradores = serializers.SerializerMethodField()
     tarefasProjeto = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Project
-        fields = ['id', 'name', 'colaboradores', 'tarefasProjeto']
+    class Meta(ProjectSerializer.Meta):
+        fields = ProjectSerializer.Meta.fields + ['colaboradores', 'tarefasProjeto']
 
     def get_colaboradores(self, project):
         users = UserProject.objects.filter(project=project)
-        return [
-            {
-                'id': up.user.id,
-                'nome': up.user.full_name,
-                'email': up.user.email,
-                'papel': up.role
-            }
-            for up in users
-        ]
+        return CollaboratorSerializer(users, many=True).data
 
     def get_tarefasProjeto(self, project):
-        fases_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase_id__in=fases_ids).order_by('due_date')
+        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
+        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
         return TaskFullInfoSerializer(tarefas, many=True).data

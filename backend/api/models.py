@@ -79,8 +79,7 @@ class ProjectPhase(models.Model):
     id = models.BigAutoField(primary_key=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE)
-    start_date = models.DateTimeField(null=True, blank=True)  # nova
-    end_date = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.project.name} - {self.phase.name}"
 
