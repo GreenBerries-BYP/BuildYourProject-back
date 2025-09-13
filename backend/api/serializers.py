@@ -327,18 +327,27 @@ class TaskFullInfoSerializer(serializers.ModelSerializer):
         return TaskFullInfoSerializer(subtasks, many=True).data
 
 
-class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
+class ProjectWithCollaboratorsAndTasksSerializer(serializers.ModelSerializer):
     colaboradores = serializers.SerializerMethodField()
     tarefasProjeto = serializers.SerializerMethodField()
 
-    class Meta(ProjectSerializer.Meta):
-        fields = ProjectSerializer.Meta.fields + ['colaboradores', 'tarefasProjeto']
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'colaboradores', 'tarefasProjeto']
 
     def get_colaboradores(self, project):
         users = UserProject.objects.filter(project=project)
-        return CollaboratorSerializer(users, many=True).data
+        return [
+            {
+                'id': up.user.id,
+                'nome': up.user.full_name,
+                'email': up.user.email,
+                'papel': up.role
+            }
+            for up in users
+        ]
 
     def get_tarefasProjeto(self, project):
-        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
+        fases_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
+        tarefas = Task.objects.filter(project_phase_id__in=fases_ids).order_by('due_date')
         return TaskFullInfoSerializer(tarefas, many=True).data

@@ -249,6 +249,7 @@ class ProjectTasksView(APIView):
 
         try:
             project = Project.objects.get(id=project_id)
+            serializer = ProjectWithCollaboratorsAndTasksSerializer(project)
         except Project.DoesNotExist:
             return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
