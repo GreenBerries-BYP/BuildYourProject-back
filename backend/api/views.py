@@ -419,6 +419,27 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         serializer = self.get_serializer(task)
         return Response(serializer.data)
 
+class SubtaskUpdateStatusView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Task.objects.all()  # Task já representa as subtarefas
+    serializer_class = TaskSerializer
+
+    def patch(self, request, *args, **kwargs):
+        subtask = self.get_object()
+        is_completed = request.data.get('is_completed')
+
+        if is_completed is None:
+            return Response({"error": "O campo 'is_completed' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not isinstance(is_completed, bool):
+            return Response({"error": "O campo 'is_completed' deve ser um valor booleano (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
+
+        subtask.is_completed = is_completed
+        subtask.save()
+        serializer = self.get_serializer(subtask)
+        return Response(serializer.data)
+
+
 class UserConfigurationView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
