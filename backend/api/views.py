@@ -277,21 +277,21 @@ class ProjectTasksView(APIView):
                 assignees = TaskAssignee.objects.filter(task=task)
                 responsaveis = [a.user.full_name for a in assignees]
 
-                subTarefas.append({
-                    "id": task.id,
-                    "title": task.title,  # o front espera title
-                    "is_completed": task.is_completed,  # o front espera is_completed
-                    "responsavel": ", ".join(responsaveis) if responsaveis else None,
-                    "prazo": task.due_date.strftime("%d/%m/%Y") if task.due_date else None,
-                    "status": "concluído" if task.is_completed else "pendente"
-                })
+            subTarefas.append({
+                "id": task.id,
+                "title": task.title,  # o front espera title
+                "is_completed": task.is_completed,  # o front espera is_completed
+                "responsavel": ", ".join(responsaveis) if responsaveis else None,
+                "prazo": task.due_date.strftime("%d/%m/%Y") if task.due_date else None,
+                "status": "concluído" if task.is_completed else "pendente"
+            })
 
-                tarefasProjeto.append({
-                    "id": phase.id,
-                    "nomeTarefa": phase.name,
-                    "progresso": progresso,
-                    "subTarefas": subTarefas
-                })
+            tarefasProjeto.append({
+                "id": phase.id,
+                "nomeTarefa": phase.name,
+                "progresso": progresso,
+                "subTarefas": subTarefas
+            })
 
         # >>> AQUI adaptamos os nomes p/ bater com o React <<<
         projeto_data = {
@@ -418,27 +418,6 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         task.save()
         serializer = self.get_serializer(task)
         return Response(serializer.data)
-
-class SubtaskUpdateStatusView(generics.UpdateAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Task.objects.all()  # Task já representa as subtarefas
-    serializer_class = TaskSerializer
-
-    def patch(self, request, *args, **kwargs):
-        subtask = self.get_object()
-        is_completed = request.data.get('is_completed')
-
-        if is_completed is None:
-            return Response({"error": "O campo 'is_completed' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not isinstance(is_completed, bool):
-            return Response({"error": "O campo 'is_completed' deve ser um valor booleano (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
-
-        subtask.is_completed = is_completed
-        subtask.save()
-        serializer = self.get_serializer(subtask)
-        return Response(serializer.data)
-
 
 class UserConfigurationView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer

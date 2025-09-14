@@ -17,7 +17,6 @@ from .views import (
     SendResetCodeView,
     VerifyResetCodeView,
     ProjectDeleteView, 
-    SubtaskUpdateStatusView,
 )
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
@@ -39,9 +38,7 @@ urlpatterns = [
     path('tasks/<int:pk>/', TaskUpdateStatusView.as_view(), name='task-update-status'),
     path('user/', UserConfigurationView.as_view(), name='user-config'),
     path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task'),
-    # igual ao TaskUpdateStatusView, mas para subtasks
-    path('subtasks/<int:pk>/', SubtaskUpdateStatusView.as_view(), name='subtask-update-status'),
-
+ 
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
