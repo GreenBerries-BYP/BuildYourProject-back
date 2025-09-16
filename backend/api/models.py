@@ -36,6 +36,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     registration_date = models.DateTimeField(auto_now_add=True)  # <-- campo criado
 
+    google_access_token = models.TextField(null=True, blank=True)
+    google_refresh_token = models.TextField(null=True, blank=True)  # opcional, mas útil
+    google_token_expiry = models.DateTimeField(null=True, blank=True)  # expiração do access_token
+
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'

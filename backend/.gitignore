@@ -44,3 +44,5 @@ build/
 
 # Ignorar arquivos de upload de mídia (se você tiver FileField/ImageField)
 # media/
+
+.env

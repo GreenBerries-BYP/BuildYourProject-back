@@ -17,6 +17,7 @@ from .views import (
     SendResetCodeView,
     VerifyResetCodeView,
     ProjectDeleteView, 
+    GoogleCalendarSyncView,
 )
 
 # As urls são o que o usuário vai acessar, sempre nesse padrão: 
@@ -49,4 +50,6 @@ urlpatterns = [
 
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
+    path("google/calendar/sync/", GoogleCalendarSyncView.as_view(), name="google_calendar_sync"),
+
 ]

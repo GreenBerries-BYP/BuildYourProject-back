@@ -18,6 +18,9 @@ from google.auth.transport import requests as google_requests
 from django.shortcuts import get_object_or_404
 import random
 
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
 from .serializers import (
@@ -77,9 +80,14 @@ User = get_user_model()
 
 class GoogleLoginView(APIView):
     def post(self, request):
+
         token = request.data.get("access_token")
         try:
-            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH2_CLIENT_ID)
+            idinfo = id_token.verify_oauth2_token(
+                token, 
+                google_requests.Request(), 
+                settings.GOOGLE_OAUTH2_CLIENT_ID
+            )
             email = idinfo["email"]
             name = idinfo.get("name", "")
 
@@ -92,11 +100,17 @@ class GoogleLoginView(APIView):
                 },
             )
 
+            user.google_access_token = token #type:ignore
+            user.save()
+
+            from rest_framework_simplejwt.tokens import RefreshToken
+
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
+                    "google_token": token,
                     "user": {
                         "id": user.id, # type: ignore
                         "email": user.email,
@@ -111,6 +125,62 @@ class GoogleLoginView(APIView):
                 {"error": "Token inválido", "details": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+class GoogleCalendarSyncView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        token = user.google_access_token
+        if not token:
+            return Response({"error": "Usuário não conectado ao Google"}, status=400)
+
+        creds = Credentials(token)
+        service = build('calendar', 'v3', credentials=creds)
+
+        # Pega próximos 10 eventos
+        events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
+                                              orderBy='startTime').execute()
+        events = events_result.get('items', [])
+
+        return Response(events)
+
+    def post(self, request):
+        user = request.user
+        access_token = getattr(user, "google_access_token", None)
+        if not access_token:
+            return Response({"error": "Usuário não tem Google conectado."}, status=400)
+
+        # Exemplo: criar um evento no Calendar
+        event = {
+            "summary": "Nova tarefa do projeto",
+            "description": "Descrição da tarefa",
+            "start": {
+                "dateTime": "2025-09-17T10:00:00-03:00",
+                "timeZone": "America/Sao_Paulo",
+            },
+            "end": {
+                "dateTime": "2025-09-17T11:00:00-03:00",
+                "timeZone": "America/Sao_Paulo",
+            },
+        }
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.post(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            headers=headers,
+            json=event,
+        )
+
+        if response.status_code == 200 or response.status_code == 201:
+            return Response({"message": "Evento criado com sucesso!", "event": response.json()})
+        else:
+            return Response({"error": "Falha ao criar evento", "details": response.json()}, status=response.status_code)
+
         
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]

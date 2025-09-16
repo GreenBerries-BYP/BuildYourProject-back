@@ -174,15 +174,19 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 # CORS mais específico para o Google OAuth
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
-    "http://localhost:3000",  # Adicione para desenvolvimento
-    "http://127.0.0.1:3000",  # Adicione para desenvolvimento
+    "http://localhost:3000",
+    "http://localhost:5173",  # Adicione para desenvolvimento
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",  # Adicione para desenvolvimento
 ]
 
 # Domínios permitidos para redirecionamento pós-autenticação
 CSRF_TRUSTED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
+    "http://localhost:5173",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
 ]
 
 # Configurações de sessão para cross-origin

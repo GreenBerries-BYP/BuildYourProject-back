@@ -2,7 +2,7 @@
 name = "buildyourproject"
 version = "0.1.0"
 description = ""
-authors = ["Rodrigo <email@exemplo.com>"]
+authors = ["GreenBerries <email@exemplo.com>"]
 package-mode = false
 
 [tool.poetry.dependencies]
