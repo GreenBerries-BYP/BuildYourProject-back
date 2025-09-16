@@ -78,4 +78,4 @@ npm run dev
 
 
 
-![Alt](https://repobeats.axiom.co/api/embed/23fc15bc670b6d14aa06893cd6211b8f190f8311.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/e6dded7619f898ccb363c37cbd862c9a48978b95.svg "Repobeats analytics image")
