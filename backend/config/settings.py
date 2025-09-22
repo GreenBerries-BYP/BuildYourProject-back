@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Carrega variáveis de ambiente do arquivo .env
@@ -50,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #"config.middleware.SecurityHeadersMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -88,6 +91,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 # Validação de senhas
 AUTH_PASSWORD_VALIDATORS = [
@@ -153,16 +157,16 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
-# ===== CONFIGURAÇÃO CORS CORRIGIDA =====
-CORS_ALLOW_ALL_ORIGINS = True  # Para desenvolvimento - permitir todas as origens
 
+# CONFIGURAÇÃO CORS UNIFICADA
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
     "OPTIONS",
-    "PATCH",
+    "PATCH", 
     "POST",
     "PUT",
 ]
@@ -173,21 +177,12 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "content-type",
     "dnt",
-    "origin",
+    "origin", 
     "user-agent",
     "x-csrftoken",
     "x-requested-with",
 ]
-
-# Configurações de segurança para cross-origin
-CSRF_TRUSTED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:8000",
-]
-
+# Configurações de sessão para cross-origin
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'

@@ -45,15 +45,14 @@ urlpatterns = [
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
-
-    path('projetos/<int:project_id>/', ProjectView.as_view(), name='delete-project'), # delete project
-  
     path('projetos/<int:project_id>/delete/', ProjectDeleteView.as_view(), name='project-delete'),  # DELETE
 
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("google/calendar/sync/", GoogleCalendarSyncView.as_view(), name="google_calendar_sync"),
 
+    path('projetos/<int:project_id>/', ProjectView.as_view(), name='delete-project'), # delete project
+    
     # IMPLEMENTAÇÃO ML
     path('projetos/<int:project_id>/analisar/', AnaliseProjetoView.as_view(), name='analisar-projeto'),
     path('projetos/<int:project_id>/aplicar-sugestao/', AplicarSugestaoView.as_view(), name='aplicar-sugestao'),
