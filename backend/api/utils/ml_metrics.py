@@ -1,4 +1,3 @@
-# api/utils/ml_metrics.py
 from django.utils import timezone
 from ..models import Project, Task, UserProject, TaskAssignee
 

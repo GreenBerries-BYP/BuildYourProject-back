@@ -1,4 +1,3 @@
-import numpy as np
 from django.utils import timezone
 from ..utils.ml_metrics import calcular_metricas_projeto
 
