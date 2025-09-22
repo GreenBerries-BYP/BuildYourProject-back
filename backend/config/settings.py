@@ -119,7 +119,6 @@ USE_TZ = True
 
 # Arquivos estáticos
 STATIC_URL = 'static/'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.User'
@@ -181,8 +180,7 @@ CORS_ALLOW_HEADERS = [
     "user-agent",
     "x-csrftoken",
     "x-requested-with",
-]
-# Configurações de sessão para cross-origin
+]# Configurações de sessão para cross-origin
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
