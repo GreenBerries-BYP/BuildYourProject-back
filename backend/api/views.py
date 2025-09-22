@@ -15,8 +15,9 @@ import requests #precisa usar o pip install requests
 from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404 
 import random
+from django.http import JsonResponse
 
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
@@ -272,19 +273,43 @@ class ProjectView(APIView):
         project.delete()
         return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
 
-# DELETE
+#DELETE
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
+    # ✅ ADICIONE este método para lidar com OPTIONS (preflight)
+    def options(self, request, *args, **kwargs):
+        response = JsonResponse({"message": "OK"})
+        response["Access-Control-Allow-Origin"] = "https://buildyourproject-front.onrender.com"
+        response["Access-Control-Allow-Methods"] = "DELETE, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "authorization, content-type"
+        response["Access-Control-Allow-Credentials"] = "true"
+        return response
+
     def delete(self, request, project_id):
-        project = get_object_or_404(Project, id=project_id)
+        try:
+            project = get_object_or_404(Project, id=project_id)
 
-        # Só o líder pode deletar
-        if not UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).exists():
-            return Response({"detail": "Você não tem permissão para apagar este projeto."}, status=status.HTTP_403_FORBIDDEN)
+            # Só o líder pode deletar
+            if not UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).exists():
+                return Response(
+                    {"detail": "Você não tem permissão para apagar este projeto."}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
-        project.delete()
-        return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+            project.delete()
+            
+            # ✅ MUDE para status 200 com resposta JSON explícita
+            return Response(
+                {"detail": "Projeto excluído com sucesso."}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return Response(
+                {"detail": f"Erro ao excluir projeto: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
 class ProjectCollaboratorsView(APIView):
     permission_classes = [IsAuthenticated]
