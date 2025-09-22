@@ -142,27 +142,15 @@ class Chat(models.Model):
 
 # ALTERAÇÕES PARA INSERIR ML
 
-# Campos novos para Project
-Project.add_to_class('complexidade_estimada', models.FloatField(default=1.0))
+# Campo novo para Project
 Project.add_to_class('probabilidade_atraso', models.FloatField(default=0.0))
-Project.add_to_class('data_ultima_analise', models.DateTimeField(auto_now=True))
-Project.add_to_class('alerta_atraso', models.BooleanField(default=False))
 
-# Campos novos para Task  
-Task.add_to_class('tempo_estimado_horas', models.FloatField(default=8.0))
-Task.add_to_class('tempo_real_horas', models.FloatField(null=True, blank=True))
+# Campo novo para Task  
 Task.add_to_class('complexidade', models.FloatField(default=3.0))
-Task.add_to_class('prioridade', models.IntegerField(default=2))
-Task.add_to_class('data_inicio_real', models.DateTimeField(null=True, blank=True))
-Task.add_to_class('data_conclusao_real', models.DateTimeField(null=True, blank=True))
 
-# Model para histórico de análises
+# Model para histórico 
 class AnaliseProjeto(models.Model):
     projeto = models.ForeignKey(Project, on_delete=models.CASCADE)
     data_analise = models.DateTimeField(auto_now_add=True)
     probabilidade_atraso = models.FloatField()
     sugestoes_geradas = models.JSONField()
-    acoes_aplicadas = models.JSONField(default=list)
-    
-    def __str__(self):
-        return f"Análise {self.projeto.name} - {self.data_analise}"

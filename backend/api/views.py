@@ -21,6 +21,11 @@ import random
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
+from django.utils import timezone
+from datetime import timedelta
+from .ml.predictor import PredictorAtraso
+from .ml.sugestoes import GeradorSugestoes
+
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
 from .serializers import (
@@ -562,3 +567,177 @@ class TermsView(TemplateView):
 
 class PoliticsView(TemplateView): 
     template_name = "index.html"
+
+# IMPLEMENTAÇÃO ML:
+class AnaliseProjetoView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, project_id):
+        """
+        Analisa o projeto e gera sugestões
+        URL: POST /api/projetos/{id}/analisar
+        """
+        from .models import AnaliseProjeto
+        
+        projeto = get_object_or_404(Project, id=project_id)
+        
+        # Verificar permissão
+        if not UserProject.objects.filter(user=request.user, project=projeto).exists():
+            return Response({"error": "Você não tem acesso a este projeto"}, status=403)
+        
+        try:
+            # 1. Calcular probabilidade de atraso
+            predictor = PredictorAtraso()
+            probabilidade = predictor.prever_probabilidade_atraso(projeto)
+            
+            # 2. Gerar sugestões
+            sugestoes = GeradorSugestoes.gerar_sugestoes(projeto)
+            
+            # 3. Salvar análise no histórico
+            analise = AnaliseProjeto.objects.create(
+                projeto=projeto,
+                probabilidade_atraso=probabilidade,
+                sugestoes_geradas=sugestoes
+            )
+            
+            # 4. Atualizar projeto com alerta
+            projeto.probabilidade_atraso = probabilidade
+            projeto.alerta_atraso = probabilidade > 70  # Alerta se >70%
+            projeto.data_ultima_analise = timezone.now()
+            projeto.save()
+            
+            return Response({
+                'sucesso': True,
+                'probabilidade_atraso': probabilidade,
+                'alerta_atraso': projeto.alerta_atraso,
+                'sugestoes': sugestoes,
+                'data_analise': analise.data_analise,
+                'mensagem': 'Análise concluída com sucesso'
+            })
+            
+        except Exception as e:
+            return Response({
+                'sucesso': False,
+                'error': f'Erro na análise: {str(e)}'
+            }, status=500)
+
+class AplicarSugestaoView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, project_id):
+        """
+        Aplica uma sugestão específica no projeto
+        URL: POST /api/projetos/{id}/aplicar-sugestao
+        """
+        from .models import AnaliseProjeto
+        
+        projeto = get_object_or_404(Project, id=project_id)
+        sugestao_id = request.data.get('sugestao_id')
+        acao = request.data.get('acao')
+        
+        # Verificar permissão (apenas líder pode aplicar sugestões)
+        user_project = UserProject.objects.filter(
+            user=request.user, 
+            project=projeto
+        ).first()
+        
+        if not user_project or user_project.role != ProjectRole.LEADER:
+            return Response({"error": "Apenas o líder do projeto pode aplicar sugestões"}, status=403)
+        
+        try:
+            # Executar a ação específica
+            if acao == 'reordenar_tarefas_complexas':
+                resultado = self._reordenar_tarefas_complexas(projeto)
+            elif acao == 'redistribuir_carga':
+                resultado = self._redistribuir_carga(projeto)
+            elif acao == 'ajustar_prazos':
+                resultado = self._ajustar_prazos(projeto)
+            else:
+                return Response({"error": "Ação não reconhecida"}, status=400)
+            
+            # Registrar no histórico
+            analise = AnaliseProjeto.objects.filter(projeto=projeto).last()
+            if analise:
+                analise.acoes_aplicadas.append({
+                    'sugestao_id': sugestao_id,
+                    'acao': acao,
+                    'data_aplicacao': timezone.now().isoformat(),
+                    'resultado': resultado,
+                    'aplicado_por': request.user.email
+                })
+                analise.save()
+            
+            return Response({
+                'sucesso': True,
+                'acao_aplicada': acao,
+                'resultado': resultado,
+                'mensagem': 'Sugestão aplicada com sucesso'
+            })
+            
+        except Exception as e:
+            return Response({
+                'sucesso': False,
+                'error': f'Erro ao aplicar sugestão: {str(e)}'
+            }, status=500)
+    
+    def _reordenar_tarefas_complexas(self, projeto):
+        """Move tarefas complexas para o início do cronograma"""
+        tarefas = Task.objects.filter(
+            project_phase__project=projeto,
+            is_completed=False
+        ).order_by('-complexidade', 'due_date')
+        
+        # Reagendar prazos baseado na nova ordem
+        data_base = timezone.now() + timedelta(days=1)
+        tarefas_atualizadas = 0
+        
+        for i, tarefa in enumerate(tarefas):
+            novo_prazo = data_base + timedelta(days=i * 2)
+            if tarefa.due_date != novo_prazo:
+                tarefa.due_date = novo_prazo
+                tarefa.save()
+                tarefas_atualizadas += 1
+        
+        return f"Reordenadas {tarefas_atualizadas} tarefas por complexidade"
+    
+    def _redistribuir_carga(self, projeto):
+        """Distribui tarefas de forma equilibrada"""
+        usuarios = list(UserProject.objects.filter(project=projeto))
+        if not usuarios:
+            return "Nenhum usuário no projeto para redistribuir"
+            
+        tarefas_nao_atribuidas = Task.objects.filter(
+            project_phase__project=projeto,
+            is_completed=False,
+            taskassignee__isnull=True
+        )
+        
+        tarefas_distribuidas = 0
+        
+        for i, tarefa in enumerate(tarefas_nao_atribuidas):
+            usuario = usuarios[i % len(usuarios)].user
+            TaskAssignee.objects.create(task=tarefa, user=usuario)
+            tarefas_distribuidas += 1
+        
+        return f"Distribuídas {tarefas_distribuidas} tarefas entre {len(usuarios)} membros"
+    
+    def _ajustar_prazos(self, projeto):
+        """Estende prazos de tarefas críticas"""
+        tarefas_criticas = Task.objects.filter(
+            project_phase__project=projeto,
+            is_completed=False,
+            due_date__lt=timezone.now() + timedelta(days=3)
+        )
+        
+        tarefas_ajustadas = 0
+        
+        for tarefa in tarefas_criticas:
+            novo_prazo = tarefa.due_date + timedelta(days=7)
+            if novo_prazo > projeto.end_date:
+                novo_prazo = projeto.end_date
+                
+            tarefa.due_date = novo_prazo
+            tarefa.save()
+            tarefas_ajustadas += 1
+        
+        return f"Ajustados prazos de {tarefas_ajustadas} tarefas críticas"
