@@ -91,15 +91,28 @@ class ProjectPhase(models.Model):
 class Task(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     is_completed = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)  # 🔹 início da tarefa
+    due_date = models.DateTimeField()                     # 🔹 fim da tarefa
     project_phase = models.ForeignKey(ProjectPhase, on_delete=models.CASCADE)
+
+    parent_task = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="subtasks"
+    )
 
     def __str__(self):
         return self.title
 
+    @property
+    def duration(self):
+        """Duração em dias"""
+        return (self.due_date - self.created_at).days
+    
 class TaskAssignee(models.Model):
     id = models.BigAutoField(primary_key=True)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -126,3 +139,30 @@ class Chat(models.Model):
 
 #     def __str__(self):
 #         return f"Attachment for Task {self.task.title}"
+
+# ALTERAÇÕES PARA INSERIR ML
+
+# Campos novos para Project
+Project.add_to_class('complexidade_estimada', models.FloatField(default=1.0))
+Project.add_to_class('probabilidade_atraso', models.FloatField(default=0.0))
+Project.add_to_class('data_ultima_analise', models.DateTimeField(auto_now=True))
+Project.add_to_class('alerta_atraso', models.BooleanField(default=False))
+
+# Campos novos para Task  
+Task.add_to_class('tempo_estimado_horas', models.FloatField(default=8.0))
+Task.add_to_class('tempo_real_horas', models.FloatField(null=True, blank=True))
+Task.add_to_class('complexidade', models.FloatField(default=3.0))
+Task.add_to_class('prioridade', models.IntegerField(default=2))
+Task.add_to_class('data_inicio_real', models.DateTimeField(null=True, blank=True))
+Task.add_to_class('data_conclusao_real', models.DateTimeField(null=True, blank=True))
+
+# Model para histórico de análises
+class AnaliseProjeto(models.Model):
+    projeto = models.ForeignKey(Project, on_delete=models.CASCADE)
+    data_analise = models.DateTimeField(auto_now_add=True)
+    probabilidade_atraso = models.FloatField()
+    sugestoes_geradas = models.JSONField()
+    acoes_aplicadas = models.JSONField(default=list)
+    
+    def __str__(self):
+        return f"Análise {self.projeto.name} - {self.data_analise}"
