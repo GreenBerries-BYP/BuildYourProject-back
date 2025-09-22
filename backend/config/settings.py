@@ -10,8 +10,6 @@ from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Carrega variáveis de ambiente do arquivo .env
@@ -52,7 +50,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "config.middleware.SecurityHeadersMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -92,7 +89,6 @@ else:
         }
     }
 
-
 # Validação de senhas
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
@@ -119,19 +115,6 @@ USE_TZ = True
 
 # Arquivos estáticos
 STATIC_URL = 'static/'
-
-# CORS
-CORS_ALLOWED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-]
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://localhost:\d+$",
-    r"^http://127\.0\.0\.1:\d+$",
-]
-
-CORS_ALLOW_CREDENTIALS = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -170,17 +153,33 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
+# ===== CONFIGURAÇÃO CORS CORRIGIDA =====
+CORS_ALLOW_ALL_ORIGINS = True  # Para desenvolvimento - permitir todas as origens
 
-# CORS mais específico para o Google OAuth
-CORS_ALLOWED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",  # Adicione para desenvolvimento
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:8000",  # Adicione para desenvolvimento
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 
-# Domínios permitidos para redirecionamento pós-autenticação
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# Configurações de segurança para cross-origin
 CSRF_TRUSTED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
@@ -189,22 +188,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
-# Configurações de sessão para cross-origin
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
-
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "OPTIONS",
-]
-CORS_ALLOW_HEADERS = [
-    "content-type",
-    "authorization",
-    "x-csrftoken",
-]
