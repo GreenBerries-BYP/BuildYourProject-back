@@ -8,6 +8,7 @@ python-dotenv==1.1.0
 sqlparse==0.5.3
 tzdata==2025.2
 gunicorn
+numpy==1.24.0
 dj-database-url
 psycopg2-binary
 python-dotenv
@@ -16,4 +17,3 @@ google-auth==2.24.0
 django-cors-headers
 djangorestframework
 google-api-python-client
-numpy==1.24.0
