@@ -255,6 +255,7 @@ class ProjectView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             # DELETE: remove projeto
+    '''
     def delete(self, request, *args, **kwargs):
         project_id = kwargs.get('project_id')
         if not project_id:
@@ -272,12 +273,11 @@ class ProjectView(APIView):
 
         project.delete()
         return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
-
+'''
 #DELETE
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # ✅ ADICIONE este método para lidar com OPTIONS (preflight)
     def options(self, request, *args, **kwargs):
         response = JsonResponse({"message": "OK"})
         response["Access-Control-Allow-Origin"] = "https://buildyourproject-front.onrender.com"
@@ -299,7 +299,6 @@ class ProjectDeleteView(APIView):
 
             project.delete()
             
-            # ✅ MUDE para status 200 com resposta JSON explícita
             return Response(
                 {"detail": "Projeto excluído com sucesso."}, 
                 status=status.HTTP_200_OK
