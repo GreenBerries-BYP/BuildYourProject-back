@@ -39,6 +39,7 @@ from .serializers import (
     SharedProjectSerializer
 )
 
+
 # Lista de convites pendentes (email -> lista de IDs de projetos)
 invited_users = {}
 
@@ -85,9 +86,14 @@ class LoginView(TokenObtainPairView):
 User = get_user_model()
 
 class GoogleLoginView(APIView):
+    permission_classes = [AllowAny] 
+
     def post(self, request):
 
         token = request.data.get("access_token")
+        if not token:
+            return Response({"error": "Token não fornecido"}, status=400)
+        
         try:
             idinfo = id_token.verify_oauth2_token(
                 token, 
