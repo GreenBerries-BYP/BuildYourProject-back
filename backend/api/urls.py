@@ -7,7 +7,8 @@ from .views import (
     ProjectView, 
     ProjectCollaboratorsView, 
     ProjectShareWithMeView, 
-    ProjectTasksView, 
+    ProjectTasksView,
+    ResetPasswordView, 
     TaskUpdateStatusView,
     UserConfigurationView, 
     TermsView, 
@@ -45,6 +46,8 @@ urlpatterns = [
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
+    path("auth/reset-password/", ResetPasswordView.as_view(), name="reset-password"),
+    
     path('projetos/<int:project_id>/delete/', ProjectDeleteView.as_view(), name='project-delete'),  # DELETE
 
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

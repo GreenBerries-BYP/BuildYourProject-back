@@ -578,6 +578,8 @@ class SendResetCodeView(APIView):
         
 # verificação de código
 class VerifyResetCodeView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get("email")
         code = request.data.get("code")
@@ -591,7 +593,48 @@ class VerifyResetCodeView(APIView):
         else:
             return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+        new_password = request.data.get("new_password")
         
+        if not all([email, code, new_password]):
+            return Response({"error": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verificar código
+        if verification_codes.get(email) != code:
+            return Response({"error": "Código inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+
+            if len(new_password) < 8:
+                return Response({"error": "A senha deve ter no mínimo 8 caracteres."}, status=400)
+
+            user.set_password(new_password)
+            user.save()
+            
+            # Remover código usado
+            if email in verification_codes:
+                del verification_codes[email]
+
+            subject = "Senha alterada com sucesso"
+            message = f"Olá {user.username},\n\nSua senha foi alterada com sucesso."
+            from_email = settings.DEFAULT_FROM_EMAIL
+
+            try:
+                send_mail(subject, message, from_email, [email], fail_silently=False)
+            except Exception as e:
+                print("Erro ao enviar email de confirmação:", e)
+            
+            return Response({"message": "Senha redefinida com sucesso."}, status=status.HTTP_200_OK)
+            
+        except User.DoesNotExist:
+            return Response({"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
 class TermsView(TemplateView):
     template_name = "index.html" 
 
