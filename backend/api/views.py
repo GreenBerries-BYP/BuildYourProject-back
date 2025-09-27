@@ -551,6 +551,8 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
         
 # envio de código de verificação (func: "esqueci minha senha")
 class SendResetCodeView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get("email")
         if not email:
@@ -579,7 +581,7 @@ class SendResetCodeView(APIView):
 # verificação de código
 class VerifyResetCodeView(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         email = request.data.get("email")
         code = request.data.get("code")
