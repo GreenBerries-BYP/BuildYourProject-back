@@ -553,6 +553,13 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
 class SendResetCodeView(APIView):
     permission_classes = [AllowAny]
     
+    def options(self, request, *args, **kwargs):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+    
     def post(self, request):
         email = request.data.get("email")
         if not email:
