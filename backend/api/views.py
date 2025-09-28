@@ -549,42 +549,44 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
         instance.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
         
-# envio de código de verificação (func: "esqueci minha senha")
 class SendResetCodeView(APIView):
     permission_classes = [AllowAny]
     
-    def options(self, request, *args, **kwargs):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-    
     def post(self, request):
-        email = request.data.get("email")
-        if not email:
-            return Response({"error": "O e-mail é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"error": "E-mail não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            email = request.data.get("email")
+            if not email:
+                return Response({"error": "O e-mail é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({"error": "E-mail não encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Gerar código de 6 dígitos
-        code = "".join([str(random.randint(0, 9)) for _ in range(6)])
-        verification_codes[email] = code  # salva temporariamente
+            # Gerar código de 6 dígitos
+            code = "".join([str(random.randint(0, 9)) for _ in range(6)])
+            verification_codes[email] = code
 
-        subject = "Código de verificação"
-        message = f"Olá {user.username},\n\nSeu código de verificação é: {code}\n\nNão compartilhe este código com ninguém."
-        from_email = settings.DEFAULT_FROM_EMAIL
+            subject = "Código de verificação"
+            message = f"Olá {user.username},\n\nSeu código de verificação é: {code}\n\nNão compartilhe este código com ninguém."
+            from_email = settings.DEFAULT_FROM_EMAIL
 
-        try:
-            send_mail(subject, message, from_email, [email], fail_silently=False)
+            # Tenta enviar email, mas não crasha se falhar
+            try:
+                send_mail(subject, message, from_email, [email], fail_silently=False)
+            except Exception as e:
+                print("Erro ao enviar e-mail:", e)
+                # Retorna sucesso mesmo se email falhar (para teste)
+                return Response({
+                    "message": "Código gerado com sucesso (email pode não ter sido enviado).",
+                    "code": code  # ← REMOVA ISSO EM PRODUÇÃO
+                }, status=status.HTTP_200_OK)
+
             return Response({"message": "Código enviado com sucesso."}, status=status.HTTP_200_OK)
+            
         except Exception as e:
-            print("Erro ao enviar e-mail:", e)
-            return Response({"error": "Erro ao enviar e-mail."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+            print("Erro crítico em SendResetCodeView:", e)
+            return Response({"error": "Erro interno do servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # verificação de código
 class VerifyResetCodeView(APIView):
     permission_classes = [AllowAny]
