@@ -170,7 +170,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
-    "https://front-buildyourproject-aig3.onrender.com",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:3000",
@@ -180,7 +179,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
-    "https://front-buildyourproject-aig3.onrender.com",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:3000",
