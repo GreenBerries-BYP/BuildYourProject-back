@@ -109,7 +109,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
     ),
 }
 
@@ -160,7 +165,7 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 
 # CONFIGURAÇÃO CORS UNIFICADA - COMPLETA
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
@@ -199,6 +204,8 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
+
+CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 

@@ -587,7 +587,7 @@ class SendResetCodeView(APIView):
         except Exception as e:
             print("Erro crítico em SendResetCodeView:", e)
             return Response({"error": "Erro interno do servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-# verificação de código
+
 class VerifyResetCodeView(APIView):
     permission_classes = [AllowAny]
 
