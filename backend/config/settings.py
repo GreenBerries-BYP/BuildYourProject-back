@@ -169,6 +169,7 @@ CORS_ALLOW_ALL_ORIGINS = False  # DESATIVADO para usar lista específica (mais s
 
 # Lista de origens permitidas - FRONTEND que pode acessar o backend
 CORS_ALLOWED_ORIGINS = [
+    "https://buildyourproject-front.omrender.com",
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
     "http://localhost:5173",
