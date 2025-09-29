@@ -207,7 +207,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
+#CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
