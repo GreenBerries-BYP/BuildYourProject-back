@@ -24,6 +24,7 @@ from google.oauth2.credentials import Credentials
 
 from django.utils import timezone
 from datetime import timedelta
+from django.core.cache import cache
 from .ml.predictor import PredictorAtraso
 from .ml.sugestoes import GeradorSugestoes
 
@@ -548,7 +549,7 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
             setattr(instance, attr, value)
         instance.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
+ 
 class SendResetCodeView(APIView):
     permission_classes = [AllowAny]
     
@@ -561,31 +562,51 @@ class SendResetCodeView(APIView):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                return Response({"error": "E-mail não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+                # Por segurança, não revelar se email existe ou não
+                return Response({"message": "Se o e-mail existir, um código será enviado."}, status=status.HTTP_200_OK)
 
             # Gerar código de 6 dígitos
             code = "".join([str(random.randint(0, 9)) for _ in range(6)])
-            verification_codes[email] = code
+            
+            # Salvar no cache por 15 minutos (900 segundos)
+            cache_key = f"reset_code_{email}"
+            cache.set(cache_key, code, 900)
 
-            subject = "Código de verificação"
-            message = f"Olá {user.username},\n\nSeu código de verificação é: {code}\n\nNão compartilhe este código com ninguém."
+            subject = "Código de verificação - BuildYourProject"
+            message = f"""
+Olá {user.full_name or user.username},
+
+Seu código de verificação para redefinição de senha é: {code}
+
+Este código expira em 15 minutos.
+
+Se você não solicitou este código, por favor ignore este e-mail.
+
+Atenciosamente,
+Equipe BuildYourProject
+"""
             from_email = settings.DEFAULT_FROM_EMAIL
 
-            # Tenta enviar email, mas não crasha se falhar
             try:
-                send_mail(subject, message, from_email, [email], fail_silently=False)
+                send_mail(subject, message.strip(), from_email, [email], fail_silently=False)
+                print(f"✅ Email de reset enviado para: {email}")  # Debug
+                return Response({"message": "Código enviado com sucesso."}, status=status.HTTP_200_OK)
+                
             except Exception as e:
-                print("Erro ao enviar e-mail:", e)
-                # Retorna sucesso mesmo se email falhar (para teste)
-                return Response({
-                    "message": "Código gerado com sucesso (email pode não ter sido enviado).",
-                    "code": code  # ← REMOVA ISSO EM PRODUÇÃO
-                }, status=status.HTTP_200_OK)
-
-            return Response({"message": "Código enviado com sucesso."}, status=status.HTTP_200_OK)
+                print("❌ Erro ao enviar e-mail:", e)
+                # Em desenvolvimento, retorna o código para testes
+                if settings.DEBUG:
+                    return Response({
+                        "message": "Erro ao enviar email. Código gerado (apenas em desenvolvimento):",
+                        "code": code
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        "error": "Erro ao enviar e-mail. Tente novamente."
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
         except Exception as e:
-            print("Erro crítico em SendResetCodeView:", e)
+            print("❌ Erro crítico em SendResetCodeView:", e)
             return Response({"error": "Erro interno do servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class VerifyResetCodeView(APIView):
@@ -598,26 +619,40 @@ class VerifyResetCodeView(APIView):
         if not email or not code:
             return Response({"error": "E-mail e código são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
         
-        if verification_codes.get(email) == code:
-            # Aqui você poderia permitir redefinir a senha
-            return Response({"message": "Código verificado com sucesso."}, status=status.HTTP_200_OK)
+        # Buscar código do cache
+        cache_key = f"reset_code_{email}"
+        stored_code = cache.get(cache_key)
+        
+        if stored_code and stored_code == code:
+            # Código válido, criar sessão de verificação
+            session_token = f"verified_{random.randint(1000, 9999)}"
+            cache.set(f"reset_verified_{email}", session_token, 600)  # 10 minutos
+            
+            # Remover código usado
+            cache.delete(cache_key)
+            
+            return Response({
+                "message": "Código verificado com sucesso.",
+                "session_token": session_token
+            }, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Código inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get("email")
-        code = request.data.get("code")
+        session_token = request.data.get("session_token")
         new_password = request.data.get("new_password")
         
-        if not all([email, code, new_password]):
+        if not all([email, session_token, new_password]):
             return Response({"error": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Verificar código
-        if verification_codes.get(email) != code:
-            return Response({"error": "Código inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
+        # Verificar sessão
+        stored_token = cache.get(f"reset_verified_{email}")
+        if not stored_token or stored_token != session_token:
+            return Response({"error": "Sessão expirada ou inválida. Por favor, inicie o processo novamente."}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             user = User.objects.get(email=email)
@@ -628,16 +663,25 @@ class ResetPasswordView(APIView):
             user.set_password(new_password)
             user.save()
             
-            # Remover código usado
-            if email in verification_codes:
-                del verification_codes[email]
+            # Limpar sessão
+            cache.delete(f"reset_verified_{email}")
 
-            subject = "Senha alterada com sucesso"
-            message = f"Olá {user.username},\n\nSua senha foi alterada com sucesso."
+            # Email de confirmação
+            subject = "Senha alterada com sucesso - BuildYourProject"
+            message = f"""
+                Olá {user.full_name or user.username},
+
+                Sua senha foi alterada com sucesso.
+
+                Se você não realizou esta alteração, entre em contato conosco imediatamente.
+
+                Atenciosamente,
+                Equipe BuildYourProject
+                """
             from_email = settings.DEFAULT_FROM_EMAIL
 
             try:
-                send_mail(subject, message, from_email, [email], fail_silently=False)
+                send_mail(subject, message.strip(), from_email, [email], fail_silently=False)
             except Exception as e:
                 print("Erro ao enviar email de confirmação:", e)
             
