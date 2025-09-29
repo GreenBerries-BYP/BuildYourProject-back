@@ -210,7 +210,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-#CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
+CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
@@ -225,3 +225,4 @@ SESSION_COOKIE_SECURE = True      # Cookies só via HTTPS
 CSRF_COOKIE_SAMESITE = 'None'     # CSRF cookies entre origens  
 CSRF_COOKIE_SECURE = True         # CSRF cookies só via HTTPS
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
