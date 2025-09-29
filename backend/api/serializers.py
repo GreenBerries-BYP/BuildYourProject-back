@@ -61,21 +61,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'startDate', 'endDate', 'creator_name', 'phases',
             'collaborators', 'collaborators_info', 'collaborator_count',
         ]
-
-    extra_kwargs = {
-            'name': {'max_length': 30},
-            'description': {'max_length': 500},
-        }
     
-    def validate_name(self, value):
-        if len(value) > 30:
-            raise serializers.ValidationError("O nome do projeto não pode ter mais de 30 caracteres.")
-        return value
-
-    def validate_description(self, value):
-        if len(value) > 500:
-            raise serializers.ValidationError("A descrição do projeto não pode ter mais de 500 caracteres.")
-        return value
 
     def get_creator_name(self, obj):
         leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
@@ -97,12 +83,22 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Todos os itens da lista de fases devem ser strings.")
         return value
     
+    def validate_name(self, value):
+        if len(value) > 30:
+            raise serializers.ValidationError({"name":"O nome do projeto não pode ter mais de 30 caracteres."})
+        return value
+
+    def validate_description(self, value):
+        if len(value) > 500:
+            raise serializers.ValidationError({"description": "A descrição do projeto não pode ter mais de 500 caracteres."})
+        return value
+    
     # --- Validação da data de início ---
     def validate_startDate(self, value):  
         hoje = timezone.now().date()
         limite = hoje - timedelta(days=30)
         if value.date() < limite:
-             raise serializers.ValidationError("A data de início não pode ser mais antiga do que 30 dias.")
+             raise serializers.ValidationError({"startDate": "A data de início não pode ser mais antiga do que 30 dias."})
         return value
 
     # --- Validação cruzada (start < end) ---
