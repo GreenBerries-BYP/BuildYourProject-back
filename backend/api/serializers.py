@@ -62,6 +62,21 @@ class ProjectSerializer(serializers.ModelSerializer):
             'collaborators', 'collaborators_info', 'collaborator_count',
         ]
 
+    extra_kwargs = {
+            'name': {'max_length': 30},
+            'description': {'max_length': 500},
+        }
+    
+    def validate_name(self, value):
+        if len(value) > 30:
+            raise serializers.ValidationError("O nome do projeto não pode ter mais de 30 caracteres.")
+        return value
+
+    def validate_description(self, value):
+        if len(value) > 500:
+            raise serializers.ValidationError("A descrição do projeto não pode ter mais de 500 caracteres.")
+        return value
+
     def get_creator_name(self, obj):
         leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
         return leader_relation.user.full_name if leader_relation else None
@@ -96,9 +111,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         end_date = data.get("end_date")
 
         if start_date and end_date and end_date < start_date:
-            raise serializers.ValidationError({
-                "endDate": "A data de término não pode ser anterior à data de início."
-            })
+            raise serializers.ValidationError({"endDate": "A data de término não pode ser anterior à data de início."})
 
         return data
 
