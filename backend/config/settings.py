@@ -172,11 +172,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # =============================================================================
-# CONFIGURAÇÃO CORS OTIMIZADA E CORRIGIDA
-# =============================================================================
 
-# CORREÇÃO PRINCIPAL: Remover CORS_ALLOW_ALL_ORIGINS = True quando usando CORS_ALLOWED_ORIGINS
-# Usar apenas uma das duas abordagens para evitar conflitos
 CORS_ALLOW_ALL_ORIGINS = False  # DESATIVADO para usar lista específica (mais seguro)
 
 # Lista de origens permitidas - FRONTEND que pode acessar o backend
@@ -221,9 +217,6 @@ CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 # Tempo de cache para preflight requests (em segundos)
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-# =============================================================================
-# CONFIGURAÇÕES DE SEGURANÇA PARA CROSS-ORIGIN
-# =============================================================================
 
 # Origins confiáveis para CSRF
 CSRF_TRUSTED_ORIGINS = [

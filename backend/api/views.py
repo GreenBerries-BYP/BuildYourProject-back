@@ -259,27 +259,7 @@ class ProjectView(APIView):
                 )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-            # DELETE: remove projeto
-    '''
-    def delete(self, request, *args, **kwargs):
-        project_id = kwargs.get('project_id')
-        if not project_id:
-            return Response({"detail": "ID do projeto não informado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Só o líder pode apagar
-        user_project = UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).first()
-        if not user_project:
-            return Response({"detail": "Você não tem permissão para apagar este projeto."}, status=status.HTTP_403_FORBIDDEN)
-
-        project.delete()
-        return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
-'''
 #DELETE
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]

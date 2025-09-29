@@ -54,7 +54,6 @@ urlpatterns = [
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("google/calendar/sync/", GoogleCalendarSyncView.as_view(), name="google_calendar_sync"),
 
-    path('projetos/<int:project_id>/', ProjectView.as_view(), name='delete-project'), # delete project
     
     # IMPLEMENTAÇÃO ML
     path('projetos/<int:project_id>/analisar/', AnaliseProjetoView.as_view(), name='analisar-projeto'),
