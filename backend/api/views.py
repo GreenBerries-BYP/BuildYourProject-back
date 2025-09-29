@@ -11,8 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-import requests #precisa usar o pip install requests
-from rest_framework_simplejwt.tokens import RefreshToken
+import requests
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.shortcuts import get_object_or_404 
@@ -25,8 +24,6 @@ from google.oauth2.credentials import Credentials
 from django.utils import timezone
 from datetime import timedelta
 from django.core.cache import cache
-from .ml.predictor import PredictorAtraso
-from .ml.sugestoes import GeradorSugestoes
 
 # Imports do projeto
 from .models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
@@ -40,31 +37,33 @@ from .serializers import (
     SharedProjectSerializer
 )
 
-
-# Lista de convites pendentes (email -> lista de IDs de projetos)
-invited_users = {}
+# Import ML apenas quando necessário (evitar carga desnecessária)
+try:
+    from .ml.predictor import PredictorAtraso
+    from .ml.sugestoes import GeradorSugestoes
+    ML_DISPONIVEL = True
+except ImportError:
+    ML_DISPONIVEL = False
 
 # Armazenamento temporário de códigos (para teste rápido, em produção use DB ou cache)
 verification_codes = {}  # {email: code}
 
 User = get_user_model()
 
-# Na view a gente faz o tratamento do que a url pede. Depende se for get, post, update.
-# Sempre retorne em JSON pro front conseguir tratar bem
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()  # Pega todos os usuários do banco de dados
-    serializer_class = UserSerializer  # Serializa os dados do usuário
-    permission_classes = [AllowAny]  # Permite acesso a qualquer usuário, mesmo não autenticado
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         user = serializer.save()
 
-        # Importa o dicionário de convites
-        from .views import invited_users
+        # Import local para evitar circular
         from .models import Project, UserProject, ProjectRole
-
-        # Verifica se o email do novo usuário está na lista de convites pendentes
-        projetos_convidados = invited_users.get(user.email, [])
+        
+        # Usar cache em vez de variável global
+        cache_key = f"project_invite_{user.email}"
+        projetos_convidados = cache.get(cache_key, [])
 
         for project_id in projetos_convidados:
             try:
@@ -77,20 +76,16 @@ class RegisterView(generics.CreateAPIView):
             except Project.DoesNotExist:
                 continue
 
-        # Remove o email do dicionário após tratar
-        if user.email in invited_users:
-            del invited_users[user.email]
+        # Remove do cache após tratar
+        cache.delete(cache_key)
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-
-User = get_user_model()
 
 class GoogleLoginView(APIView):
     permission_classes = [AllowAny] 
 
     def post(self, request):
-
         token = request.data.get("access_token")
         if not token:
             return Response({"error": "Token não fornecido"}, status=400)
@@ -113,10 +108,8 @@ class GoogleLoginView(APIView):
                 },
             )
 
-            user.google_access_token = token #type:ignore
+            user.google_access_token = token
             user.save()
-
-            from rest_framework_simplejwt.tokens import RefreshToken
 
             refresh = RefreshToken.for_user(user)
             return Response(
@@ -125,10 +118,10 @@ class GoogleLoginView(APIView):
                     "access": str(refresh.access_token),
                     "google_token": token,
                     "user": {
-                        "id": user.id, # type: ignore
+                        "id": user.id,
                         "email": user.email,
-                        "full_name": user.full_name, # type: ignore
-                        "role": user.role, # type: ignore
+                        "full_name": user.full_name,
+                        "role": user.role,
                     },
                 },
                 status=status.HTTP_200_OK
@@ -148,15 +141,25 @@ class GoogleCalendarSyncView(APIView):
         if not token:
             return Response({"error": "Usuário não conectado ao Google"}, status=400)
 
-        creds = Credentials(token)
-        service = build('calendar', 'v3', credentials=creds)
+        try:
+            creds = Credentials(token)
+            service = build('calendar', 'v3', credentials=creds)
 
-        # Pega próximos 10 eventos
-        events_result = service.events().list(calendarId='primary', maxResults=10, singleEvents=True,
-                                              orderBy='startTime').execute()
-        events = events_result.get('items', [])
-
-        return Response(events)
+            # Pega próximos 10 eventos
+            events_result = service.events().list(
+                calendarId='primary', 
+                maxResults=10, 
+                singleEvents=True,
+                orderBy='startTime'
+            ).execute()
+            events = events_result.get('items', [])
+            
+            # Fechar serviço
+            service.close()
+            
+            return Response(events)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
     def post(self, request):
         user = request.user
@@ -183,17 +186,19 @@ class GoogleCalendarSyncView(APIView):
             "Content-Type": "application/json",
         }
 
-        response = requests.post(
-            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-            headers=headers,
-            json=event,
-        )
+        try:
+            response = requests.post(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers=headers,
+                json=event,
+            )
 
-        if response.status_code == 200 or response.status_code == 201:
-            return Response({"message": "Evento criado com sucesso!", "event": response.json()})
-        else:
-            return Response({"error": "Falha ao criar evento", "details": response.json()}, status=response.status_code)
-
+            if response.status_code == 200 or response.status_code == 201:
+                return Response({"message": "Evento criado com sucesso!", "event": response.json()})
+            else:
+                return Response({"error": "Falha ao criar evento", "details": response.json()}, status=response.status_code)
+        except Exception as e:
+            return Response({"error": f"Erro na requisição: {str(e)}"}, status=500)
         
 class HomeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -206,7 +211,11 @@ class ProjectView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        projetos = Project.objects.filter(userproject__user=request.user).distinct()
+        # Query otimizada
+        projetos = Project.objects.filter(
+            userproject__user=request.user
+        ).distinct().select_related()
+        
         serializer = ProjectWithTasksSerializer(projetos, many=True)
         return Response(serializer.data)
 
@@ -214,7 +223,8 @@ class ProjectView(APIView):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             project = serializer.save()
-            # Cria o líder do projeto
+            
+            # Criar líder do projeto
             UserProject.objects.create(
                 user=request.user,
                 project=project,
@@ -222,18 +232,28 @@ class ProjectView(APIView):
             )
 
             collaborator_emails = request.data.get('collaborators', [])
+            
+            # Processar colaboradores de forma eficiente
+            users_existentes = User.objects.filter(email__in=collaborator_emails)
+            users_existentes_map = {user.email: user for user in users_existentes}
+            
             for email in collaborator_emails:
-                try:
-                    found_user = User.objects.get(email=email)
-                    UserProject.objects.create(user=found_user, project=project, role=ProjectRole.MEMBER)
-                except User.DoesNotExist:
-                    # Salva convite na memória
-                    if email not in invited_users:
-                        invited_users[email] = []
-                    invited_users[email].append(project.id) # type: ignore
+                if email in users_existentes_map:
+                    # Usuário existe - criar relação
+                    UserProject.objects.create(
+                        user=users_existentes_map[email],
+                        project=project,
+                        role=ProjectRole.MEMBER
+                    )
+                else:
+                    # Usar cache em vez de variável global
+                    cache_key = f"project_invite_{email}"
+                    existing_invites = cache.get(cache_key, [])
+                    existing_invites.append(project.id)
+                    cache.set(cache_key, existing_invites, 60*60*24*7)  # 7 dias
 
                     subject = "Você foi convidado para colaborar em um projeto!"
-                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n" # type: ignore
+                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
                                f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
                                f"Acesse a plataforma: https://buildyourproject-front.onrender.com/") 
                     from_email = settings.DEFAULT_FROM_EMAIL
@@ -242,12 +262,10 @@ class ProjectView(APIView):
                         send_mail(subject, message, from_email, [email], fail_silently=False)
                     except Exception as e:
                         print("Erro ao enviar e-mail:", e)
-                        # Em um projeto real, é ideal usar o sistema de logging do Django
-                        # em vez de print() para registrar falhas.
                         pass
 
-            # Criar tarefas a partir das fases (se quiser reforçar aqui)
-            fases = project.phases or [] # type: ignore
+            # Criar tarefas a partir das fases
+            fases = project.phases or []
             for fase_nome in fases:
                 phase_obj, _ = Phase.objects.get_or_create(name=fase_nome)
                 project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
@@ -256,32 +274,12 @@ class ProjectView(APIView):
                     title=fase_nome,
                     description=f"Fase inicial do projeto: {fase_nome}",
                     is_completed=False,
-                    due_date=project.end_date # type: ignore
+                    due_date=project.end_date
                 )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-            # DELETE: remove projeto
-    '''
-    def delete(self, request, *args, **kwargs):
-        project_id = kwargs.get('project_id')
-        if not project_id:
-            return Response({"detail": "ID do projeto não informado."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=400)
 
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Só o líder pode apagar
-        user_project = UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).first()
-        if not user_project:
-            return Response({"detail": "Você não tem permissão para apagar este projeto."}, status=status.HTTP_403_FORBIDDEN)
-
-        project.delete()
-        return Response({"detail": "Projeto excluído com sucesso."}, status=status.HTTP_204_NO_CONTENT)
-'''
-#DELETE
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -347,14 +345,13 @@ class ProjectShareWithMeView(APIView):
 class ProjectTasksView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # READ: retorna projeto com colaboradores e tarefas no formato do front
     def get(self, request, project_id):
         # Verifica se o usuário pertence ao projeto
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.select_related().get(id=project_id)
         except Project.DoesNotExist:
             return Response({"detail": "Projeto não encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -363,15 +360,20 @@ class ProjectTasksView(APIView):
         creator_name = leader.user.full_name if leader else None
 
         # colaboradores
-        collaborators_qs = UserProject.objects.filter(project=project)
+        collaborators_qs = UserProject.objects.filter(project=project).select_related('user')
         collaborators = [up.user.full_name for up in collaborators_qs]
 
-        # tarefas do projeto (phases)
+        # tarefas do projeto (phases) - query otimizada
         tarefasProjeto = []
-        project_phases = ProjectPhase.objects.filter(project=project)
+        project_phases = ProjectPhase.objects.filter(project=project).prefetch_related(
+            'task_set',
+            'task_set__taskassignee_set',
+            'task_set__taskassignee_set__user'
+        )
+        
         for pp in project_phases:
             phase = pp.phase
-            tasks = Task.objects.filter(project_phase=pp)
+            tasks = pp.task_set.all()
 
             # progresso da fase
             total_tasks = tasks.count()
@@ -380,17 +382,17 @@ class ProjectTasksView(APIView):
 
             subTarefas = []
             for task in tasks:
-                assignees = TaskAssignee.objects.filter(task=task)
+                assignees = task.taskassignee_set.select_related('user')
                 responsaveis = [a.user.full_name for a in assignees]
 
-            subTarefas.append({
-                "id": task.id,
-                "title": task.title,  # o front espera title
-                "is_completed": task.is_completed,  # o front espera is_completed
-                "responsavel": ", ".join(responsaveis) if responsaveis else None,
-                "prazo": task.due_date.strftime("%d/%m/%Y") if task.due_date else None,
-                "status": "concluído" if task.is_completed else "pendente"
-            })
+                subTarefas.append({
+                    "id": task.id,
+                    "title": task.title,
+                    "is_completed": task.is_completed,
+                    "responsavel": ", ".join(responsaveis) if responsaveis else None,
+                    "prazo": task.due_date.strftime("%d/%m/%Y") if task.due_date else None,
+                    "status": "concluído" if task.is_completed else "pendente"
+                })
 
             tarefasProjeto.append({
                 "id": phase.id,
@@ -399,25 +401,21 @@ class ProjectTasksView(APIView):
                 "subTarefas": subTarefas
             })
 
-        # >>> AQUI adaptamos os nomes p/ bater com o React <<<
         projeto_data = {
-            "name": project.name,  # antes era nomeProjeto
-            "creator_name": creator_name,  # antes era admProjeto
-            "collaborator_count": collaborators_qs.count(),  # antes era numIntegrantes
+            "name": project.name,
+            "creator_name": creator_name,
+            "collaborator_count": collaborators_qs.count(),
             "collaborators": collaborators,
             "tarefasProjeto": tarefasProjeto
         }
 
         return Response(projeto_data, status=status.HTTP_200_OK)
 
-
-    # CREATE: cria nova tarefa a partir de uma fase
     def post(self, request, project_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
         data = request.data.copy()
-        # espera que o front envie 'phase_id' para saber onde criar a tarefa
         try:
             phase = ProjectPhase.objects.get(id=data.get("phase_id"), project_id=project_id)
         except ProjectPhase.DoesNotExist:
@@ -434,12 +432,14 @@ class ProjectTasksView(APIView):
         # atribuir responsáveis se houver
         assignee_ids = data.get("assignee_ids", [])
         for uid in assignee_ids:
-            user = User.objects.get(id=uid)
-            TaskAssignee.objects.create(task=task, user=user)
+            try:
+                user = User.objects.get(id=uid)
+                TaskAssignee.objects.create(task=task, user=user)
+            except User.DoesNotExist:
+                continue
 
         return Response({"detail": "Tarefa criada com sucesso.", "task_id": task.id}, status=status.HTTP_201_CREATED)
 
-    # UPDATE: atualiza status da tarefa
     def patch(self, request, project_id, task_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
@@ -457,7 +457,6 @@ class ProjectTasksView(APIView):
         task.save()
         return Response({"detail": "Status atualizado com sucesso."})
 
-    # DELETE: remove tarefa
     def delete(self, request, project_id, task_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
@@ -470,12 +469,10 @@ class ProjectTasksView(APIView):
         task.delete()
         return Response({"detail": "Tarefa excluída com sucesso."}, status=status.HTTP_204_NO_CONTENT)
 
-# cria a tarefa do zero
 class CreateTaskView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
-        # Verifica se usuário pertence ao projeto
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -530,21 +527,18 @@ class UserConfigurationView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        # Retorna o usuário logado
         return self.request.user
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)  # PATCH
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         
-        # Se vier senha, usar set_password
         if 'password' in serializer.validated_data:
             instance.set_password(serializer.validated_data.pop('password'))
 
-        # Atualiza outros campos
         for attr, value in serializer.validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -562,7 +556,6 @@ class SendResetCodeView(APIView):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                # Por segurança, não revelar se email existe ou não
                 return Response({"message": "Se o e-mail existir, um código será enviado."}, status=status.HTTP_200_OK)
 
             # Gerar código de 6 dígitos
@@ -589,12 +582,11 @@ Equipe BuildYourProject
 
             try:
                 send_mail(subject, message.strip(), from_email, [email], fail_silently=False)
-                print(f"✅ Email de reset enviado para: {email}")  # Debug
+                print(f"✅ Email de reset enviado para: {email}")
                 return Response({"message": "Código enviado com sucesso."}, status=status.HTTP_200_OK)
                 
             except Exception as e:
                 print("❌ Erro ao enviar e-mail:", e)
-                # Em desenvolvimento, retorna o código para testes
                 if settings.DEBUG:
                     return Response({
                         "message": "Erro ao enviar email. Código gerado (apenas em desenvolvimento):",
@@ -705,6 +697,12 @@ class AnaliseProjetoView(APIView):
         Analisa o projeto e gera sugestões
         URL: POST /api/projetos/{id}/analisar
         """
+        if not ML_DISPONIVEL:
+            return Response({
+                'sucesso': False,
+                'error': 'Módulo de ML não disponível'
+            }, status=503)
+            
         from .models import AnaliseProjeto
         
         projeto = get_object_or_404(Project, id=project_id)
