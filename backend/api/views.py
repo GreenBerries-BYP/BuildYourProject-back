@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.views.generic import TemplateView
 from django.contrib.auth import get_user_model
+import threading
 
 # Imports do Django Rest Framework
 from rest_framework import status, generics
@@ -206,7 +207,14 @@ class HomeView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-    
+
+
+def send_mail_async(subject, message, from_email, recipient_list):
+    try:
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+    except Exception as e:
+        print("Erro ao enviar e-mail:", e)
+        
 class ProjectView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -246,23 +254,27 @@ class ProjectView(APIView):
                         role=ProjectRole.MEMBER
                     )
                 else:
-                    # Usar cache em vez de variável global
+                    # Atualiza cache
                     cache_key = f"project_invite_{email}"
                     existing_invites = cache.get(cache_key, [])
                     existing_invites.append(project.id)
-                    cache.set(cache_key, existing_invites, 60*60*24*7)  # 7 dias
+                    cache.set(cache_key, existing_invites, 60*60*24*7)
 
+                    # Prepara e-mail
                     subject = "Você foi convidado para colaborar em um projeto!"
-                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
-                               f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
-                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/") 
+                    message = (
+                        f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
+                        "Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
+                        "Acesse a plataforma: https://buildyourproject-front.onrender.com/"
+                    )
                     from_email = settings.DEFAULT_FROM_EMAIL
-                    
-                    try:
-                        send_mail(subject, message, from_email, [email], fail_silently=False)
-                    except Exception as e:
-                        print("Erro ao enviar e-mail:", e)
-                        pass
+
+                    # Envia e-mail em thread (não bloqueia o request)
+                    threading.Thread(
+                        target=send_mail_async,
+                        args=(subject, message, from_email, [email])
+                    ).start()
+
 
             # Criar tarefas a partir das fases
             fases = project.phases or []
