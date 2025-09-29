@@ -45,15 +45,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #"config.middleware.SecurityHeadersMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -165,29 +164,27 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # =============================================================================
 
-CORS_ALLOW_ALL_ORIGINS = True  # DESATIVADO para usar lista específica (mais seguro)
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Lista de origens permitidas - FRONTEND que pode acessar o backend
-#CORS_ALLOWED_ORIGINS = [
- #   "https://buildyourproject-front.omrender.com",
-  #  "https://buildyourproject-front.onrender.com",
-   # "https://front-buildyourproject-aig3.onrender.com",
-    #"http://localhost:3000",
-    #"http://localhost:5173",
-    #"http://127.0.0.1:3000",
-   # "http://127.0.0.1:5173",
-    #"http://127.0.0.1:8000",
-#]
-CSRF_TRUSTED_ORIGINS = [
-    "https://*",
-    "http://*", 
-    "https://*.onrender.com",
-    "http://*.onrender.com",
-    "https://*.*",
-    "http://*.*",
+CORS_ALLOWED_ORIGINS = [
+    "https://buildyourproject-front.omrender.com",
+    "https://buildyourproject-front.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://buildyourproject-front.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+]
 
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -210,19 +207,23 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
+#CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-# Origins confiáveis para CSRF
-CSRF_TRUSTED_ORIGINS = ["https://*", "http://*"]
 
-CSRF_COOKIE_SECURE = False
-CSRF_USE_SESSIONS = False
+# Origins confiáveis para CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "https://buildyourproject-front.onrender.com",
+    "http://localhost:3000", 
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+]
+
 # Configurações de cookies para cross-origin
 SESSION_COOKIE_SAMESITE = 'None'  # Permite cookies entre diferentes origens
 SESSION_COOKIE_SECURE = True      # Cookies só via HTTPS
 CSRF_COOKIE_SAMESITE = 'None'     # CSRF cookies entre origens  
 CSRF_COOKIE_SECURE = True         # CSRF cookies só via HTTPS
-
-SECURE_CROSS_ORIGIN_OPENER_POLICY = None
