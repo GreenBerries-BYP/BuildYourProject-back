@@ -10,8 +10,7 @@ from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
 
-
-
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Carrega variáveis de ambiente do arquivo .env
@@ -32,6 +31,7 @@ ALLOWED_HOSTS = [
     'buildyourproject-back.onrender.com',
 ]
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,11 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',  # App para lidar com CORS
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # DEVE SER O PRIMEIRO - Processa CORS antes de qualquer outro middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,7 +53,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #"config.middleware.SecurityHeadersMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -74,9 +73,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-STATICFILES_DIRS = [BASE_DIR / "build" / "static"]
 
-# Configuração do banco de dados
+# Database
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(
@@ -93,16 +91,38 @@ else:
         }
     }
 
-
-# Validação de senhas
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
-# REST Framework
+# Internationalization
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "build" / "static"]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'api.User'
+
+# REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -118,19 +138,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Internacionalização
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-# Arquivos estáticos
-STATIC_URL = 'static/'
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-AUTH_USER_MODEL = 'api.User'
-
-# Config JWT
+# JWT Configuration
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -154,7 +162,7 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
-# Configuração de email
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -163,56 +171,73 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
+# =============================================================================
+# CONFIGURAÇÃO CORS OTIMIZADA E CORRIGIDA
+# =============================================================================
 
-# CONFIGURAÇÃO CORS UNIFICADA - COMPLETA
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOW_CREDENTIALS = True
+# CORREÇÃO PRINCIPAL: Remover CORS_ALLOW_ALL_ORIGINS = True quando usando CORS_ALLOWED_ORIGINS
+# Usar apenas uma das duas abordagens para evitar conflitos
+CORS_ALLOW_ALL_ORIGINS = False  # DESATIVADO para usar lista específica (mais seguro)
 
+# Lista de origens permitidas - FRONTEND que pode acessar o backend
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
-    "http://localhost:5173",
+    "http://localhost:5173", 
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8000",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-]
+# Permite envio de cookies e credenciais de autenticação
+CORS_ALLOW_CREDENTIALS = True
 
+# Métodos HTTP permitidos - INCLUI DELETE para sua funcionalidade
 CORS_ALLOW_METHODS = [
-    "DELETE",
+    "DELETE",  # ← ESSENCIAL para deletar projetos
     "GET",
-    "OPTIONS",
-    "PATCH", 
-    "POST",
+    "OPTIONS",  # ← IMPORTANTE para preflight requests
+    "PATCH",
+    "POST", 
     "PUT",
 ]
 
+# Headers permitidos nas requisições
 CORS_ALLOW_HEADERS = [
     "accept",
-    "accept-encoding",
-    "authorization",
+    "accept-encoding", 
+    "authorization",  # ← IMPORTANTE para JWT
     "content-type",
     "dnt",
-    "origin", 
-    "user-agent",
+    "origin",
+    "user-agent", 
     "x-csrftoken",
     "x-requested-with",
 ]
 
+# Headers expostos para o frontend
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
+# Tempo de cache para preflight requests (em segundos)
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-# Configurações de sessão para cross-origin
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
+# =============================================================================
+# CONFIGURAÇÕES DE SEGURANÇA PARA CROSS-ORIGIN
+# =============================================================================
+
+# Origins confiáveis para CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "https://buildyourproject-front.onrender.com",
+    "http://localhost:3000", 
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+]
+
+# Configurações de cookies para cross-origin
+SESSION_COOKIE_SAMESITE = 'None'  # Permite cookies entre diferentes origens
+SESSION_COOKIE_SECURE = True      # Cookies só via HTTPS
+CSRF_COOKIE_SAMESITE = 'None'     # CSRF cookies entre origens  
+CSRF_COOKIE_SECURE = True         # CSRF cookies só via HTTPS
+
