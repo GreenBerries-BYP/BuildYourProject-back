@@ -165,30 +165,29 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
 # =============================================================================
 
-CORS_ALLOW_ALL_ORIGINS = False  # DESATIVADO para usar lista específica (mais seguro)
+CORS_ALLOW_ALL_ORIGINS = True  # DESATIVADO para usar lista específica (mais seguro)
+CORS_ALLOW_CREDENTIALS = True
 
 # Lista de origens permitidas - FRONTEND que pode acessar o backend
-CORS_ALLOWED_ORIGINS = [
-    "https://buildyourproject-front.omrender.com",
-    "https://buildyourproject-front.onrender.com",
-    "https://front-buildyourproject-aig3.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
+#CORS_ALLOWED_ORIGINS = [
+ #   "https://buildyourproject-front.omrender.com",
+  #  "https://buildyourproject-front.onrender.com",
+   # "https://front-buildyourproject-aig3.onrender.com",
+    #"http://localhost:3000",
+    #"http://localhost:5173",
+    #"http://127.0.0.1:3000",
+   # "http://127.0.0.1:5173",
+    #"http://127.0.0.1:8000",
+#]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*",
+    "http://*", 
+    "https://*.onrender.com",
+    "http://*.onrender.com",
+    "https://*.*",
+    "http://*.*",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-    "https://buildyourproject-front.omrender.com",
-    "https://front-buildyourproject-aig3.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-]
 
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -215,17 +214,11 @@ CORS_ALLOW_HEADERS = [
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-
 # Origins confiáveis para CSRF
-CSRF_TRUSTED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com",
-    "http://localhost:3000", 
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-]
+CSRF_TRUSTED_ORIGINS = ["https://*", "http://*"]
 
+CSRF_COOKIE_SECURE = False
+CSRF_USE_SESSIONS = False
 # Configurações de cookies para cross-origin
 SESSION_COOKIE_SAMESITE = 'None'  # Permite cookies entre diferentes origens
 SESSION_COOKIE_SECURE = True      # Cookies só via HTTPS
