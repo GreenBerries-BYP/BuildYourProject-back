@@ -295,14 +295,6 @@ class ProjectView(APIView):
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def options(self, request, *args, **kwargs):
-        response = JsonResponse({"message": "OK"})
-        response["Access-Control-Allow-Origin"] = "https://buildyourproject-front.onrender.com"
-        response["Access-Control-Allow-Methods"] = "DELETE, OPTIONS"
-        response["Access-Control-Allow-Headers"] = "authorization, content-type"
-        response["Access-Control-Allow-Credentials"] = "true"
-        return response
-
     def delete(self, request, project_id):
         try:
             project = get_object_or_404(Project, id=project_id)
