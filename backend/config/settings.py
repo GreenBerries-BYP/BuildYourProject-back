@@ -137,13 +137,13 @@ DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com/",  # frontend no Render
-    "http://localhost:3000/",  # se testar local
+    "https://buildyourproject-front.onrender.com",  # frontend no Render
+    "http://localhost:3000",  # se testar local
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://buildyourproject-front.onrender.com/",
-    "http://localhost:3000/",
+    "https://buildyourproject-front.onrender.com",
+    "http://localhost:3000",
 ]
 
 CORS_ALLOW_METHODS = [
