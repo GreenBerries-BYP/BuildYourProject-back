@@ -1,3 +1,5 @@
+# analisador_desempenho.py - ATUALIZADO
+
 from django.utils import timezone
 from ..utils.metricas_projeto import calcular_metricas_projeto
 
@@ -37,23 +39,27 @@ class AnalisadorDesempenho:
         spi = metricas['spi']
         porcentagem_atraso = (1 - spi) * 100
         
-        # Determinar status baseado no SPI
+        # 🎯 DETERMINAR STATUS BASEADO NO SPI
         if spi >= 1.1:
             status = "ADIANTADO"
             cor = "verde"
-            explicacao = f"Projeto {abs(porcentagem_atraso):.1f}% adiantado"
-        elif spi >= 0.9:
+            explicacao = f"Projeto {abs(porcentagem_atraso):.1f}% adiantado - SPI: {spi:.2f}"
+        elif spi >= 0.95:
             status = "NO PRAZO" 
+            cor = "verde-claro"
+            explicacao = "Projeto dentro do cronograma - SPI: 1.00"
+        elif spi >= 0.9:
+            status = "ATENÇÃO" 
             cor = "amarelo"
-            explicacao = "Projeto dentro do cronograma"
+            explicacao = f"Projeto próximo do limite - SPI: {spi:.2f}"
         elif spi >= 0.7:
             status = "ATRASO MODERADO"
             cor = "laranja"
-            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado"
+            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado - SPI: {spi:.2f}"
         else:
             status = "ATRASO CRÍTICO"
             cor = "vermelho"
-            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado"
+            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado - SPI: {spi:.2f}"
         
         return {
             'status': status,
@@ -66,5 +72,7 @@ class AnalisadorDesempenho:
             'vac': metricas['vac'],
             'dias_restantes': metricas['dias_restantes'],
             'tarefas_atrasadas': metricas['tarefas_atrasadas'],
-            'taxa_conclusao': metricas['taxa_conclusao']
+            'taxa_conclusao': metricas['taxa_conclusao'],
+            'total_tarefas': metricas['total_tarefas'],
+            'tarefas_concluidas': metricas['tarefas_concluidas']
         }
