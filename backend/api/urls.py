@@ -1,30 +1,35 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import (
+from api.views.authentication_views import (
     RegisterView, 
-    LoginView, 
-    HomeView, 
-    ProjectView, 
-    ProjectCollaboratorsView, 
-    ProjectShareWithMeView, 
-    ProjectTasksView,
-    ResetPasswordView, 
-    TaskUpdateStatusView,
-    UserConfigurationView, 
-    TermsView, 
-    PoliticsView, 
+    LoginView,
     GoogleLoginView,
-    CreateTaskView,
     SendResetCodeView,
     VerifyResetCodeView,
-    ProjectDeleteView, 
-    GoogleCalendarSyncView,
+    ResetPasswordView,
+)
+from api.views.project_views import (
+    ProjectView,
+    ProjectCollaboratorsView,
+    ProjectShareWithMeView,
+    ProjectDeleteView,
+)
+from api.views.task_views import (
+    ProjectTasksView,
+    TaskUpdateStatusView,
+    CreateTaskView,
+)
+from api.views.google_views import GoogleCalendarSyncView
+from api.views.utility_views import (
+    HomeView,
+    UserConfigurationView, 
+    TermsView, 
+    PoliticsView,
+)
+from api.views.analise_inteligente_views import (
     AnaliseProjetoView,
     AplicarSugestaoView
 )
-
-# As urls são o que o usuário vai acessar, sempre nesse padrão: 
-# Url que o usuário vai ver, nome da url na view, apelido pra referenciar a url no front
 
 urlpatterns = [
     # Rotas Estáticas
@@ -36,7 +41,7 @@ urlpatterns = [
     path('politics/', PoliticsView.as_view(), name='politics'),
     path('projetos/sharewithme/', ProjectShareWithMeView.as_view(), name='project-share-with-me'),
 
-    # Rotas dinamicas
+    # Rotas dinâmicas
     path('projetos/<int:project_id>/collaborators/', ProjectCollaboratorsView.as_view(), name='project-collaborators'),
     path('projetos/<int:project_id>/tasks/', ProjectTasksView.as_view(), name='project-tasks'),
     path('tasks/<int:pk>/', TaskUpdateStatusView.as_view(), name='task-update-status'),
@@ -48,15 +53,12 @@ urlpatterns = [
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
     path("auth/reset-password/", ResetPasswordView.as_view(), name="reset-password"),
     
-    path('projetos/<int:project_id>/delete/', ProjectDeleteView.as_view(), name='project-delete'),  # DELETE
+    path('projetos/<int:project_id>/delete/', ProjectDeleteView.as_view(), name='project-delete'),
 
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("google/calendar/sync/", GoogleCalendarSyncView.as_view(), name="google_calendar_sync"),
 
-    
     # IMPLEMENTAÇÃO ML
     path('projetos/<int:project_id>/analisar/', AnaliseProjetoView.as_view(), name='analisar-projeto'),
     path('projetos/<int:project_id>/aplicar-sugestao/', AplicarSugestaoView.as_view(), name='aplicar-sugestao'),
-
 ]
