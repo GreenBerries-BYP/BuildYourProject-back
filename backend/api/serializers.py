@@ -148,32 +148,37 @@ class SharedTaskSerializer(serializers.ModelSerializer):
     def get_responsavel(self, obj):
         assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
         return assignee.user.full_name if assignee else None
-
-
+    
 class SharedProjectSerializer(serializers.ModelSerializer):
-    colaboradores = serializers.SerializerMethodField()
-    tarefasProjeto = serializers.SerializerMethodField()
+    creator_name = serializers.SerializerMethodField()
+    collaborator_count = serializers.SerializerMethodField()
+    collaborators = serializers.SerializerMethodField()
+    tasks = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'colaboradores', 'tarefasProjeto']
+        fields = ['id', 'name', 'creator_name', 'collaborator_count', 'collaborators', 'tasks']
 
-    def get_colaboradores(self, project):
-        user_projects = UserProject.objects.filter(project=project)
-        return [
-            {
-                "id": up.user.id,
-                "nome": up.user.full_name,
-                "email": up.user.email,
-                "papel": up.role
-            }
-            for up in user_projects
-        ]
+    def get_creator_name(self, obj):
+        leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
+        return leader_relation.user.full_name if leader_relation else None
 
-    def get_tarefasProjeto(self, project):
+    def get_collaborator_count(self, obj):
+        return UserProject.objects.filter(project=obj).count()
+
+    def get_collaborators(self, obj):
+        user_projects = UserProject.objects.filter(project=obj).select_related('user')
+        return [{
+            'id': up.user.id,
+            'full_name': up.user.full_name,
+            'email': up.user.email,
+            'role': up.role
+        } for up in user_projects]
+
+    def get_tasks(self, project):
         fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
-        return SharedTaskSerializer(tarefas, many=True).data
+        tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
+        return SimpleTaskSerializer(tarefas, many=True).data
     
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
