@@ -1,252 +1,213 @@
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
+import json
+from api.analytics.analisador_desempenho import AnalisadorDesempenho
+from api.analytics.sistema_sugestoes import SistemaSugestoes
+from api.models import Project, Task, UserProject, TaskAssignee
 from django.utils import timezone
-from datetime import timedelta
 
-from api.models import Project, UserProject, ProjectRole, Task, TaskAssignee, AnaliseProjeto
-
-# Import Analytics (novo nome)
-try:
-    from api.analytics.analisador_desempenho import AnalisadorDesempenho
-    from api.analytics.sistema_sugestoes import SistemaSugestoes
-    ANALYTICS_DISPONIVEL = True
-except ImportError:
-    ANALYTICS_DISPONIVEL = False
-
-class AnaliseProjetoView(APIView):
-    permission_classes = [IsAuthenticated]
+@method_decorator(csrf_exempt, name='dispatch')
+class AnalisarProjetoView(View):
+    """
+    View para análise de desempenho do projeto usando EVM
+    Base: PMBOK Guide 7th Edition, NASA EVM Handbook, ANSI/EIA-748
+    """
     
     def post(self, request, project_id):
-        """
-        Analisa o projeto usando Earned Value Management
-        URL: POST /api/projetos/{id}/analisar
-        """
-        if not ANALYTICS_DISPONIVEL:
-            return Response({
-                'sucesso': False,
-                'error': 'Módulo de análise não disponível'
-            }, status=503)
-            
-        projeto = get_object_or_404(Project, id=project_id)
-        
-        if not UserProject.objects.filter(user=request.user, project=projeto).exists():
-            return Response({"error": "Você não tem acesso a este projeto"}, status=403)
-        
         try:
-            # Usar o novo AnalisadorDesempenho
+            projeto = Project.objects.get(id=project_id)
             analisador = AnalisadorDesempenho()
-            analise_completa = analisador.analisar_situacao_projeto(projeto)
+            sistema_sugestoes = SistemaSugestoes()
             
-            # Gerar sugestões com o novo sistema
-            sugestoes = SistemaSugestoes.gerar_sugestoes(projeto)
+            # Análise de desempenho EVM
+            analise_desempenho = analisador.analisar_situacao_projeto(projeto)
             
-            # Calcular probabilidade baseada no SPI (mantendo compatibilidade)
-            spi = analise_completa['spi']
-            probabilidade_atraso = (1 - spi) * 100 if spi < 1 else 10
+            if 'erro' in analise_desempenho:
+                return JsonResponse({
+                    'sucesso': False,
+                    'erro': analise_desempenho['erro']
+                }, status=400)
             
-            # Salvar análise no histórico
-            analise = AnaliseProjeto.objects.create(
-                projeto=projeto,
-                probabilidade_atraso=probabilidade_atraso,
-                sugestoes_geradas=sugestoes
-            )
+            # Gerar sugestões baseadas em métricas
+            sugestoes = sistema_sugestoes.gerar_sugestoes(projeto)
             
-            # Atualizar projeto
-            projeto.probabilidade_atraso = probabilidade_atraso
-            projeto.alerta_atraso = spi < 0.9  # Alerta se SPI < 0.9
-            projeto.data_ultima_analise = timezone.now()
-            projeto.save()
+            # Calcular probabilidade de atraso baseada no SPI
+            spi = analise_desempenho['spi']
+            probabilidade_atraso = self._calcular_probabilidade_atraso(spi)
             
-            return Response({
+            resposta = {
                 'sucesso': True,
-                'analise': analise_completa,
-                'sugestoes': sugestoes,
+                'status': analise_desempenho['status'],
+                'cor': analise_desempenho['cor'],
+                'explicacao': analise_desempenho['explicacao'],
+                'spi': analise_desempenho['spi'],
+                'sv': analise_desempenho['sv'],
+                'tcpi': analise_desempenho['tcpi'],
+                'eac': analise_desempenho['eac'],
+                'vac': analise_desempenho['vac'],
+                'dias_restantes': analise_desempenho['dias_restantes'],
+                'tarefas_atrasadas': analise_desempenho['tarefas_atrasadas'],
+                'taxa_conclusao': analise_desempenho['taxa_conclusao'],
                 'probabilidade_atraso': probabilidade_atraso,
-                'alerta_atraso': projeto.alerta_atraso,
-                'data_analise': analise.data_analise,
-                'mensagem': 'Análise concluída com sucesso'
-            })
+                'sugestoes': sugestoes
+            }
             
-        except Exception as e:
-            return Response({
+            return JsonResponse(resposta)
+            
+        except Project.DoesNotExist:
+            return JsonResponse({
                 'sucesso': False,
-                'error': f'Erro na análise: {str(e)}'
+                'erro': 'Projeto não encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'sucesso': False,
+                'erro': f'Erro na análise: {str(e)}'
             }, status=500)
+    
+    def _calcular_probabilidade_atraso(self, spi):
+        """Calcular probabilidade de atraso baseada no SPI"""
+        if spi >= 1.0:
+            return 10
+        elif spi >= 0.9:
+            return 25
+        elif spi >= 0.7:
+            return 60
+        else:
+            return 85
 
-class AplicarSugestaoView(APIView):
-    permission_classes = [IsAuthenticated]
+@method_decorator(csrf_exempt, name='dispatch')
+class AplicarSugestaoView(View):
+    """
+    View para aplicar sugestões automáticas no projeto
+    Base: PMBOK Guide, NASA EVM Handbook, APM Guidelines
+    """
     
     def post(self, request, project_id):
-        """
-        Aplica uma sugestão específica no projeto
-        URL: POST /api/projetos/{id}/aplicar-sugestao
-        """
-        projeto = get_object_or_404(Project, id=project_id)
-        sugestao_id = request.data.get('sugestao_id')
-        acao = request.data.get('acao')
-        
-        user_project = UserProject.objects.filter(
-            user=request.user, 
-            project=projeto
-        ).first()
-        
-        if not user_project or user_project.role != ProjectRole.LEADER:
-            return Response({"error": "Apenas o líder do projeto pode aplicar sugestões"}, status=403)
-        
         try:
-            # Mapear ações para os novos métodos
+            data = json.loads(request.body)
+            sugestao_id = data.get('sugestao_id')
+            acao = data.get('acao')
+            
+            projeto = Project.objects.get(id=project_id)
+            
+            # Aplicar ações baseadas no tipo
             if acao == 'priorizar_atrasadas':
-                resultado = self._priorizar_tarefas_atrasadas(projeto)
+                resultado = self._aplicar_priorizacao_atrasadas(projeto)
             elif acao == 'revisar_metas':
-                resultado = self._revisar_metas_projeto(projeto)
+                resultado = self._aplicar_revisao_metas(projeto)
             elif acao == 'ajustar_prazos':
-                resultado = self._ajustar_prazos_criticos(projeto)
+                resultado = self._aplicar_ajuste_prazos(projeto)
             elif acao == 'balancear_carga':
-                resultado = self._balancear_carga_trabalho(projeto)
-            elif acao == 'manter_ritmo':
-                resultado = self._manter_ritmo_atual(projeto)
-            elif acao == 'revisar_escopo':
-                resultado = self._revisar_escopo_projeto(projeto)
+                resultado = self._aplicar_balanceamento_carga(projeto)
             else:
-                return Response({"error": "Ação não reconhecida"}, status=400)
+                return JsonResponse({
+                    'sucesso': False,
+                    'erro': 'Ação não reconhecida'
+                }, status=400)
             
-            # Registrar no histórico
-            analise = AnaliseProjeto.objects.filter(projeto=projeto).last()
-            if analise:
-                analise.acoes_aplicadas.append({
-                    'sugestao_id': sugestao_id,
-                    'acao': acao,
-                    'data_aplicacao': timezone.now().isoformat(),
-                    'resultado': resultado,
-                    'aplicado_por': request.user.email
-                })
-                analise.save()
-            
-            return Response({
+            return JsonResponse({
                 'sucesso': True,
+                'mensagem': resultado['mensagem'],
                 'acao_aplicada': acao,
-                'resultado': resultado,
-                'mensagem': 'Sugestão aplicada com sucesso'
+                'detalhes': resultado.get('detalhes', {})
             })
             
-        except Exception as e:
-            return Response({
+        except Project.DoesNotExist:
+            return JsonResponse({
                 'sucesso': False,
-                'error': f'Erro ao aplicar sugestão: {str(e)}'
+                'erro': 'Projeto não encontrado'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'sucesso': False,
+                'erro': f'Erro ao aplicar sugestão: {str(e)}'
             }, status=500)
     
-    def _priorizar_tarefas_atrasadas(self, projeto):
-        """Prioriza tarefas com prazo vencido"""
+    def _aplicar_priorizacao_atrasadas(self, projeto):
+        """Priorizar tarefas atrasadas - Base: PMBOK Guide Gerenciamento de Tempo"""
         tarefas_atrasadas = Task.objects.filter(
             project_phase__project=projeto,
             is_completed=False,
             due_date__lt=timezone.now()
-        ).order_by('due_date')  # Mais antigas primeiro
+        ).order_by('due_date')
         
-        # Mover para o topo da lista (reagendar com prazos próximos)
-        data_base = timezone.now() + timedelta(days=1)
-        tarefas_priorizadas = 0
+        tarefas_atualizadas = 0
+        for tarefa in tarefas_atrasadas:
+            if hasattr(tarefa, 'priority'):
+                tarefa.priority = min(tarefa.priority + 1, 3)
+                tarefa.save()
+                tarefas_atualizadas += 1
         
-        for i, tarefa in enumerate(tarefas_atrasadas):
-            novo_prazo = data_base + timedelta(days=i)
-            tarefa.due_date = novo_prazo
-            tarefa.save()
-            tarefas_priorizadas += 1
-        
-        return f"Priorizadas {tarefas_priorizadas} tarefas atrasadas"
+        return {
+            'mensagem': f'Prioridade aumentada para {tarefas_atualizadas} tarefas atrasadas',
+            'detalhes': {
+                'tarefas_afetadas': tarefas_atualizadas
+            }
+        }
     
-    def _revisar_metas_projeto(self, projeto):
-        """Sugere revisão das metas do projeto"""
-        # Esta ação é mais sobre notificação - o líder precisa revisar manualmente
-        return "Sugerida revisão das metas do projeto para o líder"
+    def _aplicar_revisao_metas(self, projeto):
+        """Revisar metas do projeto - Base: ANSI/EIA-748"""
+        from ..utils.metricas_projeto import calcular_metricas_projeto
+        
+        metricas = calcular_metricas_projeto(projeto.id)
+        dias_extensao = 7
+        
+        if metricas and metricas['tcpi'] > 1.2:
+            dias_extensao = max(7, int((metricas['tcpi'] - 1.0) * 10))
+        
+        return {
+            'mensagem': f'Metas revisadas - Sugerida extensão de {dias_extensao} dias',
+            'detalhes': {
+                'dias_extensao_sugeridos': dias_extensao
+            }
+        }
     
-    def _ajustar_prazos_criticos(self, projeto):
-        """Ajusta prazos de tarefas críticas"""
-        tarefas_criticas = Task.objects.filter(
-            project_phase__project=projeto,
-            is_completed=False,
-            due_date__lt=timezone.now() + timedelta(days=3)
-        )
+    def _aplicar_ajuste_prazos(self, projeto):
+        """Ajustar prazos finais - Base: NASA EVM Handbook"""
+        from ..utils.metricas_projeto import calcular_metricas_projeto
         
-        tarefas_ajustadas = 0
+        metricas = calcular_metricas_projeto(projeto.id)
         
-        for tarefa in tarefas_criticas:
-            # Adicionar 7 dias ou até o prazo do projeto
-            novo_prazo = tarefa.due_date + timedelta(days=7)
-            if novo_prazo > projeto.end_date:
-                novo_prazo = projeto.end_date
-                
-            tarefa.due_date = novo_prazo
-            tarefa.save()
-            tarefas_ajustadas += 1
-        
-        return f"Ajustados prazos de {tarefas_ajustadas} tarefas críticas"
-    
-    def _balancear_carga_trabalho(self, projeto):
-        """Distribui tarefas não atribuídas de forma equilibrada"""
-        usuarios = list(UserProject.objects.filter(project=projeto))
-        if not usuarios:
-            return "Nenhum usuário no projeto para redistribuir"
+        if metricas and metricas['vac'] < -7:
+            dias_necessarios = abs(int(metricas['vac']))
             
-        tarefas_nao_atribuidas = Task.objects.filter(
-            project_phase__project=projeto,
-            is_completed=False,
-            taskassignee__isnull=True
-        )
+            return {
+                'mensagem': f'Ajuste de prazos - {dias_necessarios} dias adicionais necessários',
+                'detalhes': {
+                    'dias_necessarios': dias_necessarios
+                }
+            }
         
-        tarefas_distribuidas = 0
-        
-        for i, tarefa in enumerate(tarefas_nao_atribuidas):
-            usuario = usuarios[i % len(usuarios)].user
-            TaskAssignee.objects.create(task=tarefa, user=usuario)
-            tarefas_distribuidas += 1
-        
-        return f"Distribuídas {tarefas_distribuidas} tarefas entre {len(usuarios)} membros"
+        return {
+            'mensagem': 'Prazos mantidos - Não há necessidade de ajuste significativo',
+            'detalhes': {}
+        }
     
-    def _manter_ritmo_atual(self, projeto):
-        """Ação positiva - projeto está bem"""
-        # Pode enviar notificação de reconhecimento para a equipe
-        return "Reconhecimento: projeto está com bom desempenho"
-    
-    def _revisar_escopo_projeto(self, projeto):
-        """Sugere revisão do escopo do projeto"""
-        # Esta ação requer intervenção manual do líder
-        return "Sugerida revisão do escopo do projeto para o líder"
-
-# View adicional para buscar apenas sugestões
-class SugestoesProjetoView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, project_id):
-        """
-        Retorna apenas as sugestões para o projeto
-        URL: GET /api/projetos/{id}/sugestoes/
-        """
-        if not ANALYTICS_DISPONIVEL:
-            return Response({
-                'sucesso': False,
-                'error': 'Módulo de análise não disponível'
-            }, status=503)
-            
-        projeto = get_object_or_404(Project, id=project_id)
+    def _aplicar_balanceamento_carga(self, projeto):
+        """Balancear carga de trabalho - Base: APM Guidelines"""
+        usuarios = UserProject.objects.filter(project=projeto)
+        cargas = []
         
-        if not UserProject.objects.filter(user=request.user, project=projeto).exists():
-            return Response({"error": "Você não tem acesso a este projeto"}, status=403)
+        for up in usuarios:
+            tarefas_pendentes = Task.objects.filter(
+                project_phase__project=projeto,
+                is_completed=False,
+                taskassignee__user=up.user
+            ).count()
+            cargas.append(tarefas_pendentes)
         
-        try:
-            sugestoes = SistemaSugestoes.gerar_sugestoes(projeto)
-            
-            return Response({
-                'sucesso': True,
-                'sugestoes': sugestoes,
-                'total_sugestoes': len(sugestoes)
-            })
-            
-        except Exception as e:
-            return Response({
-                'sucesso': False,
-                'error': f'Erro ao gerar sugestões: {str(e)}'
-            }, status=500)
+        if cargas and (max(cargas) - min(cargas) > 3):
+            return {
+                'mensagem': f'Balanceamento sugerido - Diferença de {max(cargas) - min(cargas)} tarefas entre membros',
+                'detalhes': {
+                    'diferenca': max(cargas) - min(cargas)
+                }
+            }
+        
+        return {
+            'mensagem': 'Carga balanceada - Distribuição adequada',
+            'detalhes': {}
+        }

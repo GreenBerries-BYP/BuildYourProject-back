@@ -3,12 +3,8 @@ from ..utils.metricas_projeto import calcular_metricas_projeto
 
 class AnalisadorDesempenho:
     """
-    SISTEMA DE ANÁLISE DE DESEMPENHO BASEADO EM EARNED VALUE MANAGEMENT
-    
-    Referências: 
-    - PMBOK Guide 7th Edition - Earned Value Management
-    - NASA EVM Handbook
-    - ANSI/EIA-748 Standard
+    Sistema de análise de desempenho baseado em Earned Value Management
+    Base: PMBOK Guide, NASA EVM Handbook, ANSI/EIA-748
     """
     
     def __init__(self):
@@ -16,8 +12,7 @@ class AnalisadorDesempenho:
     
     def calcular_spi(self, projeto):
         """
-        Calcula Schedule Performance Index (SPI) conforme padrão EVM
-        
+        Calcular Schedule Performance Index (SPI)
         SPI = Earned Value (EV) / Planned Value (PV)
         """
         metricas = calcular_metricas_projeto(projeto.id)
@@ -28,7 +23,7 @@ class AnalisadorDesempenho:
     
     def analisar_situacao_projeto(self, projeto):
         """
-        Analisa a situação atual do projeto baseado em múltiplas métricas EVM
+        Analisar a situação atual do projeto baseado em métricas EVM
         """
         metricas = calcular_metricas_projeto(projeto.id)
         if not metricas:
