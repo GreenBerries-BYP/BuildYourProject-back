@@ -27,7 +27,7 @@ from api.views.utility_views import (
     PoliticsView,
 )
 from api.views.analise_inteligente_views import (
-    AnaliseProjetoView,
+    AnalisarProjetoView,
     AplicarSugestaoView
 )
 
@@ -59,6 +59,6 @@ urlpatterns = [
     path("google/calendar/sync/", GoogleCalendarSyncView.as_view(), name="google_calendar_sync"),
 
     # IMPLEMENTAÇÃO ML
-    path('projetos/<int:project_id>/analisar/', AnaliseProjetoView.as_view(), name='analisar-projeto'),
+    path('projetos/<int:project_id>/analisar/', AnalisarProjetoView.as_view(), name='analisar-projeto'),
     path('projetos/<int:project_id>/aplicar-sugestao/', AplicarSugestaoView.as_view(), name='aplicar-sugestao'),
 ]
