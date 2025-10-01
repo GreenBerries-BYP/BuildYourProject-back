@@ -220,46 +220,20 @@ class ChatSerializer(serializers.ModelSerializer):
         read_only_fields = ['sent_at']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    '''
-    
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['username'] = user.username
-        token['role'] = user.role
-        return token
-
-    def validate(self, attrs):
-        attrs['username'] = attrs.get('email')
-        return super().validate(attrs)
-        '''
-    
     username_field = "email"
 
     def validate(self, attrs):
-        email = attrs.get("email")
-        password = attrs.get("password")
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("E-mail ou senha inválidos.")
-
-        if not user.check_password(password):  #type: ignore
-            raise serializers.ValidationError("E-mail ou senha inválidos.")
-
-        if not user.is_active:
-            raise serializers.ValidationError("Usuário inativo.")
-
+        # ⚡ CORREÇÃO: Deixe o pai fazer toda a validação pesada
         data = super().validate(attrs)
-        data["user"] = { #type: ignore
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "role": user.role,
+        
+        # ⚡ Apenas adicione os dados extras do usuário (isso é rápido)
+        data["user"] = {
+            "id": self.user.id,
+            "email": self.user.email,
+            "full_name": self.user.full_name,
+            "role": self.user.role,
         }
         return data
-
 
 class SimpleTaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -277,34 +251,6 @@ class ProjectWithTasksSerializer(serializers.ModelSerializer):
         fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
         tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
         return SimpleTaskSerializer(tarefas, many=True).data
-
-""" class TaskFullInfoSerializer(serializers.ModelSerializer):
-    responsaveis = serializers.SerializerMethodField()
-    fase = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Task
-        fields = [
-            'id', 'title', 'description', 'is_completed',
-            'created_at', 'due_date', 'fase', 'responsaveis',
-        ]
-
-    def get_responsaveis(self, obj):
-        return [a.user.full_name for a in TaskAssignee.objects.filter(task=obj).select_related('user')]
-
-    def get_fase(self, obj):
-        return obj.project_phase.phase.name if obj.project_phase and obj.project_phase.phase else None
-
-class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
-    tasks = serializers.SerializerMethodField()
-
-    class Meta(ProjectSerializer.Meta):
-        fields = ProjectSerializer.Meta.fields + ['tasks']
-
-    def get_tasks(self, project):
-        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
-        return TaskFullInfoSerializer(tarefas, many=True).data """
 
 class CollaboratorSerializer(serializers.ModelSerializer):
     nome = serializers.CharField(source='user.username')
