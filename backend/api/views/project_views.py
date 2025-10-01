@@ -101,12 +101,7 @@ class ProjectView(APIView):
         ).distinct()
         serializer = ProjectWithTasksSerializer(projetos, many=True)
         return Response(serializer.data)
-'''        
-    def get(self, request):
-        projetos = Project.objects.filter(userproject__user=request.user).distinct()
-        serializer = ProjectWithTasksSerializer(projetos, many=True)
-        return Response(serializer.data)
-'''
+    
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
