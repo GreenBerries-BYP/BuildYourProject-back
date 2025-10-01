@@ -174,11 +174,21 @@ class SharedProjectSerializer(serializers.ModelSerializer):
             'email': up.user.email,
             'role': up.role
         } for up in user_projects]
-
+    
     def get_tasks(self, project):
         fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
-        return SimpleTaskSerializer(tarefas, many=True).data
+        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
+        
+        # CONVERTE para o formato que o ViewProject espera
+        tarefas_formatadas = []
+        for tarefa in tarefas:
+            tarefas_formatadas.append({
+                "id": tarefa.id,
+                "nomeTarefa": tarefa.title,  # ← Converte title para nomeTarefa
+                "progresso": 100 if tarefa.is_completed else 0,  # ← Calcula progresso
+                "subTarefas": []  # ← Pode buscar subtarefas se precisar
+            })
+        return tarefas_formatadas
     
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -228,7 +238,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = "email"
 
     def validate(self, attrs):
-        # ⚡ CORREÇÃO: Deixe o pai fazer toda a validação pesada
+        # Deixe o pai fazer toda a validação pesada
         data = super().validate(attrs)
         
         # ⚡ Apenas adicione os dados extras do usuário (isso é rápido)
