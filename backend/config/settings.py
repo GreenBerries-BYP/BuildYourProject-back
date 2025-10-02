@@ -201,3 +201,12 @@ SIMPLE_JWT = {
 # ------------------------
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
+
+# DEBUG: Verificar variáveis de email
+print("=== DEBUG EMAIL CONFIG ===")
+print(f"EMAIL_HOST: {os.environ.get('EMAIL_HOST')}")
+print(f"EMAIL_PORT: {os.environ.get('EMAIL_PORT')}")
+print(f"EMAIL_HOST_USER: {os.environ.get('EMAIL_HOST_USER')}")
+print(f"EMAIL_HOST_PASSWORD: {'*** SET ***' if os.environ.get('EMAIL_HOST_PASSWORD') else '*** NOT SET ***'}")
+print(f"DEFAULT_FROM_EMAIL: {os.environ.get('DEFAULT_FROM_EMAIL')}")
+print("==========================")
