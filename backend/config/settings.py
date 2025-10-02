@@ -17,6 +17,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "buildyourproject-back.onrender.com",
+    "buildyourproject-front-obrg.onrender.com",
 ]
 
 INSTALLED_APPS = [
@@ -141,6 +142,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  
     "http://localhost:5173",
     "http://localhost:4173",
+    "https://buildyourproject-front-obrg.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -148,6 +150,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:4173",
+    "https://buildyourproject-front-obrg.onrender.com",
 ]
 
 CORS_ALLOW_METHODS = [
