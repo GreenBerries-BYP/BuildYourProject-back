@@ -128,6 +128,40 @@ class SendResetCodeView(APIView):
 
         print(f"Código de reset para {email}: {code}")
 
+        subject = "Código de Recuperação de Senha - BuildYourProject"
+        message = f"""
+        Olá!
+
+        Você solicitou a redefinição de sua senha no BuildYourProject.
+
+        Seu código de verificação é: {code}
+
+        Este código expira em 10 minutos.
+
+        Se você não solicitou esta redefinição, ignore este email.
+
+        Atenciosamente,
+        Equipe BuildYourProject
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL
+        
+        try:
+            # Envia o email de forma assíncrona
+            threading.Thread(
+                target=send_mail_async,
+                args=(subject, message, from_email, [email])
+            ).start()
+            
+            print(f" Email de reset enviado para: {email}")
+            
+        except Exception as e:
+            print(f" Erro ao enviar email: {e}")
+            return Response(
+                {'error': 'Erro ao enviar email'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         return Response({'message': 'Código enviado com sucesso'}, status=status.HTTP_200_OK)
 
 class VerifyResetCodeView(APIView):
