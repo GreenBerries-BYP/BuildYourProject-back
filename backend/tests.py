@@ -1,5 +1,6 @@
 import os
 import django
+#teste
 
 # Configura o Django (ajusta se o nome do projeto não for "config")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
