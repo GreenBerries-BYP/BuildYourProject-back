@@ -18,6 +18,15 @@ from django.core.cache import cache
 
 User = get_user_model()
 
+def get_verification_code(email):
+    return cache.get(f"reset_code_{email}")
+
+def set_verification_code(email, code, timeout=600):  # 10 minutos
+    cache.set(f"reset_code_{email}", code, timeout)
+
+def delete_verification_code(email):
+    cache.delete(f"reset_code_{email}")
+
 def send_mail_async(subject, message, from_email, recipient_list):
     try:
         send_mail(subject, message, from_email, recipient_list, fail_silently=False)
@@ -101,9 +110,6 @@ class GoogleLoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-# Armazenamento temporário (em produção use cache/DB)
-verification_codes = {}
-
 class SendResetCodeView(APIView):
     permission_classes = [AllowAny]
 
@@ -118,7 +124,7 @@ class SendResetCodeView(APIView):
             return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
         code = str(random.randint(100000, 999999))
-        verification_codes[email] = code
+        set_verification_code(email, code)
 
         print(f"Código de reset para {email}: {code}")
 
@@ -132,13 +138,31 @@ class VerifyResetCodeView(APIView):
         code = request.data.get('code')
         
         if not email or not code:
-            return Response({'error': 'Email e código são obrigatórios'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Email e código são obrigatórios'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        if email in verification_codes and verification_codes[email] == code:
-            return Response({'message': 'Código válido'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Código inválido'}, status=status.HTTP_400_BAD_REQUEST)
+        # Verifica se o código existe e é válido no cache
+        stored_code = get_verification_code(email)
+        if not stored_code:
+            return Response(
+                {'error': 'Código expirado ou não encontrado. Solicite um novo código.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if stored_code != code:
+            return Response(
+                {'error': 'Código inválido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # Código válido - retorna sucesso
+        return Response({
+            'message': 'Código válido',
+            'verified': True
+        }, status=status.HTTP_200_OK)
+    
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
 
@@ -150,15 +174,19 @@ class ResetPasswordView(APIView):
         if not all([email, code, new_password]):
             return Response({'error': 'Todos os campos são obrigatórios'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if email not in verification_codes or verification_codes[email] != code:
-            return Response({'error': 'Código inválido'}, status=status.HTTP_400_BAD_REQUEST)
-
+        stored_code = get_verification_code(email)
+        if not stored_code or stored_code != code:
+            return Response( 
+                {'error': 'Código inválido ou expirado'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )  
+        
         try:
             user = User.objects.get(email=email)
             user.set_password(new_password)
             user.save()
             
-            del verification_codes[email]
+            delete_verification_code(email)
             
             return Response({'message': 'Senha redefinida com sucesso'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
