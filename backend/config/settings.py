@@ -138,12 +138,16 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",  # frontend no Render
-    "http://localhost:3000",  # se testar local
+    "http://localhost:3000",  
+    "http://localhost:5173",
+    "http://localhost:4173",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:4173",
 ]
 
 CORS_ALLOW_METHODS = [
