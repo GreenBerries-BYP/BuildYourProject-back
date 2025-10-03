@@ -145,6 +145,12 @@ class SendResetCodeView(APIView):
         """
         
         from_email = settings.DEFAULT_FROM_EMAIL
+
+        # Debug: Verificar configurações de email
+        print(f"📧 Configurações de Email:")
+        print(f"   FROM_EMAIL: {from_email}")
+        print(f"   EMAIL_BACKEND: {getattr(settings, 'EMAIL_BACKEND', 'Não configurado')}")
+        print(f"   EMAIL_HOST: {getattr(settings, 'EMAIL_HOST', 'Não configurado')}")
         
         try:
             # Envia o email de forma assíncrona
