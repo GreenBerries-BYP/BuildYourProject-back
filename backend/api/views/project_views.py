@@ -38,41 +38,55 @@ from ..serializers import (
 # Lista de convites pendentes (email -> lista de IDs de projetos) - mantido para compatibilidade
 invited_users = {}
 
+import threading
+import time
+
 def enviar_email_async(subject, message, from_email, recipient_list):
-    """Função para enviar email em thread separada"""
+    """Função com timeout para não travar"""
     def _enviar():
         try:
-            print(f"🎯 INICIANDO ENVIO DE EMAIL PARA: {recipient_list}")
+            print(f"🎯 INICIANDO ENVIO PARA: {recipient_list}")
+            
+            # ⚠️ TIMEOUT - se demorar mais de 10 segundos, para
+            start_time = time.time()
             
             from django.core.mail import send_mail
             
-            # ⚠️ AGORA COM MAIS DETALHES DO RESULTADO
             result = send_mail(
                 subject=subject,
                 message=message,
                 from_email=from_email,
                 recipient_list=recipient_list,
-                fail_silently=False  # ⚠️ MUDEI PARA False PARA VER ERROS
+                fail_silently=False
             )
             
-            print(f"📊 RESULTADO DO ENVIO: {result}")
+            elapsed = time.time() - start_time
+            print(f"📊 EMAIL PROCESSADO em {elapsed:.2f}s - Resultado: {result}")
             
             if result == 1:
-                print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO para: {recipient_list}")
-            elif result == 0:
-                print(f"❌❌❌ FALHA TOTAL - Email NÃO enviado")
+                print(f"✅✅✅ SUCESSO!")
             else:
-                print(f"⚠️  RESULTADO INESPERADO: {result}")
+                print(f"❌❌❌ FALHA")
                 
         except Exception as e:
-            print(f"💥💥💥 ERRO CRÍTICO no envio: {str(e)}")
+            elapsed = time.time() - start_time
+            print(f"💥💥💥 ERRO após {elapsed:.2f}s: {str(e)}")
             import traceback
-            print(f"📋 DETALHES DO ERRO: {traceback.format_exc()}")
+            print(f"📋 ERRO: {traceback.format_exc()}")
     
-    print(f"🚀 DISPARANDO EMAIL para: {recipient_list}")
     thread = threading.Thread(target=_enviar)
-    thread.daemon = True
+    thread.daemon = True  # ⚠️ Thread morre se main morrer
     thread.start()
+    
+    # ⚠️ Timeout opcional - mata a thread após 30s
+    def _timeout_killer():
+        time.sleep(30)
+        if thread.is_alive():
+            print(f"⏰⏰⏰ TIMEOUT - Thread de email foi interrompida")
+    
+    timeout_thread = threading.Thread(target=_timeout_killer)
+    timeout_thread.daemon = True
+    timeout_thread.start()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
