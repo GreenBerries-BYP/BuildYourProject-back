@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.cache import cache
+import threading  # ⚠️ ADICIONAR ESTE IMPORT
 
 from ..models import Project, UserProject, ProjectRole, Phase, ProjectPhase, Task, User
 from ..serializers import ProjectSerializer, ProjectWithTasksSerializer, SharedProjectSerializer, UserSerializer, TaskAssignee
@@ -36,6 +37,28 @@ from ..serializers import (
 
 # Lista de convites pendentes (email -> lista de IDs de projetos) - mantido para compatibilidade
 invited_users = {}
+
+# ⚠️ ADICIONE ESTA FUNÇÃO NO TOPO
+def enviar_email_async(subject, message, from_email, recipient_list):
+    """Função para enviar email em thread separada"""
+    def _enviar():
+        try:
+            from django.core.mail import send_mail
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=True  # ⚠️ IMPORTANTE: True para não travar
+            )
+            print(f"✅ Email disparado para: {recipient_list}")
+        except Exception as e:
+            print(f"❌ Erro no envio de email: {e}")
+    
+    # Dispara em thread separada
+    thread = threading.Thread(target=_enviar)
+    thread.daemon = True
+    thread.start()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -140,20 +163,15 @@ class ProjectView(APIView):
                         invited_users[email] = []
                     invited_users[email].append(project.id)
 
-                    # 🔥 CORREÇÃO CRÍTICA: VOLTAR PARA O MÉTODO ORIGINAL QUE FUNCIONA
+                    # 🔥 CORREÇÃO: USAR A FUNÇÃO ASYNC
                     subject = "Você foi convidado para colaborar em um projeto!"
                     message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
                               f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
-                    try:
-                        send_mail(subject, message, from_email, [email], fail_silently=False)
-                        # ⚠️ REMOVER O PRINT EXTRA - usar apenas o tratamento simples do antigo
-                    except Exception as e:
-                        print("Erro ao enviar e-mail:", e)
-                        # Manter o tratamento simples como no código antigo
-                        pass
+                    # ⚠️ CHAMADA CORRIGIDA - sem try/except
+                    enviar_email_async(subject, message, from_email, [email])
 
             # Criar tarefas a partir das fases
             fases = project.phases or []
