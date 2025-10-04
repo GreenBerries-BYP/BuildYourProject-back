@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.cache import cache
-import threading  # ⚠️ ADICIONAR ESTE IMPORT
+import threading 
 
 from ..models import Project, UserProject, ProjectRole, Phase, ProjectPhase, Task, User
 from ..serializers import ProjectSerializer, ProjectWithTasksSerializer, SharedProjectSerializer, UserSerializer, TaskAssignee
@@ -53,10 +53,10 @@ def enviar_email_async(subject, message, from_email, recipient_list):
             url = "https://api.resend.com/emails"
             
             payload = {
-                "from": "noreply@byp-backend-o4ku.onrender.com",  # ⚠️ Email verificado do Resend
-                "to": ["noreply.byp@gmail.com"],
-                "subject": subject,  # ⚠️ USA O SUBJECT PASSADO
-                "text": message      # ⚠️ USA A MENSAGEM PASSADA
+                "from": "noreply@byp-buildyourproject.com.br",  # Email verificado do Resend
+                "to": recipient_list,
+                "subject": subject,  
+                "text": message     
             }
             
             headers = {
