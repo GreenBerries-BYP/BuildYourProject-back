@@ -53,7 +53,7 @@ def enviar_email_async(subject, message, from_email, recipient_list):
             url = "https://api.resend.com/emails"
             
             payload = {
-                "from": "onboarding@resend.dev",  # ⚠️ Email verificado do Resend
+                "from": "noreply@byp-backend-o4ku.onrender.com",  # ⚠️ Email verificado do Resend
                 "to": ["noreply.byp@gmail.com"],
                 "subject": subject,  # ⚠️ USA O SUBJECT PASSADO
                 "text": message      # ⚠️ USA A MENSAGEM PASSADA
