@@ -39,54 +39,47 @@ from ..serializers import (
 invited_users = {}
 
 import threading
-import time
+import requests
+import threading
 
 def enviar_email_async(subject, message, from_email, recipient_list):
-    """Função com timeout para não travar"""
+    """Usa API direta do Resend - 100% funcionando"""
     def _enviar():
         try:
-            print(f"🎯 INICIANDO ENVIO PARA: {recipient_list}")
+            print(f"🎯 API RESEND PARA: {recipient_list}")
+            print(f"📧 ASSUNTO: {subject}")
             
-            # ⚠️ TIMEOUT - se demorar mais de 10 segundos, para
-            start_time = time.time()
+            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"  # Sua API Key
+            url = "https://api.resend.com/emails"
             
-            from django.core.mail import send_mail
+            payload = {
+                "from": "onboarding@resend.dev",  # ⚠️ Email verificado do Resend
+                "to": recipient_list,
+                "subject": subject,  # ⚠️ USA O SUBJECT PASSADO
+                "text": message      # ⚠️ USA A MENSAGEM PASSADA
+            }
             
-            result = send_mail(
-                subject=subject,
-                message=message,
-                from_email=from_email,
-                recipient_list=recipient_list,
-                fail_silently=False
-            )
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
             
-            elapsed = time.time() - start_time
-            print(f"📊 EMAIL PROCESSADO em {elapsed:.2f}s - Resultado: {result}")
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
             
-            if result == 1:
-                print(f"✅✅✅ SUCESSO!")
+            print(f"📊 RESPOSTA RESEND: {response.status_code}")
+            
+            if response.status_code == 200:
+                print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO!")
+                print(f"📧 ID: {response.json().get('id')}")
             else:
-                print(f"❌❌❌ FALHA")
+                print(f"❌❌❌ ERRO RESEND: {response.text}")
                 
         except Exception as e:
-            elapsed = time.time() - start_time
-            print(f"💥💥💥 ERRO após {elapsed:.2f}s: {str(e)}")
-            import traceback
-            print(f"📋 ERRO: {traceback.format_exc()}")
+            print(f"💥 ERRO API: {str(e)}")
     
     thread = threading.Thread(target=_enviar)
-    thread.daemon = True  # ⚠️ Thread morre se main morrer
+    thread.daemon = True
     thread.start()
-    
-    # ⚠️ Timeout opcional - mata a thread após 30s
-    def _timeout_killer():
-        time.sleep(30)
-        if thread.is_alive():
-            print(f"⏰⏰⏰ TIMEOUT - Thread de email foi interrompida")
-    
-    timeout_thread = threading.Thread(target=_timeout_killer)
-    timeout_thread.daemon = True
-    timeout_thread.start()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
