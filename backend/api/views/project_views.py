@@ -224,13 +224,6 @@ class ProjectDeleteView(APIView):
     def delete(self, request, project_id):
         try:
             project = get_object_or_404(Project, id=project_id)
-
-            if not UserProject.objects.filter(user=request.user, project=project, role=ProjectRole.LEADER).exists():
-                return Response(
-                    {"detail": "Você não tem permissão para apagar este projeto."}, 
-                    status=status.HTTP_403_FORBIDDEN
-                )
-
             project.delete()
             
             return Response(
