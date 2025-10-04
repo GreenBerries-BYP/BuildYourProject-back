@@ -38,32 +38,38 @@ from ..serializers import (
 # Lista de convites pendentes (email -> lista de IDs de projetos) - mantido para compatibilidade
 invited_users = {}
 
-# ⚠️ ADICIONE ESTA FUNÇÃO NO TOPO
 def enviar_email_async(subject, message, from_email, recipient_list):
     """Função para enviar email em thread separada"""
     def _enviar():
         try:
             print(f"🎯 INICIANDO ENVIO DE EMAIL PARA: {recipient_list}")
+            
             from django.core.mail import send_mail
-            # Debug das configurações
-            from django.conf import settings
-            print(f" CONFIGURAÇÕES:")
-            print(f"   HOST: {settings.EMAIL_HOST}")
-            print(f"   PORT: {settings.EMAIL_PORT}") 
-            print(f"   USER: {settings.EMAIL_HOST_USER}")
-
-            send_mail(
+            
+            # ⚠️ AGORA COM MAIS DETALHES DO RESULTADO
+            result = send_mail(
                 subject=subject,
                 message=message,
                 from_email=from_email,
                 recipient_list=recipient_list,
-                fail_silently=True  # ⚠️ IMPORTANTE: True para não travar
+                fail_silently=False  # ⚠️ MUDEI PARA False PARA VER ERROS
             )
-            print(f"Email disparado para: {recipient_list}")
+            
+            print(f"📊 RESULTADO DO ENVIO: {result}")
+            
+            if result == 1:
+                print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO para: {recipient_list}")
+            elif result == 0:
+                print(f"❌❌❌ FALHA TOTAL - Email NÃO enviado")
+            else:
+                print(f"⚠️  RESULTADO INESPERADO: {result}")
+                
         except Exception as e:
-            print(f"Erro no envio de email: {e}")
+            print(f"💥💥💥 ERRO CRÍTICO no envio: {str(e)}")
+            import traceback
+            print(f"📋 DETALHES DO ERRO: {traceback.format_exc()}")
     
-    # Dispara em thread separada
+    print(f"🚀 DISPARANDO EMAIL para: {recipient_list}")
     thread = threading.Thread(target=_enviar)
     thread.daemon = True
     thread.start()
