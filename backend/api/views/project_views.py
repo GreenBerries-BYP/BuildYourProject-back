@@ -43,7 +43,15 @@ def enviar_email_async(subject, message, from_email, recipient_list):
     """Função para enviar email em thread separada"""
     def _enviar():
         try:
+            print(f"🎯 INICIANDO ENVIO DE EMAIL PARA: {recipient_list}")
             from django.core.mail import send_mail
+            # Debug das configurações
+            from django.conf import settings
+            print(f" CONFIGURAÇÕES:")
+            print(f"   HOST: {settings.EMAIL_HOST}")
+            print(f"   PORT: {settings.EMAIL_PORT}") 
+            print(f"   USER: {settings.EMAIL_HOST_USER}")
+
             send_mail(
                 subject=subject,
                 message=message,
@@ -51,9 +59,9 @@ def enviar_email_async(subject, message, from_email, recipient_list):
                 recipient_list=recipient_list,
                 fail_silently=True  # ⚠️ IMPORTANTE: True para não travar
             )
-            print(f"✅ Email disparado para: {recipient_list}")
+            print(f"Email disparado para: {recipient_list}")
         except Exception as e:
-            print(f"❌ Erro no envio de email: {e}")
+            print(f"Erro no envio de email: {e}")
     
     # Dispara em thread separada
     thread = threading.Thread(target=_enviar)
@@ -163,14 +171,14 @@ class ProjectView(APIView):
                         invited_users[email] = []
                     invited_users[email].append(project.id)
 
-                    # 🔥 CORREÇÃO: USAR A FUNÇÃO ASYNC
+                    # CORREÇÃO: USAR A FUNÇÃO ASYNC
                     subject = "Você foi convidado para colaborar em um projeto!"
                     message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
                               f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
                               f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
-                    # ⚠️ CHAMADA CORRIGIDA - sem try/except
+                    # CHAMADA CORRIGIDA - sem try/except
                     enviar_email_async(subject, message, from_email, [email])
 
             # Criar tarefas a partir das fases
