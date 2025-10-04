@@ -125,19 +125,24 @@ SIMPLE_JWT = {
 # E-mail
 # ------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST = "smtp.resend.com"
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") 
+DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  
+EMAIL_PORT = 587  
+EMAIL_USE_TLS = True 
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  
+
+# Debug para confirmar
+print("🎯 CONFIGURAÇÃO EMAIL ATUAL:")
+print(f"PORT: {EMAIL_PORT}, TLS: {EMAIL_USE_TLS}, SSL: {EMAIL_USE_SSL}")
 
 # ------------------------
 # CORS & CSRF
 # ------------------------
 CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_ALL_ORIGINS = True  # Temporariamente para testes
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",  # frontend no Render
     "http://localhost:3000",  
