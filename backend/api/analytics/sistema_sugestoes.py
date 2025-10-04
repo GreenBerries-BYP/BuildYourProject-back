@@ -28,6 +28,10 @@ class SistemaSugestoes:
         vac = metricas['vac']
         tarefas_atrasadas = metricas['tarefas_atrasadas']
         dias_restantes = metricas['dias_restantes']
+
+        # projeto concluido, não retorna sugestão.
+        if metricas['taxa_conclusao'] == 100:
+            return []
         
         # 🔴 SUGESTÃO 1: PROJETO ATRASADO (SPI BAIXO)
         if spi < 0.9:

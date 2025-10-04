@@ -35,6 +35,23 @@ class AnalisadorDesempenho:
         metricas = calcular_metricas_projeto(projeto.id)
         if not metricas:
             return {'erro': 'Não foi possível calcular métricas'}
+        
+        # projeto finalizado
+        if metricas['taxa_conclusao'] == 100:
+            return {
+                'status': "CONCLUÍDO",
+                'cor': "verde",
+                'explicacao': "Projeto finalizado com sucesso!",
+                'spi': 1.0,
+                'sv': 0,
+                'tcpi': 1.0,
+                'eac': metricas['total_dias'],
+                'vac': 0,
+                'dias_restantes': 0,
+                'tarefas_atrasadas': 0,
+                'taxa_conclusao': 100,
+                'probabilidade_atraso': 0
+            }
             
         spi = metricas['spi']
         porcentagem_atraso = (1 - spi) * 100

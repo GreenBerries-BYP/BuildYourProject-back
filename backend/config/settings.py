@@ -17,6 +17,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "buildyourproject-back.onrender.com",
+    "buildyourproject-front-obrg.onrender.com",
 ]
 
 INSTALLED_APPS = [
@@ -125,8 +126,9 @@ SIMPLE_JWT = {
 # ------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
@@ -138,12 +140,18 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",  # frontend no Render
-    "http://localhost:3000",  # se testar local
+    "http://localhost:3000",  
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "https://buildyourproject-front-obrg.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://buildyourproject-front.onrender.com",
     "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "https://buildyourproject-front-obrg.onrender.com",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -193,3 +201,12 @@ SIMPLE_JWT = {
 # ------------------------
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
+
+# DEBUG: Verificar variáveis de email
+print("=== DEBUG EMAIL CONFIG ===")
+print(f"EMAIL_HOST: {os.environ.get('EMAIL_HOST')}")
+print(f"EMAIL_PORT: {os.environ.get('EMAIL_PORT')}")
+print(f"EMAIL_HOST_USER: {os.environ.get('EMAIL_HOST_USER')}")
+print(f"EMAIL_HOST_PASSWORD: {'*** SET ***' if os.environ.get('EMAIL_HOST_PASSWORD') else '*** NOT SET ***'}")
+print(f"DEFAULT_FROM_EMAIL: {os.environ.get('DEFAULT_FROM_EMAIL')}")
+print("==========================")
