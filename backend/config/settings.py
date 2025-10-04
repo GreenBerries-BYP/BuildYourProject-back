@@ -131,7 +131,7 @@ DEFAULT_FROM_EMAIL = "noreply.byp@gmail.com"
 EMAIL_PORT = 587  
 EMAIL_USE_TLS = True 
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = "resend"  
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  
 
 # Debug para confirmar
 print("🎯 CONFIGURAÇÃO EMAIL ATUAL:")
