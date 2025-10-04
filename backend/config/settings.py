@@ -126,12 +126,12 @@ SIMPLE_JWT = {
 # ------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587  # ⚠️ MUDE PARA 587
-EMAIL_USE_TLS = True  # ⚠️ PARA PORTA 587
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") 
+DEFAULT_FROM_EMAIL = "noreply.byp@gmail.com"  
+EMAIL_PORT = 587  
+EMAIL_USE_TLS = True 
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_USER = "resend"  
 
 # Debug para confirmar
 print("🎯 CONFIGURAÇÃO EMAIL ATUAL:")
