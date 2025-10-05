@@ -16,6 +16,9 @@ from django.core.mail import send_mail
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
+from datetime import timedelta
+from django.utils import timezone
+
 # Imports do Django Rest Framework
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -196,20 +199,81 @@ class ProjectView(APIView):
 
             # Criar tarefas a partir das fases
             fases = project.phases or []
-            for fase_nome in fases:
-                phase_obj, _ = Phase.objects.get_or_create(name=fase_nome)
-                project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
-                Task.objects.create(
-                    project_phase=project_phase,
-                    title=fase_nome,
-                    description=f"Fase inicial do projeto: {fase_nome}",
-                    is_completed=False,
-                    due_date=project.end_date
-                )
+            if fases and project.start_date and project.end_date:
+                self.calcular_e_criar_tarefas_com_datas(project, fases)
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+                    
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def calcular_e_criar_tarefas_com_datas(self, project, fases):
+        """Calcula datas automaticamente para tarefas e subtarefas"""
+        start_date = project.start_date
+        end_date = project.end_date - timedelta(days=1)  # 1 dia de antecedência
+        
+        total_duration = (end_date - start_date).days
+        phases_count = len(fases)
+        
+        if phases_count == 0:
+            return
+        
+        # Duração por fase (em dias)
+        days_per_phase = total_duration / phases_count
+        
+        for index, fase_nome in enumerate(fases):
+            # Calcular datas para esta fase
+            phase_start = start_date + timedelta(days=index * days_per_phase)
+            phase_end = start_date + timedelta(days=(index + 1) * days_per_phase)
+            
+            # Criar fase e tarefa principal
+            phase_obj, _ = Phase.objects.get_or_create(name=fase_nome)
+            project_phase = ProjectPhase.objects.create(project=project, phase=phase_obj)
+            
+            # Criar tarefa principal com datas calculadas
+            main_task = Task.objects.create(
+                project_phase=project_phase,
+                title=fase_nome,
+                description=f"Fase: {fase_nome}",
+                is_completed=False,
+                created_at=phase_start,  # ✅ Data de início calculada
+                due_date=phase_end,      # ✅ Data de fim calculada
+                complexidade=3.0  # Valor padrão
+            )
+            
+            # ✅ CRIAR SUBTAREFAS AUTOMATICAMENTE COM DATAS
+            self.criar_subtarefas_automaticas(main_task, phase_start, phase_end, fase_nome)
+
+    def criar_subtarefas_automaticas(self, main_task, phase_start, phase_end, fase_nome):
+        """Cria subtarefas com datas distribuídas dentro da tarefa principal"""
+        subtarefas_base = [
+            f"Planejar {fase_nome}",
+            f"Executar {fase_nome}", 
+            f"Revisar {fase_nome}",
+            f"Finalizar {fase_nome}"
+        ]
+        
+        total_duration = (phase_end - phase_start).days
+        subtasks_count = len(subtarefas_base)
+        
+        if subtasks_count == 0:
+            return
+        
+        days_per_subtask = total_duration / subtasks_count
+        
+        for sub_index, subtarefa_nome in enumerate(subtarefas_base):
+            sub_start = phase_start + timedelta(days=sub_index * days_per_subtask)
+            sub_end = phase_start + timedelta(days=(sub_index + 1) * days_per_subtask)
+            
+            Task.objects.create(
+                project_phase=main_task.project_phase,
+                title=subtarefa_nome,
+                description=f"Subtarefa: {subtarefa_nome}",
+                is_completed=False,
+                created_at=sub_start,  # ✅ Data de início calculada
+                due_date=sub_end,      # ✅ Data de fim calculada  
+                parent_task=main_task,  # ✅ Link com tarefa principal
+                complexidade=2.0  # Valor padrão para subtarefas
+            )
 
 class ProjectDeleteView(APIView):
     permission_classes = [IsAuthenticated]

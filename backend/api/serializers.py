@@ -281,13 +281,15 @@ class TaskFullInfoSerializer(serializers.ModelSerializer):
     nomeTarefa = serializers.CharField(source='title')
     descricao = serializers.CharField(source='description')
     prazo = serializers.DateField(source='due_date')
+    data_inicio = serializers.DateTimeField(source='start_date')
+    data_fim = serializers.DateTimeField(source='due_date')
     status = serializers.CharField(source='status')
     responsavel = serializers.SerializerMethodField()
     subTarefas = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ['id', 'nomeTarefa', 'descricao', 'prazo', 'status', 'responsavel', 'subTarefas']
+        fields = ['id', 'nomeTarefa', 'descricao', 'prazo','data_inicio', 'data_fim', 'status', 'responsavel', 'subTarefas']
 
     def get_responsavel(self, obj):
         return obj.assignee.username if obj.assignee else None

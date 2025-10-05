@@ -94,8 +94,10 @@ class Task(models.Model):
     description = models.TextField(blank=True, null=True)
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)  # 🔹 início da tarefa
+    start_date = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField()                     # 🔹 fim da tarefa
     project_phase = models.ForeignKey(ProjectPhase, on_delete=models.CASCADE)
+    complexidade = models.FloatField(default=3.0)
 
     parent_task = models.ForeignKey(
         "self",
@@ -111,7 +113,8 @@ class Task(models.Model):
     @property
     def duration(self):
         """Duração em dias"""
-        return (self.due_date - self.created_at).days
+        start = self.start_date if self.start_date else self.created_at
+        return (self.due_date - start).days
     
 class TaskAssignee(models.Model):
     id = models.BigAutoField(primary_key=True)
