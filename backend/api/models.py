@@ -148,8 +148,6 @@ class Chat(models.Model):
 # Campo novo para Project
 Project.add_to_class('probabilidade_atraso', models.FloatField(default=0.0))
 
-# Campo novo para Task  
-Task.add_to_class('complexidade', models.FloatField(default=3.0))
 
 # Model para histórico 
 class AnaliseProjeto(models.Model):

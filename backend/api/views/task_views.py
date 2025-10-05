@@ -186,58 +186,26 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
 class TaskAssignView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, task_id):
+    def get(self, request, project_id):
         try:
-            task = get_object_or_404(Task, id=task_id)
-            user_id = request.data.get('user_id')
-            
-            if not user_id:
-                return Response(
-                    {"error": "user_id é obrigatório"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            project = get_object_or_404(Project, id=project_id)
 
-            # Verifica se o usuário tem permissão para atribuir tarefas neste projeto
-            project_phase = task.project_phase
-            project = project_phase.project
-            
-            if not UserProject.objects.filter(user=request.user, project=project).exists():
-                return Response(
-                    {"error": "Você não tem permissão para atribuir tarefas neste projeto"}, 
-                    status=status.HTTP_403_FORBIDDEN
-                )
+            # Pegue os colaboradores do projeto
+            collaborators_qs = UserProject.objects.filter(project=project)
 
-            # Verifica se o usuário a ser atribuído é membro do projeto
-            user_to_assign = get_object_or_404(User, id=user_id)
-            if not UserProject.objects.filter(user=user_to_assign, project=project).exists():
-                return Response(
-                    {"error": "O usuário não é membro deste projeto"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Cria ou atualiza a atribuição
-            task_assignee, created = TaskAssignee.objects.get_or_create(
-                task=task,
-                defaults={'user': user_to_assign}
-            )
-            
-            if not created:
-                task_assignee.user = user_to_assign
-                task_assignee.save()
-
-            # Serializa a resposta
-            user_data = UserSerializer(user_to_assign).data
-
-            return Response({
-                "message": "Tarefa atribuída com sucesso",
-                "assigned_user": user_data,
-                "task": {
-                    "id": task.id,
-                    "title": task.title
+            collaborators = [
+                {
+                    "id": up.user.id,
+                    "full_name": up.user.full_name,
+                    "email": up.user.email,
                 }
-            }, status=status.HTTP_200_OK)
+                for up in collaborators_qs
+            ]
+
+            return Response({"collaborators": collaborators}, status=status.HTTP_200_OK)
 
         except Exception as e:
+<<<<<<< HEAD
             return Response(
                 {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -323,3 +291,6 @@ class CreateSubtaskView(APIView):
                 {"error": f"Erro ao criar subtarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+=======
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+>>>>>>> 73979a0928f0db08c2c5be4b453a27ee36ad4eab

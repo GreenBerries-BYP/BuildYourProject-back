@@ -33,25 +33,21 @@ class AnalisarProjetoView(View):
             # Gerar sugestões baseadas em métricas
             sugestoes = sistema_sugestoes.gerar_sugestoes(projeto)
             
-            # Calcular probabilidade de atraso baseada no SPI
-            spi = analise_desempenho['spi']
-            probabilidade_atraso = self._calcular_probabilidade_atraso(spi)
+            # Calcular probabilidade de atraso baseada em múltiplas métricas
+            probabilidade_atraso = self._calcular_probabilidade_atraso(analise_desempenho)
             
             resposta = {
                 'sucesso': True,
                 'status': analise_desempenho['status'],
                 'cor': analise_desempenho['cor'],
                 'explicacao': analise_desempenho['explicacao'],
-                'spi': analise_desempenho['spi'],
-                'sv': analise_desempenho['sv'],
-                'tcpi': analise_desempenho['tcpi'],
-                'eac': analise_desempenho['eac'],
-                'vac': analise_desempenho['vac'],
                 'dias_restantes': analise_desempenho['dias_restantes'],
                 'tarefas_atrasadas': analise_desempenho['tarefas_atrasadas'],
                 'taxa_conclusao': analise_desempenho['taxa_conclusao'],
                 'probabilidade_atraso': probabilidade_atraso,
-                'sugestoes': sugestoes
+                'sugestoes': sugestoes,
+                'projeto_concluido': analise_desempenho['projeto_concluido'],
+                'dias_atraso': analise_desempenho['dias_atraso']
             }
             
             return JsonResponse(resposta)
@@ -67,16 +63,49 @@ class AnalisarProjetoView(View):
                 'erro': f'Erro na análise: {str(e)}'
             }, status=500)
     
-    def _calcular_probabilidade_atraso(self, spi):
-        """Calcular probabilidade de atraso baseada no SPI"""
-        if spi >= 1.0:
-            return 10
-        elif spi >= 0.9:
-            return 25
-        elif spi >= 0.7:
-            return 60
-        else:
-            return 85
+    def _calcular_probabilidade_atraso(self, analise_desempenho):
+        """Calcular probabilidade de atraso baseada em múltiplas métricas"""
+        if analise_desempenho['projeto_concluido']:
+            return 0
+            
+        probabilidade = 0
+        spi = analise_desempenho.get('spi_calculado', 1.0)
+        tarefas_atrasadas = analise_desempenho['tarefas_atrasadas']
+        dias_atraso = analise_desempenho['dias_atraso']
+        taxa_conclusao = analise_desempenho['taxa_conclusao']
+        dias_restantes = analise_desempenho['dias_restantes']
+        
+        # Fator SPI (30% do peso)
+        if spi < 0.7:
+            probabilidade += 30
+        elif spi < 0.9:
+            probabilidade += 20
+        elif spi < 1.0:
+            probabilidade += 10
+        
+        # Fator Tarefas Atrasadas (25% do peso)
+        if tarefas_atrasadas > 5:
+            probabilidade += 25
+        elif tarefas_atrasadas > 2:
+            probabilidade += 15
+        elif tarefas_atrasadas > 0:
+            probabilidade += 5
+        
+        # Fator Dias de Atraso (25% do peso)
+        if dias_atraso > 14:
+            probabilidade += 25
+        elif dias_atraso > 7:
+            probabilidade += 15
+        elif dias_atraso > 0:
+            probabilidade += 10
+        
+        # Fator Pressão do Tempo (20% do peso)
+        if taxa_conclusao < 50 and dias_restantes < 7:
+            probabilidade += 20
+        elif taxa_conclusao < 70 and dias_restantes < 14:
+            probabilidade += 10
+        
+        return min(95, probabilidade)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AplicarSugestaoView(View):
@@ -102,6 +131,8 @@ class AplicarSugestaoView(View):
                 resultado = self._aplicar_ajuste_prazos(projeto)
             elif acao == 'balancear_carga':
                 resultado = self._aplicar_balanceamento_carga(projeto)
+            elif acao == 'acelerar_conclusao':
+                resultado = self._aplicar_acelerar_conclusao(projeto)
             else:
                 return JsonResponse({
                     'sucesso': False,
@@ -210,4 +241,21 @@ class AplicarSugestaoView(View):
         return {
             'mensagem': 'Carga balanceada - Distribuição adequada',
             'detalhes': {}
+        }
+    
+    def _aplicar_acelerar_conclusao(self, projeto):
+        """Acelerar conclusão de tarefas críticas"""
+        tarefas_criticas = Task.objects.filter(
+            project_phase__project=projeto,
+            is_completed=False,
+            due_date__lte=timezone.now() + timezone.timedelta(days=3)
+        )
+        
+        tarefas_afetadas = tarefas_criticas.count()
+        
+        return {
+            'mensagem': f'Foco em {tarefas_afetadas} tarefas críticas com prazo próximo',
+            'detalhes': {
+                'tarefas_criticas': tarefas_afetadas
+            }
         }
