@@ -50,6 +50,7 @@ class AnalisadorDesempenho:
                 'explicacao': mensagem_conclusao,
                 'dias_restantes': dias_antecedencia,  # Dias de antecedência
                 'tarefas_atrasadas': 0,
+                'tarefas_pendentes': 0,
                 'taxa_conclusao': 100,
                 'probabilidade_atraso': 0,
                 'projeto_concluido': True,
@@ -59,37 +60,29 @@ class AnalisadorDesempenho:
         
         spi = metricas['spi']
         dias_restantes_reais = metricas['dias_restantes']
+        tarefas_pendentes = metricas['total_tarefas'] - metricas['tarefas_concluidas']
+        
+        # GERAR EXPLICAÇÃO BASEADA NA SITUAÇÃO
+        explicacao = self._gerar_explicacao_situacao(
+            spi, dias_atraso, dias_restantes_reais, tarefas_pendentes
+        )
         
         # DETERMINAR STATUS BASEADO NO SPI
         if spi >= 1.1:
             status = "ADIANTADO"
             cor = "verde"
-            if dias_atraso > 0:
-                explicacao = f"Projeto adiantado, mas com {dias_atraso} dias de atraso acumulado"
-            else:
-                explicacao = "Projeto está adiantado em relação ao planejado"
         elif spi >= 0.95:
             status = "NO PRAZO" 
             cor = "verde-claro"
-            if dias_atraso > 0:
-                explicacao = f"Projeto no prazo, mas com {dias_atraso} dias de atraso acumulado"
-            else:
-                explicacao = "Projeto dentro do cronograma planejado"
         elif spi >= 0.9:
             status = "ATENÇÃO" 
             cor = "amarelo"
-            if dias_atraso > 0:
-                explicacao = f"Projeto com {dias_atraso} dias de atraso - requer atenção"
-            else:
-                explicacao = "Projeto próximo do limite - monitorar de perto"
         elif spi >= 0.7:
             status = "ATRASO MODERADO"
             cor = "laranja"
-            explicacao = f"Projeto com {dias_atraso} dias de atraso - ação corretiva necessária"
         else:
             status = "ATRASO CRÍTICO"
             cor = "vermelho"
-            explicacao = f"Projeto com {dias_atraso} dias de atraso - intervenção urgente necessária"
         
         return {
             'status': status,
@@ -97,12 +90,26 @@ class AnalisadorDesempenho:
             'explicacao': explicacao,
             'dias_restantes': dias_restantes_reais,
             'tarefas_atrasadas': metricas['tarefas_atrasadas'],
+            'tarefas_pendentes': tarefas_pendentes,
             'taxa_conclusao': metricas['taxa_conclusao'],
             'probabilidade_atraso': 0,  # Será calculado depois
             'projeto_concluido': False,
             'dias_atraso': dias_atraso,
             'spi_calculado': spi
         }
+    
+    def _gerar_explicacao_situacao(self, spi, dias_atraso, dias_restantes, tarefas_pendentes):
+        """Gera explicação contextual baseada na situação do projeto"""
+        
+        # SE HOUVER ATRASO
+        if dias_atraso > 0:
+            return f"Projeto com {dias_atraso} dias de atraso. Restam {dias_restantes} dias para concluir {tarefas_pendentes} tarefas"
+        
+        # SE NÃO HOUVER ATRASO
+        if dias_restantes > 0:
+            return f"{dias_restantes} dias restantes para concluir {tarefas_pendentes} tarefas"
+        else:
+            return f"Prazo finalizado. {tarefas_pendentes} tarefas pendentes"
     
     def _gerar_mensagem_conclusao(self, dias_antecedencia):
         """Gera mensagem personalizada para projeto concluído"""
