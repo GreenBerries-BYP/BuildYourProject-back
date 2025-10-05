@@ -321,66 +321,60 @@ class ProjectShareWithMeView(APIView):
         serializer = SharedProjectSerializer(projetos, many=True)
         return Response(serializer.data)
     
-# atribuição de tarefas
-class TaskAssignView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def post(self, request, task_id):
+    
+class TaskAssignView(APIView):
+    def put(self, request, task_id):
         try:
-            print(f"DEBUG TaskAssignView - task_id: {task_id}")
-            print(f"DEBUG - Dados recebidos: {request.data}")
-            
-            task = get_object_or_404(Task, id=task_id)
-            user_id = request.data.get('user_id')
+            task = Task.objects.get(id=task_id)
+            user_id = request.data.get('userId')
             
             if not user_id:
                 return Response(
-                    {"error": "user_id é obrigatório"}, 
+                    {"error": "User ID is required"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            # Verifica permissões
-            project_phase = task.project_phase
-            project = project_phase.project
             
-            # Verifica se usuário atual tem acesso ao projeto
-            if not UserProject.objects.filter(user=request.user, project=project).exists():
+            # Buscar o usuário
+            try:
+                # Se user_id for um email, busque o usuário
+                if '@' in str(user_id):
+                    user = User.objects.get(email=user_id)
+                else:
+                    # Tenta buscar por ID
+                    user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
                 return Response(
-                    {"error": "Você não tem permissão para atribuir tarefas neste projeto"}, 
-                    status=status.HTTP_403_FORBIDDEN
+                    {"error": "User not found"}, 
+                    status=status.HTTP_404_NOT_FOUND
                 )
-
-            # Verifica se o usuário a ser atribuído é membro do projeto
-            user_to_assign = get_object_or_404(User, id=user_id)
-            if not UserProject.objects.filter(user=user_to_assign, project=project).exists():
-                return Response(
-                    {"error": "O usuário não é membro deste projeto"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # CORREÇÃO: Usar update_or_create para garantir unicidade
-            task_assignee, created = TaskAssignee.objects.update_or_create(
-                task=task,
-                defaults={'user': user_to_assign}
-            )
-
-            print(f"Tarefa atribuída com sucesso - Task: {task.id}, User: {user_to_assign.id}")
-
-            # Serializa a resposta
-            user_data = UserSerializer(user_to_assign).data
-
+            
+            # Remove assignees existentes (se quiser apenas um responsável por tarefa)
+            TaskAssignee.objects.filter(task=task).delete()
+            
+            # Cria o novo assignee
+            task_assignee = TaskAssignee.objects.create(task=task, user=user)
+            
             return Response({
-                "message": "Tarefa atribuída com sucesso",
-                "assigned_user": user_data,
+                "message": "Task assigned successfully",
                 "task": {
                     "id": task.id,
-                    "title": task.title
+                    "title": task.title,
+                    "assigned_to": {
+                        "id": user.id,
+                        "full_name": user.full_name,
+                        "email": user.email
+                    }
                 }
-            }, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            print(f"Erro ao atribuir tarefa: {str(e)}")
+            })
+            
+        except Task.DoesNotExist:
             return Response(
-                {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
+                {"error": "Task not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
