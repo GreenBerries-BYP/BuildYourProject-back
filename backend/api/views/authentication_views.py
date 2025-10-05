@@ -27,20 +27,20 @@ def set_verification_code(email, code, timeout=600):  # 10 minutos
 def delete_verification_code(email):
     cache.delete(f"reset_code_{email}")
 
-def send_mail_async(subject, message, from_email, recipient_list):
-    """Usa API direta do Resend - igual ao project_views"""
+def send_mail_async(subject, html_content, from_email, recipient_list):
+    """Usa API direta do Resend para enviar email HTML"""
     def _enviar():
         try:
             print(f"🎯 API RESEND - RECUPERAÇÃO SENHA PARA: {recipient_list}")
             
-            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"  # Mesma API Key
+            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"
             url = "https://api.resend.com/emails"
             
             payload = {
-                "from": "noreply@byp-buildyourproject.com.br",  # ⚠️ SEU DOMÍNIO
+                "from": from_email,
                 "to": recipient_list,
                 "subject": subject,
-                "text": message
+                "html": html_content
             }
             
             headers = {
@@ -63,6 +63,113 @@ def send_mail_async(subject, message, from_email, recipient_list):
     thread = threading.Thread(target=_enviar)
     thread.daemon = True
     thread.start()
+
+def create_reset_email_html(code):
+    """Cria o template HTML personalizado para o email de reset"""
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {{
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }}
+        .header {{
+            background: linear-gradient(166deg, #8474a1 0%, #86b6a3 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }}
+        .logo-container {{
+            margin-bottom: 15px;
+        }}
+        .logo {{
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }}
+        .content {{
+            padding: 40px 30px;
+            color: #383560;
+            line-height: 1.6;
+        }}
+        .code {{
+            background: #c1d5cd;
+            border: 2px dashed #58917a;
+            border-radius: 10px;
+            padding: 25px;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            color: #045a5c;
+            margin: 25px 0;
+            letter-spacing: 5px;
+        }}
+        .footer {{
+            background: #c8c1d4;
+            padding: 25px;
+            text-align: center;
+            color: #383560;
+            font-size: 14px;
+        }}
+        .footer-image {{
+            display: block;
+            margin: 15px auto;
+            max-width: 200px;
+            height: auto;
+        }}
+        .info-text {{
+            color: #54969a;
+            font-size: 14px;
+            margin-top: 10px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">BuildYourProject</div>
+            </div>
+            <div style="font-size: 18px;">Redefinição de Senha</div>
+        </div>
+        
+        <div class="content">
+            <h2 style="color: #5b4584; margin-top: 0;">Olá!</h2>
+            <p>Você solicitou a redefinição de sua senha no <strong style="color: #8474a1;">BuildYourProject</strong>.</p>
+            
+            <p>Seu código de verificação é:</p>
+            <div class="code">{code}</div>
+            
+            <p class="info-text"><strong>⚠️ Este código expira em 10 minutos.</strong></p>
+            
+            <p>Se você não solicitou esta redefinição, ignore este email.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Atenciosamente,<br>
+            <strong>Equipe BuildYourProject</strong></p>
+            <img src="https://uploads.onecompiler.io/43yq2h4ef/43ypzs2ky/BYP_logo_slogan.png" alt="BuildYourProject" class="footer-image">
+            <p style="margin-top: 15px; font-size: 12px; color: #5b4584;">
+                © 2025 BuildYourProject. Todos os direitos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
