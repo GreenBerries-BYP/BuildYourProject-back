@@ -321,60 +321,63 @@ class ProjectShareWithMeView(APIView):
         serializer = SharedProjectSerializer(projetos, many=True)
         return Response(serializer.data)
     
-
-    
+# atribuição de tarefas
 class TaskAssignView(APIView):
-    def put(self, request, task_id):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, task_id):
         try:
-            task = Task.objects.get(id=task_id)
-            user_id = request.data.get('userId')
+            task = get_object_or_404(Task, id=task_id)
+            user_id = request.data.get('user_id')
             
             if not user_id:
                 return Response(
-                    {"error": "User ID is required"}, 
+                    {"error": "user_id é obrigatório"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
+            # Verifica se o usuário tem permissão para atribuir tarefas neste projeto
+            project_phase = task.project_phase
+            project = project_phase.project
             
-            # Buscar o usuário
-            try:
-                # Se user_id for um email, busque o usuário
-                if '@' in str(user_id):
-                    user = User.objects.get(email=user_id)
-                else:
-                    # Tenta buscar por ID
-                    user = User.objects.get(id=user_id)
-            except User.DoesNotExist:
+            if not UserProject.objects.filter(user=request.user, project=project).exists():
                 return Response(
-                    {"error": "User not found"}, 
-                    status=status.HTTP_404_NOT_FOUND
+                    {"error": "Você não tem permissão para atribuir tarefas neste projeto"}, 
+                    status=status.HTTP_403_FORBIDDEN
                 )
+
+            # Verifica se o usuário a ser atribuído é membro do projeto
+            user_to_assign = get_object_or_404(User, id=user_id)
+            if not UserProject.objects.filter(user=user_to_assign, project=project).exists():
+                return Response(
+                    {"error": "O usuário não é membro deste projeto"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Cria ou atualiza a atribuição
+            task_assignee, created = TaskAssignee.objects.get_or_create(
+                task=task,
+                defaults={'user': user_to_assign}
+            )
             
-            # Remove assignees existentes (se quiser apenas um responsável por tarefa)
-            TaskAssignee.objects.filter(task=task).delete()
-            
-            # Cria o novo assignee
-            task_assignee = TaskAssignee.objects.create(task=task, user=user)
-            
+            if not created:
+                task_assignee.user = user_to_assign
+                task_assignee.save()
+
+            # Serializa a resposta
+            user_data = UserSerializer(user_to_assign).data
+
             return Response({
-                "message": "Task assigned successfully",
+                "message": "Tarefa atribuída com sucesso",
+                "assigned_user": user_data,
                 "task": {
                     "id": task.id,
-                    "title": task.title,
-                    "assigned_to": {
-                        "id": user.id,
-                        "full_name": user.full_name,
-                        "email": user.email
-                    }
+                    "title": task.title
                 }
-            })
-            
-        except Task.DoesNotExist:
-            return Response(
-                {"error": "Task not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
-                {"error": str(e)}, 
+                {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

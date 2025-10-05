@@ -224,7 +224,6 @@ class TaskSerializer(serializers.ModelSerializer):
         return 'concluído' if obj.is_completed else 'pendente'
 
 class TaskAssigneeSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
     class Meta:
         model = TaskAssignee
         fields = ['id', 'task', 'user']  # model aponta para user, não user_project
