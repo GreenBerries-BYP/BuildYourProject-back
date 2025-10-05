@@ -326,9 +326,7 @@ class TaskAssignView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, task_id):
-        
         try:
-
             print(f"DEBUG TaskAssignView - task_id: {task_id}")
             print(f"DEBUG - Dados recebidos: {request.data}")
             
@@ -337,45 +335,42 @@ class TaskAssignView(APIView):
             
             if not user_id:
                 return Response(
-                    {"error": "user_id e obrigatorio"}, 
+                    {"error": "user_id é obrigatório"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Verifica permissoes
+            # Verifica permissões
             project_phase = task.project_phase
             project = project_phase.project
             
+            # Verifica se usuário atual tem acesso ao projeto
             if not UserProject.objects.filter(user=request.user, project=project).exists():
                 return Response(
-                    {"error": "Voce nao tem permissao para atribuir tarefas neste projeto"}, 
+                    {"error": "Você não tem permissão para atribuir tarefas neste projeto"}, 
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-            # Verifica se o usuario a ser atribuido e membro do projeto
+            # Verifica se o usuário a ser atribuído é membro do projeto
             user_to_assign = get_object_or_404(User, id=user_id)
             if not UserProject.objects.filter(user=user_to_assign, project=project).exists():
                 return Response(
-                    {"error": "O usuario nao e membro deste projeto"}, 
+                    {"error": "O usuário não é membro deste projeto"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # CORRETO: Criar ou atualizar TaskAssignee
-            task_assignee, created = TaskAssignee.objects.get_or_create(
+            # CORREÇÃO: Usar update_or_create para garantir unicidade
+            task_assignee, created = TaskAssignee.objects.update_or_create(
                 task=task,
                 defaults={'user': user_to_assign}
             )
-            
-            if not created:
-                task_assignee.user = user_to_assign
-                task_assignee.save()
 
-            print(f"Tarefa atribuida com sucesso - Criado: {created}")
+            print(f"Tarefa atribuída com sucesso - Task: {task.id}, User: {user_to_assign.id}")
 
             # Serializa a resposta
             user_data = UserSerializer(user_to_assign).data
 
             return Response({
-                "message": "Tarefa atribuida com sucesso",
+                "message": "Tarefa atribuída com sucesso",
                 "assigned_user": user_data,
                 "task": {
                     "id": task.id,
@@ -384,7 +379,7 @@ class TaskAssignView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(f"Erro: {str(e)}")
+            print(f"Erro ao atribuir tarefa: {str(e)}")
             return Response(
                 {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
