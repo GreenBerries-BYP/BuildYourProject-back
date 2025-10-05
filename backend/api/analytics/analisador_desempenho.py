@@ -18,11 +18,11 @@ class AnalisadorDesempenho:
             return {'erro': 'Não foi possível calcular métricas'}
             
         # ✅ VERIFICAR SE PROJETO ESTÁ FINALIZADO
-        if metricas['taxa_conclusao'] == 100:
+        if metricas['taxa_conclusao'] >= 99.9:
             return {
                 'status': "CONCLUÍDO",
                 'cor': "verde",
-                'explicacao': "Projeto finalizado com sucesso!",
+                'explicacao': "🎉 Projeto finalizado com sucesso! Parabéns pela conclusão!",
                 'spi': 1.0,
                 'sv': 0,
                 'tcpi': 1.0,
