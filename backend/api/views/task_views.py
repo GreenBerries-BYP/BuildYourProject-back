@@ -181,34 +181,7 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         task.save()
         
         return Response({"detail": "Status atualizado com sucesso."})
-    
-# atribuição de tarefas
-class TaskAssignView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, project_id):
-        try:
-            project = get_object_or_404(Project, id=project_id)
-
-            # Pegue os colaboradores do projeto
-            collaborators_qs = UserProject.objects.filter(project=project)
-
-            collaborators = [
-                {
-                    "id": up.user.id,
-                    "full_name": up.user.full_name,
-                    "email": up.user.email,
-                }
-                for up in collaborators_qs
-            ]
-
-            return Response({"collaborators": collaborators}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response(
-                {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+  
 
 class CreateSubtaskView(APIView):
     permission_classes = [IsAuthenticated]
