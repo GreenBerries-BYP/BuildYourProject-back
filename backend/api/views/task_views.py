@@ -205,7 +205,6 @@ class TaskAssignView(APIView):
             return Response({"collaborators": collaborators}, status=status.HTTP_200_OK)
 
         except Exception as e:
-<<<<<<< HEAD
             return Response(
                 {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -291,6 +290,3 @@ class CreateSubtaskView(APIView):
                 {"error": f"Erro ao criar subtarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-=======
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
->>>>>>> 73979a0928f0db08c2c5be4b453a27ee36ad4eab
