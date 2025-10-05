@@ -372,7 +372,6 @@ class ProjectView(APIView):
                 complexidade=3.0  # Valor padrão
             )
             
-            # ✅ CRIAR SUBTAREFAS AUTOMATICAMENTE COM DATAS
             self.criar_subtarefas_automaticas(main_task, phase_start, phase_end, fase_nome)
 
     def criar_subtarefas_automaticas(self, main_task, phase_start, phase_end, fase_nome):
@@ -401,9 +400,9 @@ class ProjectView(APIView):
                 title=subtarefa_nome,
                 description=f"Subtarefa: {subtarefa_nome}",
                 is_completed=False,
-                created_at=sub_start,  # ✅ Data de início calculada
-                due_date=sub_end,      # ✅ Data de fim calculada  
-                parent_task=main_task,  # ✅ Link com tarefa principal
+                created_at=sub_start,  # Data de início calculada
+                due_date=sub_end,      # Data de fim calculada  
+                parent_task=main_task,  # Link com tarefa principal
                 complexidade=2.0  # Valor padrão para subtarefas
             )
 

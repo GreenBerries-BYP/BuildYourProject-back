@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 
 from ..models import Project, UserProject, ProjectPhase, Task, TaskAssignee, Phase, ProjectRole
 from ..serializers import TaskSerializer
+from datetime import timedelta
+
 
 User = get_user_model()
 
@@ -209,12 +211,12 @@ class CreateSubtaskView(APIView):
 
             # Cria a subtarefa
             subtask_data = {
-                'title': request.data.get('nome'),  # Mapeia 'nome' para 'title'
+                'title': request.data.get('nome'),
                 'description': request.data.get('descricao', ''),
-                'due_date': request.data.get('dataEntrega'),
+                'due_date': project.end_date - timedelta(days=1),  # Projeto - 1 dia
                 'project_phase': parent_task.project_phase,
                 'parent_task': parent_task,
-                'complexidade': 2.0  # Valor padrão para subtarefas
+                'complexidade': 2.0 #complexidade padrão para subtarefas
             }
 
             # Verifica campos obrigatórios
