@@ -22,74 +22,94 @@ class SistemaSugestoes:
         if not metricas:
             return sugestoes
         
+        # PROJETO CONCLUÍDO - SEM SUGESTÕES
+        if metricas['taxa_conclusao'] == 100:
+            return []
+        
         spi = metricas['spi']
         sv = metricas['sv']
         tcpi = metricas['tcpi']
         vac = metricas['vac']
         tarefas_atrasadas = metricas['tarefas_atrasadas']
         dias_restantes = metricas['dias_restantes']
+        total_tarefas = metricas['total_tarefas']
+        taxa_conclusao = metricas['taxa_conclusao']
+        dias_atraso = max(0, -vac)
 
-        # projeto concluido, não retorna sugestão.
-        if metricas['taxa_conclusao'] == 100:
-            return []
-        
-        # 🔴 SUGESTÃO 1: PROJETO ATRASADO (SPI BAIXO)
-        if spi < 0.9:
+        # SUGESTÃO 1: PROJETO ATRASADO (SPI BAIXO) - SÓ SE TIVER +1 TAREFA
+        if spi < 0.9 and total_tarefas > 1 and tarefas_atrasadas > 0:
+            descricao = f"Priorize as {tarefas_atrasadas} tarefas atrasadas. "
+            descricao += "Foque nas atividades críticas do caminho para retomar o cronograma. "
+            descricao += f"O projeto está com {dias_atraso} dias de atraso."
+            
             sugestoes.append({
                 'id': 'priorizar_atrasadas',
-                'titulo': '🎯 Priorizar Tarefas Atrasadas',
-                'descricao': f'SPI {spi:.2f} indica atraso. {tarefas_atrasadas} tarefas com prazo vencido',
+                'titulo': 'Priorizar Tarefas Atrasadas',
+                'descricao': descricao,
                 'acao': 'priorizar_atrasadas',
                 'prioridade': 'alta' if spi < 0.7 else 'media'
             })
         
-        # 🔴 SUGESTÃO 2: PERFORMANCE INSUSTENTÁVEL (TCPI ALTO)
+        # SUGESTÃO 2: PERFORMANCE INSUSTENTÁVEL (TCPI ALTO)
         if tcpi > 1.2:
+            descricao = f"TCPI de {tcpi:.2f} indica necessidade de performance muito acima do planejado. "
+            descricao += "Considere revisar escopo, alocar mais recursos ou renegociar prazos."
+            
             sugestoes.append({
                 'id': 'revisar_metas',
-                'titulo': '📈 Revisar Metas do Projeto',
-                'descricao': f'TCPI {tcpi:.2f} indica necessidade de performance muito acima do planejado',
+                'titulo': 'Revisar Metas do Projeto',
+                'descricao': descricao,
                 'acao': 'revisar_metas',
                 'prioridade': 'alta'
             })
         
-        # 🔴 SUGESTÃO 3: PREVISÃO DE ATRASO (VAC NEGATIVO)
+        # SUGESTÃO 3: PREVISÃO DE ATRASO (VAC NEGATIVO)
         if vac < -7:
+            descricao = f"Previsão de {abs(vac):.0f} dias de atraso no término. "
+            descricao += f"Restam {dias_restantes} dias. Avalie extensão de prazo ou redução de escopo."
+            
             sugestoes.append({
                 'id': 'ajustar_prazos',
-                'titulo': '⚠️ Ajustar Prazos Finais',
-                'descricao': f'Previsão de {abs(vac):.0f} dias de atraso no término. Restam {dias_restantes} dias',
+                'titulo': 'Ajustar Prazos Finais',
+                'descricao': descricao,
                 'acao': 'ajustar_prazos', 
                 'prioridade': 'alta' if vac < -14 else 'media'
             })
         
-        # 🔴 SUGESTÃO 4: CARGA DESBALANCEADA
+        # SUGESTÃO 4: CARGA DESBALANCEADA - SÓ SE TIVER +1 MEMBRO
         carga_desequilibrada = SistemaSugestoes._verificar_carga_desequilibrada(projeto)
-        if carga_desequilibrada['desequilibrio']:
+        if carga_desequilibrada['desequilibrio'] and carga_desequilibrada['total_usuarios'] > 1:
+            descricao = f"Distribua melhor as tarefas. Diferença de {carga_desequilibrada['diferenca']} tarefas entre membros. "
+            descricao += f"Membro mais sobrecarregado: {carga_desequilibrada['maior_carga']} tarefas. "
+            descricao += f"Membro menos carregado: {carga_desequilibrada['menor_carga']} tarefas."
+            
             sugestoes.append({
                 'id': 'balancear_carga',
-                'titulo': '⚖️ Balancear Carga de Trabalho',
-                'descricao': f"Diferença de {carga_desequilibrada['diferenca']} tarefas entre membros",
+                'titulo': 'Balancear Carga de Trabalho',
+                'descricao': descricao,
                 'acao': 'balancear_carga',
                 'prioridade': 'media'
             })
         
-        # 🔴 SUGESTÃO 5: BAIXA TAXA DE CONCLUSÃO
-        if metricas['taxa_conclusao'] < 30 and dias_restantes < 7:
+        # SUGESTÃO 5: BAIXA TAXA DE CONCLUSÃO COM PRAZO CURTO
+        if taxa_conclusao < 50 and dias_restantes < 7:
+            descricao = f"Apenas {taxa_conclusao}% concluído com {dias_restantes} dias restantes. "
+            descricao += "Foque nas tarefas críticas e considere trabalho extra para cumprir o prazo."
+            
             sugestoes.append({
                 'id': 'acelerar_conclusao',
-                'titulo': '🚀 Acelerar Conclusão',
-                'descricao': f'Apenas {metricas["taxa_conclusao"]}% concluído com {dias_restantes} dias restantes',
+                'titulo': 'Acelerar Conclusão',
+                'descricao': descricao,
                 'acao': 'acelerar_conclusao',
                 'prioridade': 'alta'
             })
         
-        # 🔵 SUGESTÃO 6: PROJETO SAUDÁVEL
-        if spi >= 1.0 and tcpi <= 1.1 and vac >= 0:
+        # SUGESTÃO 6: PROJETO SAUDÁVEL
+        if spi >= 1.0 and tcpi <= 1.1 and vac >= 0 and taxa_conclusao > 70:
             sugestoes.append({
                 'id': 'manter_ritmo',
-                'titulo': '✅ Manter Ritmo Atual',
-                'descricao': 'Projeto está no caminho certo! Continue com o bom trabalho',
+                'titulo': 'Manter Ritmo Atual',
+                'descricao': 'Projeto está no caminho certo! Continue com o bom trabalho e mantenha o foco na conclusão.',
                 'acao': 'manter_ritmo',
                 'prioridade': 'baixa'
             })
@@ -111,12 +131,13 @@ class SistemaSugestoes:
             cargas.append(tarefas_pendentes)
         
         if not cargas:
-            return {'desequilibrio': False, 'diferenca': 0}
+            return {'desequilibrio': False, 'diferenca': 0, 'total_usuarios': 0}
         
         diferenca = max(cargas) - min(cargas)
         return {
             'desequilibrio': diferenca > 3,
             'diferenca': diferenca,
             'maior_carga': max(cargas),
-            'menor_carga': min(cargas)
+            'menor_carga': min(cargas),
+            'total_usuarios': len(cargas)
         }
