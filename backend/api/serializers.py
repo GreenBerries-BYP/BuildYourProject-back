@@ -71,6 +71,20 @@ class ProjectSerializer(serializers.ModelSerializer):
         user_projects = UserProject.objects.filter(project=obj).select_related('user')
         return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
 
+    collaborators_with_ids = serializers.SerializerMethodField()
+    
+    def get_collaborators_with_ids(self, obj):
+        user_projects = UserProject.objects.filter(project=obj).select_related('user')
+        return [
+            {
+                'id': up.user.id,
+                'full_name': up.user.full_name,
+                'email': up.user.email,
+                'role': up.role
+            } 
+            for up in user_projects
+        ]
+
     def get_collaborator_count(self, obj):
         return UserProject.objects.filter(project=obj).count()
 

@@ -29,7 +29,15 @@ class ProjectTasksView(APIView):
         creator_name = leader.user.full_name if leader else None
 
         collaborators_qs = UserProject.objects.filter(project=project).select_related('user')
-        collaborators = [up.user.full_name for up in collaborators_qs]
+
+        collaborators = [
+            {
+                'id': up.user.id,
+                'full_name': up.user.full_name, 
+                'email': up.user.email
+            } 
+            for up in collaborators_qs
+        ]
 
         tarefasProjeto = []
         project_phases = ProjectPhase.objects.filter(project=project).prefetch_related(
