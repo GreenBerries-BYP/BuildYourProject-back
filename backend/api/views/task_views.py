@@ -3,13 +3,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db.models import Count, Min, Max
+from datetime import timedelta
 
 from ..models import Project, UserProject, ProjectPhase, Task, TaskAssignee, Phase, ProjectRole
 from ..serializers import TaskSerializer
-from datetime import timedelta
-
 
 User = get_user_model()
 
@@ -82,16 +82,21 @@ class ProjectTasksView(APIView):
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
         data = request.data.copy()
+        project = get_object_or_404(Project, id=project_id)
+        
         try:
             phase = ProjectPhase.objects.get(id=data.get("phase_id"), project_id=project_id)
         except ProjectPhase.DoesNotExist:
             return Response({"detail": "Fase não encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Calcula a data distribuída para a tarefa
+        task_due_date = self.calculate_distributed_task_due_date(project, phase)
+
         task = Task.objects.create(
             title=data.get("title"),
             description=data.get("description", ""),
             is_completed=data.get("is_completed", False),
-            due_date=data.get("due_date"),
+            due_date=task_due_date,
             project_phase=phase
         )
 
@@ -104,6 +109,31 @@ class ProjectTasksView(APIView):
                 continue
 
         return Response({"detail": "Tarefa criada com sucesso.", "task_id": task.id}, status=status.HTTP_201_CREATED)
+
+    def calculate_distributed_task_due_date(self, project, phase):
+        """
+        Distribui as tarefas ao longo do período do projeto
+        """
+        # Conta quantas tarefas já existem nesta fase
+        existing_tasks_count = Task.objects.filter(project_phase=phase).count()
+        
+        # Calcula o período total do projeto em dias
+        project_duration_days = (project.end_date - project.start_date).days
+        
+        if project_duration_days <= 0:
+            return project.end_date
+            
+        # Distribui as tarefas ao longo do período
+        # Cada nova tarefa ocupa uma posição sequencial no tempo
+        days_to_add = (existing_tasks_count * project_duration_days) // max(1, (existing_tasks_count + 1))
+        
+        due_date = project.start_date + timedelta(days=days_to_add)
+        
+        # Garante que não ultrapasse a data final do projeto
+        if due_date > project.end_date:
+            due_date = project.end_date
+            
+        return due_date
 
     def patch(self, request, project_id, task_id):
         if not UserProject.objects.filter(user=request.user, project_id=project_id).exists():
@@ -142,16 +172,20 @@ class CreateTaskView(APIView):
             return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
 
         data = request.data.copy()
+        project = get_object_or_404(Project, id=project_id)
 
         phase_obj, _ = Phase.objects.get_or_create(name=data.get("nome"))
         project_phase = ProjectPhase.objects.create(project_id=project_id, phase=phase_obj)
+
+        # Calcula a data distribuída para a tarefa
+        task_due_date = self.calculate_distributed_task_due_date(project, project_phase)
 
         task = Task.objects.create(
             project_phase=project_phase,
             title=data.get("nome"),
             description=data.get("descricao", ""),
             is_completed=False,
-            due_date=data.get("dataEntrega")
+            due_date=task_due_date
         )
 
         responsavel_id = data.get("responsavel")
@@ -163,6 +197,30 @@ class CreateTaskView(APIView):
                 pass
 
         return Response({"detail": "Tarefa criada com sucesso.", "task_id": task.id}, status=status.HTTP_201_CREATED)
+
+    def calculate_distributed_task_due_date(self, project, project_phase):
+        """
+        Distribui as tarefas ao longo do período do projeto
+        """
+        # Conta quantas tarefas já existem nesta fase
+        existing_tasks_count = Task.objects.filter(project_phase=project_phase).count()
+        
+        # Calcula o período total do projeto em dias
+        project_duration_days = (project.end_date - project.start_date).days
+        
+        if project_duration_days <= 0:
+            return project.end_date
+            
+        # Distribui as tarefas ao longo do período
+        days_to_add = (existing_tasks_count * project_duration_days) // max(1, (existing_tasks_count + 1))
+        
+        due_date = project.start_date + timedelta(days=days_to_add)
+        
+        # Garante que não ultrapasse a data final do projeto
+        if due_date > project.end_date:
+            due_date = project.end_date
+            
+        return due_date
 
 class TaskUpdateStatusView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -209,26 +267,23 @@ class CreateSubtaskView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Calcula a data distribuída para a subtarefa
+            subtask_due_date = self.calculate_distributed_subtask_due_date(parent_task, project)
+
             # Cria a subtarefa
             subtask_data = {
-                'title': request.data.get('nome'),  # Mapeia 'nome' para 'title'
+                'title': request.data.get('nome'),
                 'description': request.data.get('descricao', ''),
-                'due_date': request.data.get('dataEntrega'),
+                'due_date': subtask_due_date,
                 'project_phase': parent_task.project_phase,
                 'parent_task': parent_task,
-                'complexidade': 2.0  # Valor padrão para subtarefas
+                'complexidade': 2.0
             }
 
             # Verifica campos obrigatórios
             if not subtask_data['title']:
                 return Response(
                     {"error": "Nome da subtarefa é obrigatório"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            if not subtask_data['due_date']:
-                return Response(
-                    {"error": "Data de entrega é obrigatória"}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -265,3 +320,33 @@ class CreateSubtaskView(APIView):
                 {"error": f"Erro ao criar subtarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def calculate_distributed_subtask_due_date(self, parent_task, project):
+        """
+        Distribui as subtarefas ao longo do período da tarefa pai
+        """
+        # Data de início base (início do projeto ou data atual)
+        start_date = max(project.start_date, timezone.now().date())
+        
+        # Data final base (due_date da tarefa pai ou fim do projeto)
+        end_date = parent_task.due_date if parent_task.due_date else project.end_date
+        
+        # Conta quantas subtarefas já existem para esta tarefa pai
+        existing_subtasks_count = Task.objects.filter(parent_task=parent_task).count()
+        
+        # Calcula a duração disponível para as subtarefas
+        available_duration_days = (end_date - start_date).days
+        
+        if available_duration_days <= 0:
+            return end_date
+            
+        # Distribui as subtarefas ao longo do período disponível
+        days_to_add = (existing_subtasks_count * available_duration_days) // max(1, (existing_subtasks_count + 1))
+        
+        due_date = start_date + timedelta(days=days_to_add)
+        
+        # Garante que não ultrapasse a data final
+        if due_date > end_date:
+            due_date = end_date
+            
+        return due_date
