@@ -50,30 +50,30 @@ def enviar_email_async(subject, html_content, from_email, recipient_list):
             print(f"🎯 API RESEND PARA: {recipient_list}")
             print(f"📧 ASSUNTO: {subject}")
             
-           api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"
-           url = "https://api.resend.com/emails"
-        
+            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"
+            url = "https://api.resend.com/emails"
+            
             payload = {
-                "from": from_email,
-                "to": recipient_list,
-                "subject": subject,
-                "html": html_content  # ✅ Agora envia HTML
-            }
-            
+                    "from": from_email,
+                    "to": recipient_list,
+                    "subject": subject,
+                    "html": html_content  # ✅ Agora envia HTML
+                }
+                
             headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            }
-            
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                }
+                
             response = requests.post(url, json=payload, headers=headers, timeout=10)
-            
+                
             print(f"📊 RESPOSTA RESEND: {response.status_code}")
-            
+                
             if response.status_code == 200:
-                print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO!")
-                print(f"📧 ID: {response.json().get('id')}")
+                    print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO!")
+                    print(f"📧 ID: {response.json().get('id')}")
             else:
-                print(f"❌❌❌ ERRO RESEND: {response.text}")
+                    print(f"❌❌❌ ERRO RESEND: {response.text}")
                 
         except Exception as e:
             print(f"💥 ERRO API: {str(e)}")
