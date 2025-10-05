@@ -211,12 +211,12 @@ class CreateSubtaskView(APIView):
 
             # Cria a subtarefa
             subtask_data = {
-                'title': request.data.get('nome'),
+                'title': request.data.get('nome'),  # Mapeia 'nome' para 'title'
                 'description': request.data.get('descricao', ''),
-                'due_date': project.end_date - timedelta(days=1),  # Projeto - 1 dia
+                'due_date': request.data.get('dataEntrega'),
                 'project_phase': parent_task.project_phase,
                 'parent_task': parent_task,
-                'complexidade': 2.0 #complexidade padrão para subtarefas
+                'complexidade': 2.0  # Valor padrão para subtarefas
             }
 
             # Verifica campos obrigatórios
