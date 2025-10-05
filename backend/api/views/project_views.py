@@ -274,9 +274,10 @@ class ProjectView(APIView):
             userproject__user=request.user, 
             userproject__role=ProjectRole.LEADER
         ).distinct()
-        serializer = ProjectWithTasksSerializer(projetos, many=True)
+        # MUDANÇA AQUI: Usar o serializer que inclui as datas
+        serializer = ProjectWithCollaboratorsAndTasksSerializer(projetos, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
