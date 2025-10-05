@@ -189,7 +189,7 @@ class SharedProjectSerializer(serializers.ModelSerializer):
                 "subTarefas": []  # ← Pode buscar subtarefas se precisar
             })
         return tarefas_formatadas
-    
+
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProject
