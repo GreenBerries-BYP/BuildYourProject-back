@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny
@@ -11,6 +10,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import random
 import threading
+import requests
 
 from ..models import Project, UserProject, ProjectRole
 from ..serializers import UserSerializer, CustomTokenObtainPairSerializer
@@ -28,10 +28,41 @@ def delete_verification_code(email):
     cache.delete(f"reset_code_{email}")
 
 def send_mail_async(subject, message, from_email, recipient_list):
-    try:
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-    except Exception as e:
-        print("Erro ao enviar e-mail:", e)
+    """Usa API direta do Resend - igual ao project_views"""
+    def _enviar():
+        try:
+            print(f"🎯 API RESEND - RECUPERAÇÃO SENHA PARA: {recipient_list}")
+            
+            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"  # Mesma API Key
+            url = "https://api.resend.com/emails"
+            
+            payload = {
+                "from": "noreply@byp-buildyourproject.com.br",  # ⚠️ SEU DOMÍNIO
+                "to": recipient_list,
+                "subject": subject,
+                "text": message
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            
+            print(f"📊 RESPOSTA RECUPERAÇÃO: {response.status_code}")
+            
+            if response.status_code == 200:
+                print(f"✅✅✅ EMAIL DE RECUPERAÇÃO ENVIADO!")
+            else:
+                print(f"❌❌❌ ERRO RECUPERAÇÃO: {response.text}")
+                
+        except Exception as e:
+            print(f"💥 ERRO API RECUPERAÇÃO: {str(e)}")
+    
+    thread = threading.Thread(target=_enviar)
+    thread.daemon = True
+    thread.start()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
