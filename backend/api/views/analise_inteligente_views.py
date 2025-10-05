@@ -46,6 +46,7 @@ class AnalisarProjetoView(View):
                 'vac': analise_desempenho['vac'],
                 'dias_restantes': analise_desempenho['dias_restantes'],
                 'tarefas_atrasadas': analise_desempenho['tarefas_atrasadas'],
+                'tarefas_pendentes': analise_desempenho['tarefas_pendentes'],  # ✅ ADICIONADO
                 'taxa_conclusao': analise_desempenho['taxa_conclusao'],
                 'probabilidade_atraso': probabilidade_atraso,
                 'sugestoes': sugestoes
@@ -74,6 +75,7 @@ class AnalisarProjetoView(View):
         tarefas_atrasadas = analise_desempenho['tarefas_atrasadas']
         taxa_conclusao = analise_desempenho['taxa_conclusao']
         dias_restantes = analise_desempenho['dias_restantes']
+        tarefas_pendentes = analise_desempenho['tarefas_pendentes']  # ✅ AGORA EXISTE
         
         # Baseado no SPI (50% do peso)
         if spi < 0.7:
@@ -96,6 +98,7 @@ class AnalisarProjetoView(View):
             probabilidade += 20
         
         return min(95, probabilidade)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AplicarSugestaoView(View):
@@ -122,6 +125,8 @@ class AplicarSugestaoView(View):
                 resultado = self._aplicar_balanceamento_carga(projeto)
             elif acao == 'acelerar_conclusao':
                 resultado = self._aplicar_acelerar_conclusao(projeto)
+            elif acao == 'manter_ritmo':
+                resultado = self._aplicar_manter_ritmo(projeto)
             else:
                 return JsonResponse({
                     'sucesso': False,
@@ -251,8 +256,17 @@ class AplicarSugestaoView(View):
         tarefas_afetadas = tarefas_criticas.count()
         
         return {
-            'mensagem': f'Foco em {tarefas_afetadas} tarefas críticas com prazo próximo',
+            'mensagem': f'Foco em {tarefas_afetadas} tarefas com prazo próximo',
             'detalhes': {
                 'tarefas_criticas': tarefas_afetadas
+            }
+        }
+    
+    def _aplicar_manter_ritmo(self, projeto):
+        """Manter ritmo atual - Ação positiva"""
+        return {
+            'mensagem': 'Ritmo mantido - Continue com o excelente trabalho!',
+            'detalhes': {
+                'status': 'positivo'
             }
         }
