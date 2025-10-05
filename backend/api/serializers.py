@@ -257,15 +257,36 @@ class SimpleTaskSerializer(serializers.ModelSerializer):
 
 class ProjectWithTasksSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
+    # ADICIONAR ESTES CAMPOS
+    startDate = serializers.DateTimeField(source='start_date')
+    endDate = serializers.DateTimeField(source='end_date')
+    creator_name = serializers.SerializerMethodField()
+    collaborator_count = serializers.SerializerMethodField()
+    collaborators_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'tasks']
+        fields = [
+            'id', 'name', 'tasks', 'startDate', 'endDate', 
+            'creator_name', 'collaborator_count', 'collaborators_info'
+        ]
 
     def get_tasks(self, project):
         fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
         tarefas = Task.objects.filter(project_phase__id__in=fase_ids).order_by('due_date')
         return SimpleTaskSerializer(tarefas, many=True).data
+
+    # ADICIONAR ESTES MÉTODOS
+    def get_creator_name(self, obj):
+        leader_relation = UserProject.objects.filter(project=obj, role='leader').select_related('user').first()
+        return leader_relation.user.full_name if leader_relation else None
+
+    def get_collaborator_count(self, obj):
+        return UserProject.objects.filter(project=obj).count()
+
+    def get_collaborators_info(self, obj):
+        user_projects = UserProject.objects.filter(project=obj).select_related('user')
+        return [{'id': up.user.id, 'full_name': up.user.full_name, 'email': up.user.email} for up in user_projects]
 
 class CollaboratorSerializer(serializers.ModelSerializer):
     nome = serializers.CharField(source='user.username')
