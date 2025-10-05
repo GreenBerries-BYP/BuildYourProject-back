@@ -11,6 +11,7 @@ from google.auth.transport import requests as google_requests
 import random
 import threading
 import requests
+import os
 
 from ..models import Project, UserProject, ProjectRole
 from ..serializers import UserSerializer, CustomTokenObtainPairSerializer
@@ -135,6 +136,12 @@ def create_reset_email_html(code):
             font-size: 14px;
             margin-top: 10px;
         }}
+        .brand-text {{
+            font-size: 20px;
+            font-weight: bold;
+            color: #5b4584;
+            margin: 15px 0;
+        }}
     </style>
 </head>
 <body>
@@ -161,7 +168,9 @@ def create_reset_email_html(code):
         <div class="footer">
             <p>Atenciosamente,<br>
             <strong>Equipe BuildYourProject</strong></p>
-            <img src="https://uploads.onecompiler.io/43yq2h4ef/43ypzs2ky/BYP_logo_slogan.png" alt="BuildYourProject" class="footer-image">
+        
+            <img src="https://github.com/GreenBerries-BYP/BuildYourProject-front/blob/main/BYP_logo_slogan.png?raw=true" alt="BuildYourProject" class="footer-image"> 
+            
             <p style="margin-top: 15px; font-size: 12px; color: #5b4584;">
                 © 2025 BuildYourProject. Todos os direitos reservados.
             </p>
@@ -267,20 +276,9 @@ class SendResetCodeView(APIView):
         print(f"Código de reset para {email}: {code}")
 
         subject = "Código de Recuperação de Senha - BuildYourProject"
-        message = f"""
-        Olá!
-
-        Você solicitou a redefinição de sua senha no BuildYourProject.
-
-        Seu código de verificação é: {code}
-
-        Este código expira em 10 minutos.
-
-        Se você não solicitou esta redefinição, ignore este email.
-
-        Atenciosamente,
-        Equipe BuildYourProject
-        """
+        
+        # ✅ AGORA USA O HTML PERSONALIZADO
+        html_message = create_reset_email_html(code)
         
         from_email = settings.DEFAULT_FROM_EMAIL
 
@@ -291,16 +289,16 @@ class SendResetCodeView(APIView):
         print(f"   EMAIL_HOST: {getattr(settings, 'EMAIL_HOST', 'Não configurado')}")
         
         try:
-            # Envia o email de forma assíncrona
+            # ✅ ENVIA O HTML EM VEZ DO TEXTO SIMPLES
             threading.Thread(
                 target=send_mail_async,
-                args=(subject, message, from_email, [email])
+                args=(subject, html_message, from_email, [email])
             ).start()
             
-            print(f" Email de reset enviado para: {email}")
+            print(f"📧 Email de reset HTML enviado para: {email}")
             
         except Exception as e:
-            print(f" Erro ao enviar email: {e}")
+            print(f"❌ Erro ao enviar email: {e}")
             return Response(
                 {'error': 'Erro ao enviar email'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
