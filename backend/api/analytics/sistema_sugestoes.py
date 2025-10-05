@@ -1,6 +1,5 @@
 from ..utils.metricas_projeto import calcular_metricas_projeto
 from ..models import UserProject, Task, TaskAssignee
-from django.utils import timezone
 
 class SistemaSugestoes:
     """
@@ -34,7 +33,7 @@ class SistemaSugestoes:
             sugestoes.append({
                 'id': 'priorizar_atrasadas',
                 'titulo': '🎯 Priorizar Tarefas Atrasadas',
-                'descricao': f'{tarefas_atrasadas} tarefas estão com prazo vencido. O cronograma está atrasado',
+                'descricao': f'{tarefas_atrasadas} tarefas estão com prazo vencido',
                 'acao': 'priorizar_atrasadas',
                 'prioridade': 'alta' if tarefas_atrasadas > 5 else 'media'
             })
@@ -44,7 +43,7 @@ class SistemaSugestoes:
             sugestoes.append({
                 'id': 'revisar_metas',
                 'titulo': '📈 Revisar Metas do Projeto',
-                'descricao': 'O ritmo atual não é suficiente para cumprir os prazos restantes',
+                'descricao': 'O ritmo atual não é suficiente para cumprir os prazos',
                 'acao': 'revisar_metas',
                 'prioridade': 'alta'
             })
@@ -54,7 +53,7 @@ class SistemaSugestoes:
             sugestoes.append({
                 'id': 'ajustar_prazos',
                 'titulo': '⚠️ Ajustar Prazos Finais',
-                'descricao': f'Previsão indica mais atrasos no futuro. Restam {dias_restantes} dias',
+                'descricao': f'Previsão indica atraso no término. Restam {dias_restantes} dias',
                 'acao': 'ajustar_prazos', 
                 'prioridade': 'alta' if vac < -14 else 'media'
             })
@@ -75,7 +74,7 @@ class SistemaSugestoes:
             sugestoes.append({
                 'id': 'acelerar_conclusao',
                 'titulo': '🚀 Acelerar Conclusão',
-                'descricao': f'Progresso insuficiente com prazo próximo do vencimento',
+                'descricao': f'Progresso insuficiente com prazo próximo',
                 'acao': 'acelerar_conclusao',
                 'prioridade': 'alta'
             })
