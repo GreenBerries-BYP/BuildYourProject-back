@@ -1,16 +1,15 @@
 from ..utils.metricas_projeto import calcular_metricas_projeto
 from ..models import UserProject, Task, TaskAssignee
-from django.utils import timezone
 
 class SistemaSugestoes:
     """
-    SISTEMA DE SUGESTÕES INTELIGENTES BASEADO EM MÉTRICAS EVM
+    SISTEMA DE SUGESTÕES INTELIGENTES CORRIGIDO
     """
     
     @staticmethod
     def gerar_sugestoes(projeto):
         """
-        Gera sugestões contextuais baseadas em análise EVM do projeto
+        Gera sugestões contextuais baseadas em análise realista do projeto
         """
         sugestoes = []
         metricas = calcular_metricas_projeto(projeto.id)
@@ -19,68 +18,80 @@ class SistemaSugestoes:
             return sugestoes
         
         # ✅ VERIFICAR SE PROJETO ESTÁ FINALIZADO
-        if metricas['taxa_conclusao'] == 100:
+        if metricas['taxa_conclusao'] >= 99.9:
             return []  # Retorna array vazio = sem sugestões
         
         spi = metricas['spi']
         tcpi = metricas['tcpi']
         vac = metricas['vac']
         tarefas_atrasadas = metricas['tarefas_atrasadas']
+        tarefas_pendentes = metricas['tarefas_pendentes']
         dias_restantes = metricas['dias_restantes']
         taxa_conclusao = metricas['taxa_conclusao']
+        projeto_atrasado = metricas['projeto_atrasado']
         
-        # 🔴 SUGESTÃO 1: PROJETO ATRASADO (TAREFAS ATRASADAS)
+        # 🔴 SUGESTÃO 1: PROJETO ATRASADO (TAREFAS ATRASADAS) - COM INFO ESPECÍFICA
         if tarefas_atrasadas > 0:
             sugestoes.append({
                 'id': 'priorizar_atrasadas',
                 'titulo': '🎯 Priorizar Tarefas Atrasadas',
-                'descricao': f'{tarefas_atrasadas} tarefas estão com prazo vencido. O cronograma está atrasado',
+                'descricao': f'Existem {tarefas_atrasadas} tarefas com prazo vencido que precisam de atenção imediata',
                 'acao': 'priorizar_atrasadas',
-                'prioridade': 'alta' if tarefas_atrasadas > 5 else 'media'
+                'prioridade': 'alta'
             })
         
-        # 🔴 SUGESTÃO 2: PERFORMANCE INSUSTENTÁVEL
-        if tcpi > 1.2:
+        # 🔴 SUGESTÃO 2: PROJETO CRÍTICO - DATA FINAL JÁ PASSOU
+        if projeto_atrasado and tarefas_pendentes > 0:
+            sugestoes.append({
+                'id': 'revisao_urgente',
+                'titulo': '🚨 Revisão Urgente do Projeto',
+                'descricao': f'O projeto está {abs(metricas["dias_restantes"])} dias atrasado com {tarefas_pendentes} tarefas pendentes',
+                'acao': 'revisao_urgente',
+                'prioridade': 'alta'
+            })
+        
+        # 🔴 SUGESTÃO 3: PERFORMANCE INSUSTENTÁVEL
+        if tcpi > 1.5:
             sugestoes.append({
                 'id': 'revisar_metas',
-                'titulo': '📈 Revisar Metas do Projeto',
-                'descricao': 'O ritmo atual não é suficiente para cumprir os prazos restantes',
+                'titulo': '📈 Revisar Metas Realistas',
+                'descricao': f'O ritmo necessário (TCPI: {tcpi:.2f}) é muito alto. Considere replanejar',
                 'acao': 'revisar_metas',
                 'prioridade': 'alta'
             })
         
-        # 🔴 SUGESTÃO 3: PREVISÃO DE MAIS ATRASO
+        # 🔴 SUGESTÃO 4: OTIMIZAR PROCESSOS (SUBSTITUI AJUSTE DE PRAZO)
         if vac < -7:
             sugestoes.append({
-                'id': 'ajustar_prazos',
-                'titulo': '⚠️ Ajustar Prazos Finais',
-                'descricao': f'Previsão indica mais atrasos no futuro. Restam {dias_restantes} dias',
-                'acao': 'ajustar_prazos', 
+                'id': 'otimizar_processos',
+                'titulo': '⚡ Otimizar Processos',
+                'descricao': f'Identificamos oportunidades para ganhar eficiência e recuperar {abs(round(vac))} dias',
+                'acao': 'otimizar_processos',
                 'prioridade': 'alta' if vac < -14 else 'media'
             })
         
-        # 🔴 SUGESTÃO 4: CARGA DESBALANCEADA
+        # 🔴 SUGESTÃO 5: CARGA DESBALANCEADA
         carga_desequilibrada = SistemaSugestoes._verificar_carga_desequilibrada(projeto)
         if carga_desequilibrada['desequilibrio']:
             sugestoes.append({
                 'id': 'balancear_carga',
                 'titulo': '⚖️ Balancear Carga de Trabalho',
-                'descricao': f"Distribuição desigual de tarefas entre a equipe",
+                'descricao': f"Distribuição desigual: {carga_desequilibrada['maior_carga']} vs {carga_desequilibrada['menor_carga']} tarefas por pessoa",
                 'acao': 'balancear_carga',
                 'prioridade': 'media'
             })
         
-        # 🔴 SUGESTÃO 5: BAIXA TAXA DE CONCLUSÃO
-        if taxa_conclusao < 30 and dias_restantes < 7:
+        # 🔴 SUGESTÃO 6: BAIXA TAXA DE CONCLUSÃO COM PRAZO CURTO
+        if taxa_conclusao < 50 and dias_restantes < (metricas['total_dias'] * 0.2):
             sugestoes.append({
-                'id': 'acelerar_conclusao',
-                'titulo': '🚀 Acelerar Conclusão',
-                'descricao': f'Progresso insuficiente com prazo próximo do vencimento',
-                'acao': 'acelerar_conclusao',
+                'id': 'foco_conclusao',
+                'titulo': '🚀 Foco na Conclusão',
+                'descricao': f'Apenas {taxa_conclusao}% concluído com prazo próximo. Priorize tarefas essenciais',
+                'acao': 'foco_conclusao',
                 'prioridade': 'alta'
             })
         
-        # 🔵 SUGESTÃO 6: PROJETO SAUDÁVEL
+        # 🔵 SUGESTÃO 7: PROJETO SAUDÁVEL
         if spi >= 1.0 and tcpi <= 1.1 and vac >= 0 and tarefas_atrasadas == 0:
             sugestoes.append({
                 'id': 'manter_ritmo',

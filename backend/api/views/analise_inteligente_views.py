@@ -5,14 +5,12 @@ from django.views import View
 import json
 from api.analytics.analisador_desempenho import AnalisadorDesempenho
 from api.analytics.sistema_sugestoes import SistemaSugestoes
-from api.models import Project, Task, UserProject, TaskAssignee
-from django.utils import timezone
+from api.models import Project
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AnalisarProjetoView(View):
     """
     View para análise de desempenho do projeto usando EVM
-    Base: PMBOK Guide 7th Edition, NASA EVM Handbook, ANSI/EIA-748
     """
     
     def post(self, request, project_id):
@@ -30,10 +28,10 @@ class AnalisarProjetoView(View):
                     'erro': analise_desempenho['erro']
                 }, status=400)
             
-            # Gerar sugestões baseadas em métricas
+            # Gerar sugestões
             sugestoes = sistema_sugestoes.gerar_sugestoes(projeto)
             
-            # Calcular probabilidade de atraso baseada em múltiplas métricas
+            # Calcular probabilidade de atraso
             probabilidade_atraso = self._calcular_probabilidade_atraso(analise_desempenho)
             
             resposta = {
@@ -41,14 +39,17 @@ class AnalisarProjetoView(View):
                 'status': analise_desempenho['status'],
                 'cor': analise_desempenho['cor'],
                 'explicacao': analise_desempenho['explicacao'],
+                'spi': analise_desempenho['spi'],
+                'sv': analise_desempenho['sv'],
+                'tcpi': analise_desempenho['tcpi'],
+                'eac': analise_desempenho['eac'],
+                'vac': analise_desempenho['vac'],
                 'dias_restantes': analise_desempenho['dias_restantes'],
                 'tarefas_atrasadas': analise_desempenho['tarefas_atrasadas'],
-                'tarefas_pendentes': analise_desempenho['tarefas_pendentes'],
+                'tarefas_pendentes': analise_desempenho['tarefas_pendentes'],  # ✅ ADICIONADO
                 'taxa_conclusao': analise_desempenho['taxa_conclusao'],
                 'probabilidade_atraso': probabilidade_atraso,
-                'sugestoes': sugestoes,
-                'projeto_concluido': analise_desempenho['projeto_concluido'],
-                'dias_atraso': analise_desempenho['dias_atraso']
+                'sugestoes': sugestoes
             }
             
             return JsonResponse(resposta)
@@ -65,63 +66,44 @@ class AnalisarProjetoView(View):
             }, status=500)
     
     def _calcular_probabilidade_atraso(self, analise_desempenho):
-        """Calcular probabilidade de atraso baseada em múltiplas métricas"""
-        if analise_desempenho['projeto_concluido']:
+        """Calcular probabilidade de atraso baseada em métricas EXISTENTES"""
+        if analise_desempenho.get('status') == "CONCLUÍDO":
             return 0
             
         probabilidade = 0
-        spi = analise_desempenho.get('spi_calculado', 1.0)
+        spi = analise_desempenho['spi']
         tarefas_atrasadas = analise_desempenho['tarefas_atrasadas']
-        dias_atraso = analise_desempenho['dias_atraso']
         taxa_conclusao = analise_desempenho['taxa_conclusao']
         dias_restantes = analise_desempenho['dias_restantes']
-        tarefas_pendentes = analise_desempenho['tarefas_pendentes']
+        tarefas_pendentes = analise_desempenho['tarefas_pendentes']  # ✅ AGORA EXISTE
         
-        # Fator SPI (25% do peso)
+        # Baseado no SPI (50% do peso)
         if spi < 0.7:
-            probabilidade += 25
+            probabilidade += 50
         elif spi < 0.9:
-            probabilidade += 15
+            probabilidade += 30
         elif spi < 1.0:
-            probabilidade += 5
+            probabilidade += 10
         
-        # Fator Tarefas Atrasadas (20% do peso)
+        # Baseado em tarefas atrasadas (30% do peso)
         if tarefas_atrasadas > 5:
-            probabilidade += 20
+            probabilidade += 30
         elif tarefas_atrasadas > 2:
-            probabilidade += 10
-        elif tarefas_atrasadas > 0:
-            probabilidade += 5
-        
-        # Fator Dias de Atraso (20% do peso)
-        if dias_atraso > 14:
             probabilidade += 20
-        elif dias_atraso > 7:
-            probabilidade += 15
-        elif dias_atraso > 0:
+        elif tarefas_atrasadas > 0:
             probabilidade += 10
         
-        # Fator Pressão do Tempo (20% do peso)
+        # Baseado em pressão de tempo (20% do peso)
         if taxa_conclusao < 50 and dias_restantes < 7:
             probabilidade += 20
-        elif taxa_conclusao < 70 and dias_restantes < 14:
-            probabilidade += 10
-        
-        # Fator Carga Desproporcional (15% do peso)
-        if dias_restantes > 0 and tarefas_pendentes > 0:
-            tarefas_por_dia = tarefas_pendentes / dias_restantes
-            if tarefas_por_dia > 3:
-                probabilidade += 15
-            elif tarefas_por_dia > 2:
-                probabilidade += 10
         
         return min(95, probabilidade)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AplicarSugestaoView(View):
     """
     View para aplicar sugestões automáticas no projeto
-    Base: PMBOK Guide, NASA EVM Handbook, APM Guidelines
     """
     
     def post(self, request, project_id):
@@ -143,8 +125,8 @@ class AplicarSugestaoView(View):
                 resultado = self._aplicar_balanceamento_carga(projeto)
             elif acao == 'acelerar_conclusao':
                 resultado = self._aplicar_acelerar_conclusao(projeto)
-            elif acao == 'otimizar_carga':
-                resultado = self._aplicar_otimizar_carga(projeto)
+            elif acao == 'manter_ritmo':
+                resultado = self._aplicar_manter_ritmo(projeto)
             else:
                 return JsonResponse({
                     'sucesso': False,
@@ -170,7 +152,10 @@ class AplicarSugestaoView(View):
             }, status=500)
     
     def _aplicar_priorizacao_atrasadas(self, projeto):
-        """Priorizar tarefas atrasadas - Base: PMBOK Guide Gerenciamento de Tempo"""
+        """Priorizar tarefas atrasadas"""
+        from api.models import Task
+        from django.utils import timezone
+        
         tarefas_atrasadas = Task.objects.filter(
             project_phase__project=projeto,
             is_completed=False,
@@ -192,13 +177,13 @@ class AplicarSugestaoView(View):
         }
     
     def _aplicar_revisao_metas(self, projeto):
-        """Revisar metas do projeto - Base: ANSI/EIA-748"""
+        """Revisar metas do projeto"""
         from ..utils.metricas_projeto import calcular_metricas_projeto
         
         metricas = calcular_metricas_projeto(projeto.id)
         dias_extensao = 7
         
-        if metricas and metricas['tcpi'] > 1.2:
+        if metricas and metricas.get('tcpi', 1.0) > 1.2:
             dias_extensao = max(7, int((metricas['tcpi'] - 1.0) * 10))
         
         return {
@@ -209,12 +194,12 @@ class AplicarSugestaoView(View):
         }
     
     def _aplicar_ajuste_prazos(self, projeto):
-        """Ajustar prazos finais - Base: NASA EVM Handbook"""
+        """Ajustar prazos finais"""
         from ..utils.metricas_projeto import calcular_metricas_projeto
         
         metricas = calcular_metricas_projeto(projeto.id)
         
-        if metricas and metricas['vac'] < -7:
+        if metricas and metricas.get('vac', 0) < -7:
             dias_necessarios = abs(int(metricas['vac']))
             
             return {
@@ -230,7 +215,9 @@ class AplicarSugestaoView(View):
         }
     
     def _aplicar_balanceamento_carga(self, projeto):
-        """Balancear carga de trabalho - Base: APM Guidelines"""
+        """Balancear carga de trabalho"""
+        from api.models import UserProject, Task, TaskAssignee
+        
         usuarios = UserProject.objects.filter(project=projeto)
         cargas = []
         
@@ -257,6 +244,9 @@ class AplicarSugestaoView(View):
     
     def _aplicar_acelerar_conclusao(self, projeto):
         """Acelerar conclusão de tarefas críticas"""
+        from api.models import Task
+        from django.utils import timezone
+        
         tarefas_criticas = Task.objects.filter(
             project_phase__project=projeto,
             is_completed=False,
@@ -266,39 +256,17 @@ class AplicarSugestaoView(View):
         tarefas_afetadas = tarefas_criticas.count()
         
         return {
-            'mensagem': f'Foco em {tarefas_afetadas} tarefas críticas com prazo próximo',
+            'mensagem': f'Foco em {tarefas_afetadas} tarefas com prazo próximo',
             'detalhes': {
                 'tarefas_criticas': tarefas_afetadas
             }
         }
     
-    def _aplicar_otimizar_carga(self, projeto):
-        """Otimizar carga de trabalho desproporcional"""
-        from ..utils.metricas_projeto import calcular_metricas_projeto
-        from ..analytics.sistema_sugestoes import SistemaSugestoes
-        
-        metricas = calcular_metricas_projeto(projeto.id)
-        if not metricas:
-            return {
-                'mensagem': 'Não foi possível analisar a carga de trabalho',
-                'detalhes': {}
-            }
-        
-        tarefas_pendentes = metricas['total_tarefas'] - metricas['tarefas_concluidas']
-        dias_restantes = metricas['dias_restantes']
-        
-        if dias_restantes > 0:
-            tarefas_por_dia = tarefas_pendentes / dias_restantes
-            return {
-                'mensagem': f'Otimização sugerida - {tarefas_por_dia:.1f} tarefas/dia necessárias. Considere redistribuir carga.',
-                'detalhes': {
-                    'tarefas_por_dia': round(tarefas_por_dia, 1),
-                    'tarefas_pendentes': tarefas_pendentes,
-                    'dias_restantes': dias_restantes
-                }
-            }
-        
+    def _aplicar_manter_ritmo(self, projeto):
+        """Manter ritmo atual - Ação positiva"""
         return {
-            'mensagem': 'Análise de carga concluída',
-            'detalhes': {}
+            'mensagem': 'Ritmo mantido - Continue com o excelente trabalho!',
+            'detalhes': {
+                'status': 'positivo'
+            }
         }
