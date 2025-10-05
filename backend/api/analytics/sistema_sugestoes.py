@@ -18,7 +18,7 @@ class SistemaSugestoes:
             return sugestoes
         
         # ✅ VERIFICAR SE PROJETO ESTÁ FINALIZADO
-        if metricas['taxa_conclusao'] == 100:
+        if metricas['taxa_conclusao'] >= 99.9:
             return []  # Retorna array vazio = sem sugestões
         
         spi = metricas['spi']
@@ -48,13 +48,13 @@ class SistemaSugestoes:
                 'prioridade': 'alta'
             })
         
-        # 🔴 SUGESTÃO 3: PREVISÃO DE MAIS ATRASO
+        # 🔴 SUGESTÃO 3: OTIMIZAR PROCESSOS (SUBSTITUI AJUSTE DE PRAZO)
         if vac < -7:
             sugestoes.append({
-                'id': 'ajustar_prazos',
-                'titulo': '⚠️ Ajustar Prazos Finais',
-                'descricao': f'Previsão indica atraso no término. Restam {dias_restantes} dias',
-                'acao': 'ajustar_prazos', 
+                'id': 'otimizar_processos',
+                'titulo': '⚡ Otimizar Processos',
+                'descricao': f'Identificamos oportunidades para ganhar eficiência e recuperar {abs(round(vac))} dias',
+                'acao': 'otimizar_processos',
                 'prioridade': 'alta' if vac < -14 else 'media'
             })
         
