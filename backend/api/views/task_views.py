@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 
+from django.shortcuts import get_object_or_404
+
 from ..models import Project, UserProject, ProjectPhase, Task, TaskAssignee, Phase, ProjectRole
 from ..serializers import TaskSerializer
 
@@ -238,5 +240,86 @@ class TaskAssignView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Erro ao atribuir tarefa: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CreateSubtaskView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id, task_id):
+        try:
+            # Verifica se o projeto existe e o usuário tem acesso
+            project = get_object_or_404(Project, id=project_id)
+            if not UserProject.objects.filter(user=request.user, project=project).exists():
+                return Response(
+                    {"error": "Você não tem permissão para acessar este projeto"}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Verifica se a tarefa pai existe e pertence ao projeto
+            parent_task = get_object_or_404(Task, id=task_id)
+            
+            # Verifica se a tarefa pai pertence ao projeto
+            parent_project_phase = parent_task.project_phase
+            if parent_project_phase.project.id != project_id:
+                return Response(
+                    {"error": "A tarefa não pertence a este projeto"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Cria a subtarefa
+            subtask_data = {
+                'title': request.data.get('nome'),  # Mapeia 'nome' para 'title'
+                'description': request.data.get('descricao', ''),
+                'due_date': request.data.get('dataEntrega'),
+                'project_phase': parent_task.project_phase,
+                'parent_task': parent_task,
+                'complexidade': 2.0  # Valor padrão para subtarefas
+            }
+
+            # Verifica campos obrigatórios
+            if not subtask_data['title']:
+                return Response(
+                    {"error": "Nome da subtarefa é obrigatório"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if not subtask_data['due_date']:
+                return Response(
+                    {"error": "Data de entrega é obrigatória"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Cria a subtarefa
+            subtask = Task.objects.create(**subtask_data)
+
+            # Se foi especificado um responsável, atribui a subtarefa
+            responsavel_email = request.data.get('user')
+            if responsavel_email:
+                from ..models import User, TaskAssignee
+                try:
+                    user_responsavel = User.objects.get(email=responsavel_email)
+                    # Verifica se o usuário é membro do projeto
+                    if UserProject.objects.filter(user=user_responsavel, project=project).exists():
+                        TaskAssignee.objects.create(task=subtask, user=user_responsavel)
+                except User.DoesNotExist:
+                    # Se o usuário não existe, continua sem atribuir
+                    pass
+
+            # Serializa a resposta no formato esperado pelo frontend
+            response_data = {
+                'id': subtask.id,
+                'nome': subtask.title,
+                'descricao': subtask.description,
+                'prazo': subtask.due_date,
+                'status': 'pendente',
+                'responsavel': responsavel_email if responsavel_email else None
+            }
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Erro ao criar subtarefa: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

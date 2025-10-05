@@ -19,6 +19,7 @@ from api.views.task_views import (
     ProjectTasksView,
     TaskUpdateStatusView,
     CreateTaskView,
+    CreateSubtaskView,
 )
 from api.views.google_views import GoogleCalendarSyncView
 from api.views.utility_views import (
@@ -49,6 +50,8 @@ urlpatterns = [
     path('user/', UserConfigurationView.as_view(), name='user-config'),
     path('projetos/<int:project_id>/tarefas-novas/', CreateTaskView.as_view(), name='create-task'),
     path('tasks/<int:task_id>/assign/', TaskAssignView.as_view(), name='task-assign'),
+    path('projetos/<int:project_id>/tarefas/<int:task_id>/subtasks/', CreateSubtaskView.as_view(), name='create-subtask'),
+
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
     path("auth/send-reset-code/", SendResetCodeView.as_view(), name="send-reset-code"),
     path("auth/verify-reset-code/", VerifyResetCodeView.as_view(), name="verify-reset-code"),
