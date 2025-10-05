@@ -1,16 +1,9 @@
-# analisador_desempenho.py - CORRIGIDO
-
 from django.utils import timezone
 from ..utils.metricas_projeto import calcular_metricas_projeto
 
 class AnalisadorDesempenho:
     """
     SISTEMA DE ANÁLISE DE DESEMPENHO BASEADO EM EARNED VALUE MANAGEMENT
-    
-    Referências: 
-    - PMBOK Guide 7th Edition - Earned Value Management
-    - NASA EVM Handbook
-    - ANSI/EIA-748 Standard
     """
     
     def __init__(self):
@@ -19,8 +12,6 @@ class AnalisadorDesempenho:
     def calcular_spi(self, projeto):
         """
         Calcula Schedule Performance Index (SPI) conforme padrão EVM
-        
-        SPI = Earned Value (EV) / Planned Value (PV)
         """
         metricas = calcular_metricas_projeto(projeto.id)
         if not metricas or metricas['total_tarefas'] == 0:
@@ -50,7 +41,8 @@ class AnalisadorDesempenho:
                 'dias_restantes': 0,
                 'tarefas_atrasadas': 0,
                 'taxa_conclusao': 100,
-                'probabilidade_atraso': 0
+                'total_tarefas': metricas['total_tarefas'],
+                'tarefas_concluidas': metricas['tarefas_concluidas']
             }
             
         spi = metricas['spi']

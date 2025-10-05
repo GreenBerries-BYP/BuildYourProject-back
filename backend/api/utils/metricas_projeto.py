@@ -1,7 +1,5 @@
-# metricas_projeto.py - CORRIGIDO
-
 from django.utils import timezone
-from ..models import Project, Task, UserProject, TaskAssignee
+from ..models import Project, Task
 
 def calcular_metricas_projeto(projeto_id):
     """
@@ -13,30 +11,31 @@ def calcular_metricas_projeto(projeto_id):
         
         # 📊 MÉTRICAS BÁSICAS
         total_tarefas = tarefas.count()
+        if total_tarefas == 0:
+            return None
+            
         tarefas_concluidas = tarefas.filter(is_completed=True).count()
         tarefas_atrasadas = tarefas.filter(is_completed=False, due_date__lt=timezone.now()).count()
         
-        taxa_conclusao = (tarefas_concluidas / total_tarefas * 100) if total_tarefas > 0 else 0
+        taxa_conclusao = (tarefas_concluidas / total_tarefas * 100)
         dias_restantes = max(0, (projeto.end_date - timezone.now()).days)
         
         # 🧮 CÁLCULO EVM - EARNED VALUE MANAGEMENT
         total_dias = max(1, (projeto.end_date - projeto.start_date).days)
         dias_decorridos = max(0, (timezone.now() - projeto.start_date).days)
         
-        # ✅ CORREÇÃO: Se tem tarefas atrasadas, projeto JÁ ESTÁ ATRASADO
         # EV (Earned Value) = Percentual de trabalho REALIZADO
-        ev = tarefas_concluidas / total_tarefas if total_tarefas > 0 else 0
+        ev = tarefas_concluidas / total_tarefas
         
         # PV (Planned Value) = Percentual de trabalho PLANEJADO
-        pv = min(dias_decorridos / total_dias, 1.0) if total_dias > 0 else 0
+        pv = min(dias_decorridos / total_dias, 1.0)
         
         # 📈 SPI (Schedule Performance Index)
         spi = ev / pv if pv > 0 else 1.0
         
-        # ✅ CORREÇÃO: Ajustar SPI se há tarefas atrasadas
-        # Se tem tarefas atrasadas, forçar SPI < 1 para refletir realidade
+        # ✅ CORREÇÃO: Se tem tarefas atrasadas, ajusta SPI para refletir realidade
         if tarefas_atrasadas > 0 and spi >= 1.0:
-            spi = max(0.7, spi - 0.2)  # Ajusta SPI para refletir atraso
+            spi = max(0.7, spi * 0.8)  # Reduz SPI se há atrasos
         
         # 📉 SV (Schedule Variance)
         sv = ev - pv
