@@ -43,6 +43,7 @@ class AnalisarProjetoView(View):
                 'explicacao': analise_desempenho['explicacao'],
                 'dias_restantes': analise_desempenho['dias_restantes'],
                 'tarefas_atrasadas': analise_desempenho['tarefas_atrasadas'],
+                'tarefas_pendentes': analise_desempenho['tarefas_pendentes'],
                 'taxa_conclusao': analise_desempenho['taxa_conclusao'],
                 'probabilidade_atraso': probabilidade_atraso,
                 'sugestoes': sugestoes,
@@ -74,26 +75,27 @@ class AnalisarProjetoView(View):
         dias_atraso = analise_desempenho['dias_atraso']
         taxa_conclusao = analise_desempenho['taxa_conclusao']
         dias_restantes = analise_desempenho['dias_restantes']
+        tarefas_pendentes = analise_desempenho['tarefas_pendentes']
         
-        # Fator SPI (30% do peso)
+        # Fator SPI (25% do peso)
         if spi < 0.7:
-            probabilidade += 30
-        elif spi < 0.9:
-            probabilidade += 20
-        elif spi < 1.0:
-            probabilidade += 10
-        
-        # Fator Tarefas Atrasadas (25% do peso)
-        if tarefas_atrasadas > 5:
             probabilidade += 25
-        elif tarefas_atrasadas > 2:
+        elif spi < 0.9:
             probabilidade += 15
+        elif spi < 1.0:
+            probabilidade += 5
+        
+        # Fator Tarefas Atrasadas (20% do peso)
+        if tarefas_atrasadas > 5:
+            probabilidade += 20
+        elif tarefas_atrasadas > 2:
+            probabilidade += 10
         elif tarefas_atrasadas > 0:
             probabilidade += 5
         
-        # Fator Dias de Atraso (25% do peso)
+        # Fator Dias de Atraso (20% do peso)
         if dias_atraso > 14:
-            probabilidade += 25
+            probabilidade += 20
         elif dias_atraso > 7:
             probabilidade += 15
         elif dias_atraso > 0:
@@ -104,6 +106,14 @@ class AnalisarProjetoView(View):
             probabilidade += 20
         elif taxa_conclusao < 70 and dias_restantes < 14:
             probabilidade += 10
+        
+        # Fator Carga Desproporcional (15% do peso)
+        if dias_restantes > 0 and tarefas_pendentes > 0:
+            tarefas_por_dia = tarefas_pendentes / dias_restantes
+            if tarefas_por_dia > 3:
+                probabilidade += 15
+            elif tarefas_por_dia > 2:
+                probabilidade += 10
         
         return min(95, probabilidade)
 
@@ -133,6 +143,8 @@ class AplicarSugestaoView(View):
                 resultado = self._aplicar_balanceamento_carga(projeto)
             elif acao == 'acelerar_conclusao':
                 resultado = self._aplicar_acelerar_conclusao(projeto)
+            elif acao == 'otimizar_carga':
+                resultado = self._aplicar_otimizar_carga(projeto)
             else:
                 return JsonResponse({
                     'sucesso': False,
@@ -258,4 +270,35 @@ class AplicarSugestaoView(View):
             'detalhes': {
                 'tarefas_criticas': tarefas_afetadas
             }
+        }
+    
+    def _aplicar_otimizar_carga(self, projeto):
+        """Otimizar carga de trabalho desproporcional"""
+        from ..utils.metricas_projeto import calcular_metricas_projeto
+        from ..analytics.sistema_sugestoes import SistemaSugestoes
+        
+        metricas = calcular_metricas_projeto(projeto.id)
+        if not metricas:
+            return {
+                'mensagem': 'Não foi possível analisar a carga de trabalho',
+                'detalhes': {}
+            }
+        
+        tarefas_pendentes = metricas['total_tarefas'] - metricas['tarefas_concluidas']
+        dias_restantes = metricas['dias_restantes']
+        
+        if dias_restantes > 0:
+            tarefas_por_dia = tarefas_pendentes / dias_restantes
+            return {
+                'mensagem': f'Otimização sugerida - {tarefas_por_dia:.1f} tarefas/dia necessárias. Considere redistribuir carga.',
+                'detalhes': {
+                    'tarefas_por_dia': round(tarefas_por_dia, 1),
+                    'tarefas_pendentes': tarefas_pendentes,
+                    'dias_restantes': dias_restantes
+                }
+            }
+        
+        return {
+            'mensagem': 'Análise de carga concluída',
+            'detalhes': {}
         }
