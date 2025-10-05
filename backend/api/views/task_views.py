@@ -179,3 +179,56 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         task.save()
         
         return Response({"detail": "Status atualizado com sucesso."})
+    
+class AssignTaskToUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, task_id):
+        try:
+            task = Task.objects.select_related(
+                'project_phase__project'
+            ).get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({"error": "Tarefa não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificar se o usuário tem acesso ao projeto da tarefa
+        project = task.project_phase.project
+        if not UserProject.objects.filter(user=request.user, project=project).exists():
+            return Response({"detail": "Você não tem acesso a este projeto."}, status=status.HTTP_403_FORBIDDEN)
+
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({"error": "ID do usuário é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_to_assign = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificar se o usuário a ser atribuído é colaborador do projeto
+        if not UserProject.objects.filter(user=user_to_assign, project=project).exists():
+            return Response({"error": "Este usuário não é colaborador do projeto."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Criar a atribuição da tarefa (permite múltiplos assignees se necessário)
+        task_assignee, created = TaskAssignee.objects.get_or_create(
+            task=task,
+            user=user_to_assign
+        )
+
+        # Serializar os dados do usuário para retornar ao frontend
+        user_data = {
+            "id": user_to_assign.id,
+            "full_name": user_to_assign.full_name,
+            "email": user_to_assign.email,
+            "name": user_to_assign.full_name  # Para compatibilidade com frontend
+        }
+
+        # Serializar a tarefa atualizada
+        task_serializer = TaskSerializer(task)
+
+        return Response({
+            "detail": "Tarefa atribuída com sucesso." if created else "Tarefa já estava atribuída a este usuário.",
+            "task_id": task.id,
+            "assigned_user": user_data,
+            "task": task_serializer.data
+        }, status=status.HTTP_200_OK)
