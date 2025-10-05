@@ -60,6 +60,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'type',
             'startDate', 'endDate', 'creator_name', 'phases',
             'collaborators', 'collaborators_info', 'collaborator_count',
+            'collaborators_with_ids',
         ]
     
 
