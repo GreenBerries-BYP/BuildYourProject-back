@@ -1,4 +1,4 @@
-# metricas_projeto.py - ATUALIZADO COM CÁLCULOS CORRETOS
+# metricas_projeto.py - CORRIGIDO
 
 from django.utils import timezone
 from ..models import Project, Task, UserProject, TaskAssignee
@@ -6,13 +6,6 @@ from ..models import Project, Task, UserProject, TaskAssignee
 def calcular_metricas_projeto(projeto_id):
     """
     Calcula métricas de desempenho do projeto usando Earned Value Management
-    
-    Métricas calculadas:
-    - SPI (Schedule Performance Index)
-    - SV (Schedule Variance) 
-    - TCPI (To Complete Performance Index)
-    - EAC (Estimate at Completion)
-    - VAC (Variance at Completion)
     """
     try:
         projeto = Project.objects.get(id=projeto_id)
@@ -30,6 +23,7 @@ def calcular_metricas_projeto(projeto_id):
         total_dias = max(1, (projeto.end_date - projeto.start_date).days)
         dias_decorridos = max(0, (timezone.now() - projeto.start_date).days)
         
+        # ✅ CORREÇÃO: Se tem tarefas atrasadas, projeto JÁ ESTÁ ATRASADO
         # EV (Earned Value) = Percentual de trabalho REALIZADO
         ev = tarefas_concluidas / total_tarefas if total_tarefas > 0 else 0
         
@@ -38,6 +32,11 @@ def calcular_metricas_projeto(projeto_id):
         
         # 📈 SPI (Schedule Performance Index)
         spi = ev / pv if pv > 0 else 1.0
+        
+        # ✅ CORREÇÃO: Ajustar SPI se há tarefas atrasadas
+        # Se tem tarefas atrasadas, forçar SPI < 1 para refletir realidade
+        if tarefas_atrasadas > 0 and spi >= 1.0:
+            spi = max(0.7, spi - 0.2)  # Ajusta SPI para refletir atraso
         
         # 📉 SV (Schedule Variance)
         sv = ev - pv
