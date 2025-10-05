@@ -180,7 +180,7 @@ class TaskUpdateStatusView(generics.UpdateAPIView):
         
         return Response({"detail": "Status atualizado com sucesso."})
     
-class AssignTaskToUserView(APIView):
+class TaskAssignView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, task_id):
