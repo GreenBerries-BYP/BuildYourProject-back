@@ -187,7 +187,7 @@ def create_invite_email_html(project_name, inviter_name):
             <p>Para aceitar este convite e começar a colaborar:</p>
             
             <div style="text-align: center;">
-                <a href="https://buildyourproject-front.onrender.com/" class="cta-button">
+                <a href="https://buildyourproject-front-obrg.onrender.com/" class="cta-button">
                     🚀 Acessar a Plataforma
                 </a>
             </div>
