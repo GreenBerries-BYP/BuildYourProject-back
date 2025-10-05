@@ -324,29 +324,44 @@ class CreateSubtaskView(APIView):
     def calculate_distributed_subtask_due_date(self, parent_task, project):
         """
         Distribui as subtarefas ao longo do período da tarefa pai
+        Cada subtarefa ocupa um intervalo proporcional
         """
-        # Data de início base (início do projeto ou data atual)
+        # Data de início (início do projeto ou hoje, o que for maior)
         start_date = max(project.start_date, timezone.now().date())
         
-        # Data final base (due_date da tarefa pai ou fim do projeto)
+        # Data final (due_date da tarefa pai ou fim do projeto)
         end_date = parent_task.due_date if parent_task.due_date else project.end_date
         
-        # Conta quantas subtarefas já existem para esta tarefa pai
-        existing_subtasks_count = Task.objects.filter(parent_task=parent_task).count()
+        # Se não há data final definida, usa hoje + 7 dias como padrão
+        if not end_date:
+            end_date = timezone.now().date() + timedelta(days=7)
         
-        # Calcula a duração disponível para as subtarefas
-        available_duration_days = (end_date - start_date).days
+        # Calcula a duração total disponível em dias
+        total_duration_days = (end_date - start_date).days
         
-        if available_duration_days <= 0:
+        # Se a duração for muito curta, ajusta
+        if total_duration_days <= 0:
             return end_date
-            
-        # Distribui as subtarefas ao longo do período disponível
-        days_to_add = (existing_subtasks_count * available_duration_days) // max(1, (existing_subtasks_count + 1))
         
-        due_date = start_date + timedelta(days=days_to_add)
+        # Conta quantas subtarefas já existem (incluindo a que está sendo criada)
+        existing_subtasks_count = Task.objects.filter(parent_task=parent_task).count()
+        total_subtasks = existing_subtasks_count + 1  # Inclui a nova subtarefa
+        
+        # Se há apenas uma subtarefa, termina um dia antes do prazo final
+        if total_subtasks == 1:
+            return end_date - timedelta(days=1)
+        
+        # Para múltiplas subtarefas, distribui proporcionalmente
+        # Cada subtarefa ocupa uma "fatia" do tempo disponível
+        subtask_duration = total_duration_days // total_subtasks
+        
+        # A nova subtarefa ocupa a última posição (mais próxima do final)
+        days_from_start = (total_subtasks - 1) * subtask_duration
+        
+        due_date = start_date + timedelta(days=days_from_start)
         
         # Garante que não ultrapasse a data final
         if due_date > end_date:
-            due_date = end_date
+            due_date = end_date - timedelta(days=1)
             
         return due_date
