@@ -9,16 +9,6 @@ class AnalisadorDesempenho:
     def __init__(self):
         pass
     
-    def calcular_spi(self, projeto):
-        """
-        Calcula Schedule Performance Index (SPI) conforme padrão EVM
-        """
-        metricas = calcular_metricas_projeto(projeto.id)
-        if not metricas or metricas['total_tarefas'] == 0:
-            return 1.0
-        
-        return metricas['spi']
-    
     def analisar_situacao_projeto(self, projeto):
         """
         Analisa a situação atual do projeto baseado em múltiplas métricas EVM
@@ -40,6 +30,7 @@ class AnalisadorDesempenho:
                 'vac': 0,
                 'dias_restantes': 0,
                 'tarefas_atrasadas': 0,
+                'tarefas_pendentes': 0, 
                 'taxa_conclusao': 100,
                 'total_tarefas': metricas['total_tarefas'],
                 'tarefas_concluidas': metricas['tarefas_concluidas']
@@ -69,6 +60,9 @@ class AnalisadorDesempenho:
             cor = "vermelho"
             explicacao = "Projeto com atraso crítico"
         
+        # ✅ CALCULAR TAREFAS PENDENTES
+        tarefas_pendentes = metricas['total_tarefas'] - metricas['tarefas_concluidas']
+        
         return {
             'status': status,
             'cor': cor,
@@ -80,6 +74,7 @@ class AnalisadorDesempenho:
             'vac': metricas['vac'],
             'dias_restantes': metricas['dias_restantes'],
             'tarefas_atrasadas': metricas['tarefas_atrasadas'],
+            'tarefas_pendentes': tarefas_pendentes,  
             'taxa_conclusao': metricas['taxa_conclusao'],
             'total_tarefas': metricas['total_tarefas'],
             'tarefas_concluidas': metricas['tarefas_concluidas']
