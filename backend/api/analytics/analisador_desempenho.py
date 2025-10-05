@@ -36,60 +36,80 @@ class AnalisadorDesempenho:
         if not metricas:
             return {'erro': 'Não foi possível calcular métricas'}
         
-        # projeto finalizado
+        # Calcular dias de atraso baseado no VAC
+        dias_atraso = max(0, -metricas['vac'])
+        
+        # PROJETO CONCLUÍDO
         if metricas['taxa_conclusao'] == 100:
+            dias_antecedencia = max(0, (projeto.end_date - timezone.now()).days)
+            mensagem_conclusao = self._gerar_mensagem_conclusao(dias_antecedencia)
+            
             return {
-                'status': "CONCLUÍDO",
+                'status': "PROJETO CONCLUÍDO",
                 'cor': "verde",
-                'explicacao': "Projeto finalizado com sucesso!",
-                'spi': 1.0,
-                'sv': 0,
-                'tcpi': 1.0,
-                'eac': metricas['total_dias'],
-                'vac': 0,
-                'dias_restantes': 0,
+                'explicacao': mensagem_conclusao,
+                'dias_restantes': dias_antecedencia,  # Dias de antecedência
                 'tarefas_atrasadas': 0,
                 'taxa_conclusao': 100,
-                'probabilidade_atraso': 0
+                'probabilidade_atraso': 0,
+                'projeto_concluido': True,
+                'dias_atraso': 0,
+                'spi_calculado': 1.0
             }
-            
-        spi = metricas['spi']
-        porcentagem_atraso = (1 - spi) * 100
         
-        # 🎯 DETERMINAR STATUS BASEADO NO SPI
+        spi = metricas['spi']
+        dias_restantes_reais = metricas['dias_restantes']
+        
+        # DETERMINAR STATUS BASEADO NO SPI
         if spi >= 1.1:
             status = "ADIANTADO"
             cor = "verde"
-            explicacao = f"Projeto {abs(porcentagem_atraso):.1f}% adiantado - SPI: {spi:.2f}"
+            if dias_atraso > 0:
+                explicacao = f"Projeto adiantado, mas com {dias_atraso} dias de atraso acumulado"
+            else:
+                explicacao = "Projeto está adiantado em relação ao planejado"
         elif spi >= 0.95:
             status = "NO PRAZO" 
             cor = "verde-claro"
-            explicacao = "Projeto dentro do cronograma - SPI: 1.00"
+            if dias_atraso > 0:
+                explicacao = f"Projeto no prazo, mas com {dias_atraso} dias de atraso acumulado"
+            else:
+                explicacao = "Projeto dentro do cronograma planejado"
         elif spi >= 0.9:
             status = "ATENÇÃO" 
             cor = "amarelo"
-            explicacao = f"Projeto próximo do limite - SPI: {spi:.2f}"
+            if dias_atraso > 0:
+                explicacao = f"Projeto com {dias_atraso} dias de atraso - requer atenção"
+            else:
+                explicacao = "Projeto próximo do limite - monitorar de perto"
         elif spi >= 0.7:
             status = "ATRASO MODERADO"
             cor = "laranja"
-            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado - SPI: {spi:.2f}"
+            explicacao = f"Projeto com {dias_atraso} dias de atraso - ação corretiva necessária"
         else:
             status = "ATRASO CRÍTICO"
             cor = "vermelho"
-            explicacao = f"Projeto {porcentagem_atraso:.1f}% atrasado - SPI: {spi:.2f}"
+            explicacao = f"Projeto com {dias_atraso} dias de atraso - intervenção urgente necessária"
         
         return {
             'status': status,
             'cor': cor,
             'explicacao': explicacao,
-            'spi': round(spi, 3),
-            'sv': metricas['sv'],
-            'tcpi': metricas['tcpi'],
-            'eac': metricas['eac'],
-            'vac': metricas['vac'],
-            'dias_restantes': metricas['dias_restantes'],
+            'dias_restantes': dias_restantes_reais,
             'tarefas_atrasadas': metricas['tarefas_atrasadas'],
             'taxa_conclusao': metricas['taxa_conclusao'],
-            'total_tarefas': metricas['total_tarefas'],
-            'tarefas_concluidas': metricas['tarefas_concluidas']
+            'probabilidade_atraso': 0,  # Será calculado depois
+            'projeto_concluido': False,
+            'dias_atraso': dias_atraso,
+            'spi_calculado': spi
         }
+    
+    def _gerar_mensagem_conclusao(self, dias_antecedencia):
+        """Gera mensagem personalizada para projeto concluído"""
+        if dias_antecedencia > 0:
+            return f"Parabéns! Projeto concluído com {dias_antecedencia} dias de antecedência"
+        elif dias_antecedencia == 0:
+            return "Parabéns! Projeto concluído exatamente no prazo"
+        else:
+            dias_atraso = abs(dias_antecedencia)
+            return f"Projeto concluído com {dias_atraso} dias de atraso"
