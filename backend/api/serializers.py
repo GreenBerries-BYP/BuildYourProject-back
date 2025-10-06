@@ -164,6 +164,8 @@ class SharedTaskSerializer(serializers.ModelSerializer):
         assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
         return assignee.user.full_name if assignee else None
     
+# Nas suas views, atualize o método get_tasks do SharedProjectSerializer
+
 class SharedProjectSerializer(serializers.ModelSerializer):
     creator_name = serializers.SerializerMethodField()
     collaborator_count = serializers.SerializerMethodField()
@@ -191,18 +193,61 @@ class SharedProjectSerializer(serializers.ModelSerializer):
         } for up in user_projects]
     
     def get_tasks(self, project):
-        fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
-        tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
+        # Buscar tarefas principais (sem parent_task)
+        tarefas_principais = Task.objects.filter(
+            project_phase__project=project,
+            parent_task__isnull=True  # Apenas tarefas principais
+        ).select_related(
+            'project_phase'
+        ).prefetch_related(
+            'subtasks',
+            'subtasks__taskassignee_set',
+            'subtasks__taskassignee_set__user'
+        )
         
-        # CONVERTE para o formato que o ViewProject espera
         tarefas_formatadas = []
-        for tarefa in tarefas:
+        for tarefa in tarefas_principais:
+            # Buscar responsável da tarefa principal
+            responsavel_principal = None
+            try:
+                assignee = TaskAssignee.objects.filter(task=tarefa).select_related('user').first()
+                if assignee:
+                    responsavel_principal = assignee.user.full_name
+            except TaskAssignee.DoesNotExist:
+                pass
+            
+            # Buscar subtarefas
+            subtarefas_data = []
+            for subtarefa in tarefa.subtasks.all():
+                responsavel_subtarefa = None
+                try:
+                    sub_assignee = TaskAssignee.objects.filter(task=subtarefa).select_related('user').first()
+                    if sub_assignee:
+                        responsavel_subtarefa = sub_assignee.user.full_name
+                except TaskAssignee.DoesNotExist:
+                    pass
+                
+                subtarefas_data.append({
+                    "id": subtarefa.id,
+                    "nome": subtarefa.title,
+                    "descricao": subtarefa.description,
+                    "prazo": subtarefa.due_date,
+                    "data_inicio": subtarefa.start_date or subtarefa.created_at,
+                    "status": "concluído" if subtarefa.is_completed else "pendente",
+                    "responsavel": responsavel_subtarefa
+                })
+            
             tarefas_formatadas.append({
                 "id": tarefa.id,
-                "nomeTarefa": tarefa.title,  # ← Converte title para nomeTarefa
-                "progresso": 100 if tarefa.is_completed else 0,  # ← Calcula progresso
-                "subTarefas": []  # ← Pode buscar subtarefas se precisar
+                "nomeTarefa": tarefa.title,
+                "descricao": tarefa.description,
+                "prazo": tarefa.due_date,
+                "data_inicio": tarefa.start_date or tarefa.created_at,
+                "status": "concluído" if tarefa.is_completed else "pendente",
+                "responsavel": responsavel_principal,
+                "subTarefas": subtarefas_data
             })
+        
         return tarefas_formatadas
 
 class UserProjectSerializer(serializers.ModelSerializer):
@@ -295,7 +340,7 @@ class CollaboratorSerializer(serializers.ModelSerializer):
 class TaskFullInfoSerializer(serializers.ModelSerializer):
     nomeTarefa = serializers.CharField(source='title')
     descricao = serializers.CharField(source='description')
-    prazo = serializers.DateField(source='due_date')
+    prazo = serializers.DateTimeField(source='due_date')
     data_inicio = serializers.DateTimeField(source='start_date')
     data_fim = serializers.DateTimeField(source='due_date')
     status = serializers.CharField(source='status')
@@ -307,11 +352,22 @@ class TaskFullInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'nomeTarefa', 'descricao', 'prazo','data_inicio', 'data_fim', 'status', 'responsavel', 'subTarefas']
 
     def get_responsavel(self, obj):
-        return obj.assignee.username if obj.assignee else None
+        try:
+            assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
+            if assignee and assignee.user:
+                return {
+                    'id': assignee.user.id,
+                    'nome': assignee.user.full_name,
+                    'email': assignee.user.email
+                }
+        except TaskAssignee.DoesNotExist:
+            pass
+        return None
 
     def get_subTarefas(self, obj):
         subtasks = Task.objects.filter(parent_task=obj)
         return TaskFullInfoSerializer(subtasks, many=True).data
+    
 
 
 class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
@@ -329,3 +385,28 @@ class ProjectWithCollaboratorsAndTasksSerializer(ProjectSerializer):
         fase_ids = ProjectPhase.objects.filter(project=project).values_list('id', flat=True)
         tarefas = Task.objects.filter(project_phase_id__in=fase_ids).order_by('due_date')
         return TaskFullInfoSerializer(tarefas, many=True).data
+
+
+# Adicione este serializer para listagem básica
+class SimpleTaskWithAssigneeSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source='title')
+    prazo = serializers.DateTimeField(source='due_date')
+    data_inicio = serializers.DateTimeField(source='start_date')
+    responsavel = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        fields = ['id', 'nome', 'responsavel', 'prazo', 'data_inicio', 'status']
+
+    def get_responsavel(self, obj):
+        try:
+            assignee = TaskAssignee.objects.filter(task=obj).select_related('user').first()
+            if assignee and assignee.user:
+                return assignee.user.full_name
+        except TaskAssignee.DoesNotExist:
+            pass
+        return None
+
+    def get_status(self, obj):
+        return 'concluído' if obj.is_completed else 'pendente'
