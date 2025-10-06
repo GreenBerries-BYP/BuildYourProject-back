@@ -311,7 +311,7 @@ class ProjectShareWithMeView(APIView):
 class TaskAssignView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, task_id):
+    def put(self, request, task_id):
         try:
             task = get_object_or_404(Task, id=task_id)
             user_id = request.data.get('user_id')
