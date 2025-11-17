@@ -32,10 +32,10 @@ def send_mail_async(subject, html_content, from_email, recipient_list):
     """Usa API direta do Resend para enviar email HTML"""
     def _enviar():
         try:
-            print(f"🎯 API RESEND - RECUPERAÇÃO SENHA PARA: {recipient_list}")
-            
-            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"
-            url = "https://api.resend.com/emails"
+            print(f"API RESEND - RECUPERAÇÃO SENHA PARA: {recipient_list}")
+
+            api_key = os.environ.get('RESEND_API_KEY')
+            url = os.environ.get('RESEND_API_URL') 
             
             payload = {
                 "from": from_email,
@@ -51,15 +51,15 @@ def send_mail_async(subject, html_content, from_email, recipient_list):
             
             response = requests.post(url, json=payload, headers=headers, timeout=10)
             
-            print(f"📊 RESPOSTA RECUPERAÇÃO: {response.status_code}")
+            print(f" RESPOSTA RECUPERAÇÃO: {response.status_code}")
             
             if response.status_code == 200:
-                print(f"✅✅✅ EMAIL DE RECUPERAÇÃO ENVIADO!")
+                print(f" EMAIL DE RECUPERAÇÃO ENVIADO!")
             else:
-                print(f"❌❌❌ ERRO RECUPERAÇÃO: {response.text}")
+                print(f" ERRO RECUPERAÇÃO: {response.text}")
                 
         except Exception as e:
-            print(f"💥 ERRO API RECUPERAÇÃO: {str(e)}")
+            print(f"ERRO API RECUPERAÇÃO: {str(e)}")
     
     thread = threading.Thread(target=_enviar)
     thread.daemon = True
@@ -277,28 +277,27 @@ class SendResetCodeView(APIView):
 
         subject = "Código de Recuperação de Senha - BuildYourProject"
         
-        # ✅ AGORA USA O HTML PERSONALIZADO
+        # HTML PERSONALIZADO
         html_message = create_reset_email_html(code)
         
         from_email = settings.DEFAULT_FROM_EMAIL
 
         # Debug: Verificar configurações de email
-        print(f"📧 Configurações de Email:")
+        print(f" Configurações de Email:")
         print(f"   FROM_EMAIL: {from_email}")
         print(f"   EMAIL_BACKEND: {getattr(settings, 'EMAIL_BACKEND', 'Não configurado')}")
         print(f"   EMAIL_HOST: {getattr(settings, 'EMAIL_HOST', 'Não configurado')}")
         
         try:
-            # ✅ ENVIA O HTML EM VEZ DO TEXTO SIMPLES
             threading.Thread(
                 target=send_mail_async,
                 args=(subject, html_message, from_email, [email])
             ).start()
             
-            print(f"📧 Email de reset HTML enviado para: {email}")
+            print(f"Email de reset enviado para: {email}")
             
         except Exception as e:
-            print(f"❌ Erro ao enviar email: {e}")
+            print(f"Erro ao enviar email: {e}")
             return Response(
                 {'error': 'Erro ao enviar email'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
