@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 
 from datetime import timedelta
 from django.utils import timezone
+import os
 
 # Imports do Django Rest Framework
 from rest_framework import status, generics
@@ -31,21 +32,29 @@ invited_users = {}
 import threading
 import requests
 
-def enviar_email_async(subject, message, from_email, recipient_list):
+import threading
+import requests
+import os
+
+def enviar_email_async(subject, html_content, from_email, recipient_list):
     """Usa API direta do Resend - 100% funcionando"""
     def _enviar():
         try:
-            print(f"🎯 API RESEND PARA: {recipient_list}")
+            print(f"📧 API RESEND PARA: {recipient_list}")
             print(f"📧 ASSUNTO: {subject}")
             
-            api_key = "re_FKTWQnZM_8f99hCKt5mug8TtEWtQzbrTh"  # Sua API Key
-            url = "https://api.resend.com/emails"
+            api_key = os.environ.get('RESEND_API_KEY')
+            api_url = os.environ.get('RESEND_API_URL', 'https://api.resend.com/emails')
+            
+            if not api_key:
+                print("❌ RESEND_API_KEY não encontrada")
+                return
             
             payload = {
-                "from": "noreply@byp-buildyourproject.com.br",  # Email verificado do Resend
+                "from": from_email,
                 "to": recipient_list,
-                "subject": subject,  
-                "text": message     
+                "subject": subject,
+                "html": html_content,
             }
             
             headers = {
@@ -53,22 +62,152 @@ def enviar_email_async(subject, message, from_email, recipient_list):
                 "Content-Type": "application/json"
             }
             
-            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            response = requests.post(api_url, json=payload, headers=headers, timeout=10)
             
-            print(f"📊 RESPOSTA RESEND: {response.status_code}")
+            print(f"RESPOSTA RESEND: {response.status_code}")
             
             if response.status_code == 200:
-                print(f"✅✅✅ EMAIL ENVIADO COM SUCESSO!")
-                print(f"📧 ID: {response.json().get('id')}")
+                print(f"EMAIL ENVIADO COM SUCESSO!")
+                print(f"ID: {response.json().get('id')}")
             else:
-                print(f"❌❌❌ ERRO RESEND: {response.text}")
+                print(f"ERRO RESEND: {response.text}")
                 
         except Exception as e:
-            print(f"💥 ERRO API: {str(e)}")
+            print(f" ERRO API: {str(e)}")
     
     thread = threading.Thread(target=_enviar)
     thread.daemon = True
     thread.start()
+
+def create_invite_email_html(project_name, inviter_name):
+    """Cria o template HTML personalizado para o email de convite"""
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {{
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }}
+        .header {{
+            background: linear-gradient(166deg, #8474a1 0%, #86b6a3 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }}
+        .logo-container {{
+            margin-bottom: 15px;
+        }}
+        .logo {{
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }}
+        .content {{
+            padding: 40px 30px;
+            color: #383560;
+            line-height: 1.6;
+        }}
+        .highlight {{
+            background: #c1d5cd;
+            border: 2px dashed #58917a;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: #045a5c;
+            margin: 25px 0;
+        }}
+        .cta-button {{
+            background: linear-gradient(45deg, #86b6a3, #58917a);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 16px;
+        }}
+        .footer {{
+            background: #c8c1d4;
+            padding: 25px;
+            text-align: center;
+            color: #383560;
+            font-size: 14px;
+        }}
+        .footer-image {{
+            display: block;
+            margin: 15px auto;
+            max-width: 200px;
+            height: auto;
+        }}
+        .brand-text {{
+            font-size: 20px;
+            font-weight: bold;
+            color: #5b4584;
+            margin: 15px 0;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">BuildYourProject</div>
+            </div>
+            <div style="font-size: 18px;">Convite para Colaboração</div>
+        </div>
+        
+        <div class="content">
+            <h2 style="color: #5b4584; margin-top: 0;">Olá!</h2>
+            <p>Você recebeu um convite especial para colaborar em um projeto!</p>
+            
+            <div class="highlight">
+                <strong>{inviter_name}</strong> convidou você para colaborar no projeto:<br>
+                <strong style="font-size: 24px;">"{project_name}"</strong>
+            </div>
+            
+            <p>Para aceitar este convite e começar a colaborar:</p>
+            
+            <div style="text-align: center;">
+                <a href="https://buildyourproject-front.onrender.com/" class="cta-button">
+                    🚀 Acessar a Plataforma
+                </a>
+            </div>
+            
+            <p style="color: #54969a; font-size: 14px; margin-top: 20px;">
+                <strong>💡 Dica:</strong> Se você ainda não tem uma conta, 
+                registre-se usando este e-mail para ter acesso imediato ao projeto.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Atenciosamente,<br>
+            <strong>Equipe BuildYourProject</strong></p>
+            <div class="brand-text">BuildYourProject</div>
+            
+            <p style="margin-top: 15px; font-size: 12px; color: #5b4584;">
+                © 2025 BuildYourProject. Todos os direitos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -175,13 +314,14 @@ class ProjectView(APIView):
 
                     # CORREÇÃO: USAR A FUNÇÃO ASYNC
                     subject = "Você foi convidado para colaborar em um projeto!"
-                    message = (f"Olá!\n\nVocê foi convidado para colaborar no projeto '{project.name}'.\n"
-                              f"Se você ainda não tem uma conta, por favor, registre-se usando este e-mail para ter acesso.\n\n"
-                              f"Acesse a plataforma: https://buildyourproject-front.onrender.com/")
+                    html_message = create_invite_email_html(
+                        project_name=project.name,
+                        inviter_name=request.user.full_name or request.user.email
+                    )
                     from_email = settings.DEFAULT_FROM_EMAIL
                     
                     # CHAMADA CORRIGIDA - sem try/except
-                    enviar_email_async(subject, message, from_email, [email])
+                    enviar_email_async(subject, html_message, from_email, [email])
 
             # Criar tarefas a partir das fases
             fases = project.phases or []
