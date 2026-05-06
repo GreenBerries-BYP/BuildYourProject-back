@@ -365,3 +365,42 @@ class CreateSubtaskView(APIView):
             due_date = end_date_adjusted
 
         return due_date
+# Adicione esta view para criar tarefas com responsável
+class CreateTaskWithAssigneeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, projetoId):
+        try:
+            data = request.data
+            project = get_object_or_404(Project, id=projetoId)
+            
+            # Encontrar a ProjectPhase (você precisa definir qual fase usar)
+            project_phase = ProjectPhase.objects.filter(project=project).first()
+            if not project_phase:
+                return Response({"error": "Nenhuma fase encontrada para o projeto"}, status=400)
+            
+            # Criar a tarefa
+            task = Task.objects.create(
+                title=data.get('nome'),
+                description=data.get('descricao'),
+                due_date=data.get('dataEntrega'),
+                project_phase=project_phase,
+                is_completed=False
+            )
+            
+            # Atribuir responsável se fornecido
+            user_email = data.get('user')
+            if user_email:
+                try:
+                    user_to_assign = User.objects.get(email=user_email)
+                    TaskAssignee.objects.create(task=task, user=user_to_assign)
+                except User.DoesNotExist:
+                    # Usuário não encontrado, mas a tarefa é criada sem responsável
+                    pass
+            
+            # Serializar resposta
+            serializer = TaskFullInfoSerializer(task)
+            return Response(serializer.data, status=201)
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
