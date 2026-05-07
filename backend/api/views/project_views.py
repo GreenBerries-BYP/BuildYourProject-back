@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Imports do projeto
-from ..models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase
+from ..models import Project, User, UserProject, ProjectRole, Task, ProjectPhase, Phase, TaskAssignee
 from ..serializers import (
     UserSerializer,
     CustomTokenObtainPairSerializer,
