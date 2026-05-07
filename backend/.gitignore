@@ -9,6 +9,15 @@
 __pycache__/
 *.pyc
 
+# Ignorar pastas de migrações geradas (exceto __init__.py)
+# Isso é útil para evitar conflitos de migração em equipes,
+# mas significa que cada desenvolvedor precisará rodar makemigrations
+# após pull de mudanças nos modelos.
+# Se você está trabalhando sozinho, pode ser menos crítico,
+# mas ainda é uma boa prática.
+*/migrations/[0-9]*.py
+*/migrations/__pycache__/
+
 # Ignorar arquivos de log
 *.log
 *.log.*
