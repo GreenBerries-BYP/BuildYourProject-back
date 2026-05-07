@@ -15,7 +15,6 @@ __pycache__/
 # após pull de mudanças nos modelos.
 # Se você está trabalhando sozinho, pode ser menos crítico,
 # mas ainda é uma boa prática.
-*/migrations/[0-9]*.py
 */migrations/__pycache__/
 
 # Ignorar arquivos de log
